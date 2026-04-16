@@ -1,7 +1,13 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { landingContentBySegment } from "@/content/landing";
-import { createLeadSlug, getLeadPages, saveLeadPage } from "@/lib/leadPages";
+import {
+  createLeadSlug,
+  isSupabaseConfigured,
+  loadLeadPages,
+  saveLeadPage,
+} from "@/lib/leadPages";
+import { LeadPageConfig } from "@/types/lead";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminLeadGeneratorPage = () => {
@@ -9,13 +15,43 @@ const AdminLeadGeneratorPage = () => {
   const [companyName, setCompanyName] = useState("");
   const [city, setCity] = useState("");
   const [primaryGoal, setPrimaryGoal] = useState("");
-  const [leads, setLeads] = useState(() => getLeadPages());
+  const [leads, setLeads] = useState<LeadPageConfig[]>([]);
+  const [listLoading, setListLoading] = useState(true);
   const { toast } = useToast();
 
   const knownSegments = useMemo(() => Object.keys(landingContentBySegment), []);
   const generatedSlug = createLeadSlug(segmentSlug, companyName);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      setListLoading(true);
+      try {
+        const data = await loadLeadPages();
+        if (!cancelled) setLeads(data);
+      } catch (err) {
+        if (!cancelled) {
+          toast({
+            title: "Não foi possível carregar os leads",
+            description: err instanceof Error ? err.message : "Verifique o Supabase e as variáveis de ambiente.",
+            variant: "destructive",
+          });
+          setLeads([]);
+        }
+      } finally {
+        if (!cancelled) setListLoading(false);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!segmentSlug.trim() || !companyName.trim()) {
@@ -26,20 +62,28 @@ const AdminLeadGeneratorPage = () => {
       return;
     }
 
-    const persisted = saveLeadPage({
-      slug: generatedSlug,
-      segmentSlug: segmentSlug.trim().toLowerCase(),
-      companyName: companyName.trim(),
-      city: city.trim() || undefined,
-      primaryGoal: primaryGoal.trim() || undefined,
-    });
+    try {
+      const persisted = await saveLeadPage({
+        slug: generatedSlug,
+        segmentSlug: segmentSlug.trim().toLowerCase(),
+        companyName: companyName.trim(),
+        city: city.trim() || undefined,
+        primaryGoal: primaryGoal.trim() || undefined,
+      });
 
-    setLeads(getLeadPages());
+      setLeads(await loadLeadPages());
 
-    toast({
-      title: "Página gerada com sucesso",
-      description: `Lead salvo em /lp/${persisted.slug}`,
-    });
+      toast({
+        title: "Página gerada com sucesso",
+        description: `Lead salvo em /lp/${persisted.slug}`,
+      });
+    } catch (err) {
+      toast({
+        title: "Erro ao salvar",
+        description: err instanceof Error ? err.message : "Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -51,6 +95,14 @@ const AdminLeadGeneratorPage = () => {
           <p className="mt-3 text-sm text-muted-foreground">
             Preencha os dados do lead para gerar uma página dedicada em tempo real.
           </p>
+          {!isSupabaseConfigured() ? (
+            <p className="mt-3 text-sm text-amber-600 dark:text-amber-500">
+              Supabase não configurado: usando armazenamento local do navegador. Defina{" "}
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">VITE_SUPABASE_URL</code> e{" "}
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">VITE_SUPABASE_ANON_KEY</code> em{" "}
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">.env.local</code>.
+            </p>
+          ) : null}
         </div>
 
         <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-card p-6 md:p-8 space-y-5">
@@ -132,7 +184,9 @@ const AdminLeadGeneratorPage = () => {
         <div className="mt-10">
           <h2 className="text-xl font-heading font-semibold">Leads gerados</h2>
           <div className="mt-4 space-y-3">
-            {leads.length === 0 ? (
+            {listLoading ? (
+              <p className="text-sm text-muted-foreground">Carregando…</p>
+            ) : leads.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nenhuma página gerada ainda.</p>
             ) : (
               leads.map((lead) => (
@@ -147,10 +201,7 @@ const AdminLeadGeneratorPage = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Link
-                      to={`/lp/${lead.slug}`}
-                      className="text-sm text-primary hover:underline"
-                    >
+                    <Link to={`/lp/${lead.slug}`} className="text-sm text-primary hover:underline">
                       Abrir página
                     </Link>
                   </div>
