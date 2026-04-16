@@ -1,18 +1,12 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { LandingContent } from "@/types/landing";
 
-const techs = [
-  { name: "React", icon: "⚛️" },
-  { name: "Next.js", icon: "▲" },
-  { name: "Python", icon: "🐍" },
-  { name: "OpenAI", icon: "🤖" },
-  { name: "Supabase", icon: "⚡" },
-  { name: "TypeScript", icon: "📘" },
-  { name: "Node.js", icon: "🟢" },
-  { name: "PostgreSQL", icon: "🐘" },
-];
+type TechStackSectionProps = {
+  content: LandingContent["techStack"];
+};
 
-const TechStackSection = () => {
+const TechStackSection = ({ content }: TechStackSectionProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -25,10 +19,10 @@ const TechStackSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-10"
         >
-          <span className="text-sm text-muted-foreground uppercase tracking-wider">Tech Stack</span>
+          <span className="text-sm text-muted-foreground uppercase tracking-wider">{content.eyebrow}</span>
         </motion.div>
         <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
-          {techs.map((tech, i) => (
+          {content.items.map((tech, i) => (
             <motion.div
               key={tech.name}
               initial={{ opacity: 0, scale: 0.8 }}

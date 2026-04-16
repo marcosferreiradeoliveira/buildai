@@ -1,8 +1,13 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { LandingContent } from "@/types/landing";
 
-const FooterSection = () => {
+type FooterSectionProps = {
+  content: LandingContent["contact"];
+};
+
+const FooterSection = ({ content }: FooterSectionProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   const { toast } = useToast();
@@ -24,8 +29,8 @@ const FooterSection = () => {
     ev.preventDefault();
     if (!validate()) return;
     toast({
-      title: "Mensagem enviada!",
-      description: "Entraremos em contato em até 24h.",
+      title: content.successTitle,
+      description: content.successDescription,
     });
     setForm({ name: "", email: "", message: "" });
     setErrors({});
@@ -41,22 +46,22 @@ const FooterSection = () => {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <span className="text-sm font-medium text-primary uppercase tracking-wider">Contato</span>
+            <span className="text-sm font-medium text-primary uppercase tracking-wider">{content.eyebrow}</span>
             <h2 className="text-3xl sm:text-4xl font-heading font-bold mt-3 mb-6">
-              Pronto para <span className="gradient-text">começar</span>?
+              {content.title} <span className="gradient-text">{content.highlightedText}</span>?
             </h2>
             <p className="text-muted-foreground mb-10 max-w-md leading-relaxed">
-              Preencha o formulário e nossa equipe entrará em contato para entender seu projeto e propor a melhor solução.
+              {content.description}
             </p>
 
             <div className="flex gap-4">
-              {["twitter", "linkedin", "github"].map((social) => (
+              {content.socials.map((social) => (
                 <a
-                  key={social}
-                  href="#"
+                  key={social.label}
+                  href={social.href}
                   className="w-10 h-10 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/40 transition"
                 >
-                  <span className="text-xs capitalize">{social.charAt(0).toUpperCase()}</span>
+                  <span className="text-xs capitalize">{social.label.charAt(0).toUpperCase()}</span>
                 </a>
               ))}
             </div>
@@ -107,13 +112,13 @@ const FooterSection = () => {
               type="submit"
               className="w-full bg-primary text-primary-foreground py-3.5 rounded-lg font-semibold text-sm hover:opacity-90 transition neon-glow"
             >
-              Enviar Mensagem
+              {content.submitLabel}
             </button>
           </motion.form>
         </div>
 
         <div className="mt-20 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} BuildAI. Todos os direitos reservados.
+          © {new Date().getFullYear()} {content.copyrightName}. Todos os direitos reservados.
         </div>
       </div>
     </footer>

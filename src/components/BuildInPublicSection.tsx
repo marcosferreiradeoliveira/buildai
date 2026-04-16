@@ -1,14 +1,12 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { LandingContent } from "@/types/landing";
 
-const timeline = [
-  { date: "Semana 1", title: "Descoberta & Planejamento", description: "Entendemos seu problema, definimos escopo e escolhemos a stack ideal.", status: "done" },
-  { date: "Semana 2-3", title: "MVP & Prototipação", description: "Desenvolvimento ágil com entregas diárias. Você acompanha tudo em tempo real.", status: "done" },
-  { date: "Semana 4", title: "Testes & Feedback", description: "Ciclo de testes com usuários reais. Ajustes rápidos baseados em dados.", status: "active" },
-  { date: "Semana 5+", title: "Deploy & Iteração", description: "Lançamento, monitoramento e melhoria contínua com métricas de sucesso.", status: "upcoming" },
-];
+type BuildInPublicSectionProps = {
+  content: LandingContent["process"];
+};
 
-const BuildInPublicSection = () => {
+const BuildInPublicSection = ({ content }: BuildInPublicSectionProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -21,12 +19,12 @@ const BuildInPublicSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-medium text-primary uppercase tracking-wider">Build-in-Public</span>
+          <span className="text-sm font-medium text-primary uppercase tracking-wider">{content.eyebrow}</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mt-3">
-            Transparência <span className="gradient-text">total</span> no processo
+            {content.title} <span className="gradient-text">{content.highlightedText}</span> no processo
           </h2>
           <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
-            Você acompanha cada etapa do desenvolvimento. Sem surpresas, sem caixas-pretas.
+            {content.description}
           </p>
         </motion.div>
 
@@ -34,7 +32,7 @@ const BuildInPublicSection = () => {
           {/* Vertical line */}
           <div className="absolute left-6 top-0 bottom-0 w-px bg-border" />
 
-          {timeline.map((item, i) => (
+          {content.timeline.map((item, i) => (
             <motion.div
               key={item.title}
               initial={{ opacity: 0, x: -30 }}

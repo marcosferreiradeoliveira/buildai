@@ -1,8 +1,24 @@
 import { motion } from "framer-motion";
+import { LandingContent } from "@/types/landing";
 
-const HeroSection = () => {
+type HeroSectionProps = {
+  content: LandingContent["hero"];
+};
+
+const HeroSection = ({ content }: HeroSectionProps) => {
   return (
     <section className="relative min-h-screen flex items-center justify-center hero-gradient overflow-hidden">
+      {content.backgroundImageSrc ? (
+        <img
+          src={content.backgroundImageSrc}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover opacity-30"
+        />
+      ) : null}
+
+      {content.backgroundImageSrc ? <div className="absolute inset-0 bg-background/45" /> : null}
+
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-neon-purple/5 rounded-full blur-3xl animate-float" />
@@ -26,7 +42,7 @@ const HeroSection = () => {
             transition={{ duration: 0.8 }}
           >
             <span className="inline-block px-4 py-1.5 rounded-full text-xs font-medium tracking-wider uppercase bg-primary/10 text-primary border border-primary/20 mb-8">
-              Build-in-Public Agency
+              {content.badge}
             </span>
           </motion.div>
 
@@ -36,8 +52,7 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.15 }}
             className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold leading-tight mb-6"
           >
-            Construímos o futuro do seu negócio com{" "}
-            <span className="gradient-text">MicroSaaS e IA</span>
+            {content.title} <span className="gradient-text">{content.highlightedText}</span>
           </motion.h1>
 
           <motion.p
@@ -46,7 +61,7 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            Transformamos suas ideias em softwares escaláveis e automações inteligentes que economizam centenas de horas e maximizam seu ROI.
+            {content.description}
           </motion.p>
 
           <motion.div
@@ -59,13 +74,13 @@ const HeroSection = () => {
               onClick={() => document.querySelector("#contato")?.scrollIntoView({ behavior: "smooth" })}
               className="bg-primary text-primary-foreground px-8 py-3.5 rounded-lg font-semibold text-base hover:opacity-90 transition neon-glow"
             >
-              Agendar Consultoria →
+              {content.primaryCtaLabel}
             </button>
             <button
               onClick={() => document.querySelector("#portfolio")?.scrollIntoView({ behavior: "smooth" })}
               className="px-8 py-3.5 rounded-lg font-semibold text-base border border-border text-foreground hover:bg-secondary transition"
             >
-              Ver Portfólio
+              {content.secondaryCtaLabel}
             </button>
           </motion.div>
 
@@ -76,11 +91,7 @@ const HeroSection = () => {
             transition={{ duration: 1, delay: 0.7 }}
             className="mt-20 grid grid-cols-3 gap-8 max-w-lg mx-auto"
           >
-            {[
-              { value: "50+", label: "Projetos entregues" },
-              { value: "98%", label: "Satisfação" },
-              { value: "10x", label: "ROI médio" },
-            ].map((stat) => (
+            {content.stats.map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-2xl sm:text-3xl font-heading font-bold gradient-text">{stat.value}</div>
                 <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>

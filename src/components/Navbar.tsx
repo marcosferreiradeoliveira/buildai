@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { NavLink } from "@/types/landing";
 
-const navLinks = [
-  { label: "Serviços", href: "#servicos" },
-  { label: "Processo", href: "#build-in-public" },
-  { label: "Tecnologias", href: "#tech-stack" },
-  { label: "Portfólio", href: "#portfolio" },
-  { label: "Contato", href: "#contato" },
-];
+type NavbarProps = {
+  brandName: string;
+  navLinks: NavLink[];
+  ctaLabel: string;
+};
 
-const Navbar = () => {
+const Navbar = ({ brandName, navLinks, ctaLabel }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -35,7 +34,8 @@ const Navbar = () => {
     >
       <div className="container mx-auto flex items-center justify-between py-4 px-4">
         <a href="#" className="font-heading text-xl font-bold gradient-text">
-          BuildAI<span className="text-foreground">.</span>
+          {brandName}
+          <span className="text-foreground">.</span>
         </a>
 
         {/* Desktop */}
@@ -53,7 +53,7 @@ const Navbar = () => {
             onClick={() => handleClick("#contato")}
             className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition neon-glow"
           >
-            Agendar Consultoria
+            {ctaLabel}
           </button>
         </div>
 
@@ -92,7 +92,7 @@ const Navbar = () => {
             onClick={() => handleClick("#contato")}
             className="mt-2 w-full bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium"
           >
-            Agendar Consultoria
+            {ctaLabel}
           </button>
         </motion.div>
       )}
