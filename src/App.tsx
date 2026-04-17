@@ -19,6 +19,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/admin" element={<AdminLeadGeneratorPage />} />
           <Route path="/admin/gerar" element={<AdminLeadGeneratorPage />} />
           <Route path="/lp/:leadSlug" element={<LeadLandingPage />} />
           <Route path="/:segmentSlug" element={<SegmentPage />} />
