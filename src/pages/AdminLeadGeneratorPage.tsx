@@ -21,6 +21,7 @@ const AdminLeadGeneratorPage = () => {
 
   const knownSegments = useMemo(() => Object.keys(landingContentBySegment), []);
   const generatedSlug = createLeadSlug(segmentSlug, companyName);
+  const appOrigin = typeof window !== "undefined" ? window.location.origin : "";
 
   useEffect(() => {
     let cancelled = false;
@@ -182,7 +183,12 @@ const AdminLeadGeneratorPage = () => {
         </form>
 
         <div className="mt-10">
-          <h2 className="text-xl font-heading font-semibold">Leads gerados</h2>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-xl font-heading font-semibold">Páginas geradas</h2>
+            <span className="text-xs rounded-full border border-border px-2.5 py-1 text-muted-foreground">
+              {leads.length} {leads.length === 1 ? "página" : "páginas"}
+            </span>
+          </div>
           <div className="mt-4 space-y-3">
             {listLoading ? (
               <p className="text-sm text-muted-foreground">Carregando…</p>
@@ -192,18 +198,40 @@ const AdminLeadGeneratorPage = () => {
               leads.map((lead) => (
                 <div
                   key={lead.id}
-                  className="flex flex-col gap-2 rounded-xl border border-border bg-card px-4 py-3 md:flex-row md:items-center md:justify-between"
+                  className="flex flex-col gap-3 rounded-xl border border-border bg-card px-4 py-3 md:flex-row md:items-center md:justify-between"
                 >
                   <div>
                     <p className="font-medium">{lead.companyName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Segmento: {lead.segmentSlug} · URL: /lp/{lead.slug}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Segmento: {lead.segmentSlug} · Criada em{" "}
+                      {new Date(lead.createdAt).toLocaleDateString("pt-BR")}
                     </p>
+                    <a
+                      href={`${appOrigin}/lp/${lead.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-block text-xs text-primary hover:underline break-all"
+                    >
+                      {`${appOrigin}/lp/${lead.slug}`}
+                    </a>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 text-sm">
                     <Link to={`/lp/${lead.slug}`} className="text-sm text-primary hover:underline">
                       Abrir página
                     </Link>
+                    <button
+                      type="button"
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(`${appOrigin}/lp/${lead.slug}`);
+                        toast({
+                          title: "Link copiado",
+                          description: `URL /lp/${lead.slug} copiada para a área de transferência.`,
+                        });
+                      }}
+                    >
+                      Copiar link
+                    </button>
                   </div>
                 </div>
               ))
