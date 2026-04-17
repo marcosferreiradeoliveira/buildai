@@ -75,13 +75,15 @@ const HeroSection = ({ content, companyName }: HeroSectionProps) => {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <button
+              type="button"
               onClick={() => openWhatsApp(whatsappMessage)}
               className="bg-primary text-primary-foreground px-8 py-3.5 rounded-lg font-semibold text-base hover:opacity-90 transition neon-glow"
             >
               {content.primaryCtaLabel}
             </button>
             <button
-              onClick={() => openWhatsApp(whatsappMessage)}
+              type="button"
+              onClick={() => document.querySelector("#portfolio")?.scrollIntoView({ behavior: "smooth" })}
               className="px-8 py-3.5 rounded-lg font-semibold text-base border border-border text-foreground hover:bg-secondary transition"
             >
               {content.secondaryCtaLabel}
