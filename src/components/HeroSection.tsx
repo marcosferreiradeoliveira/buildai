@@ -1,11 +1,15 @@
 import { motion } from "framer-motion";
 import { LandingContent } from "@/types/landing";
+import { createDefaultWhatsAppMessage, openWhatsApp } from "@/lib/whatsapp";
 
 type HeroSectionProps = {
   content: LandingContent["hero"];
+  companyName: string;
 };
 
-const HeroSection = ({ content }: HeroSectionProps) => {
+const HeroSection = ({ content, companyName }: HeroSectionProps) => {
+  const whatsappMessage = createDefaultWhatsAppMessage(companyName);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center hero-gradient overflow-hidden">
       {content.backgroundImageSrc ? (
@@ -71,13 +75,13 @@ const HeroSection = ({ content }: HeroSectionProps) => {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <button
-              onClick={() => document.querySelector("#contato")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => openWhatsApp(whatsappMessage)}
               className="bg-primary text-primary-foreground px-8 py-3.5 rounded-lg font-semibold text-base hover:opacity-90 transition neon-glow"
             >
               {content.primaryCtaLabel}
             </button>
             <button
-              onClick={() => document.querySelector("#portfolio")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => openWhatsApp(whatsappMessage)}
               className="px-8 py-3.5 rounded-lg font-semibold text-base border border-border text-foreground hover:bg-secondary transition"
             >
               {content.secondaryCtaLabel}

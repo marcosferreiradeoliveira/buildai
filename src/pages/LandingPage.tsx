@@ -26,7 +26,7 @@ const LandingPage = ({ content }: LandingPageProps) => {
         navLinks={content.navbar.navLinks}
         ctaLabel={content.navbar.ctaLabel}
       />
-      <HeroSection content={content.hero} />
+      <HeroSection content={content.hero} companyName={content.navbar.brandName} />
       <ServicesSection content={content.services} />
       <BuildInPublicSection content={content.process} />
       <TechStackSection content={content.techStack} />

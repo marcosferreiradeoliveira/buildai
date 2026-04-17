@@ -1,7 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { LandingContent } from "@/types/landing";
+import { openWhatsApp } from "@/lib/whatsapp";
 
 type FooterSectionProps = {
   content: LandingContent["contact"];
@@ -10,7 +10,6 @@ type FooterSectionProps = {
 const FooterSection = ({ content }: FooterSectionProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
-  const { toast } = useToast();
 
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -28,10 +27,8 @@ const FooterSection = ({ content }: FooterSectionProps) => {
   const handleSubmit = (ev: React.FormEvent) => {
     ev.preventDefault();
     if (!validate()) return;
-    toast({
-      title: content.successTitle,
-      description: content.successDescription,
-    });
+    const message = `Olá! Meu nome é ${form.name}.\nEmail: ${form.email}\nMensagem: ${form.message}`;
+    openWhatsApp(message);
     setForm({ name: "", email: "", message: "" });
     setErrors({});
   };

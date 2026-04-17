@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { NavLink } from "@/types/landing";
+import { createDefaultWhatsAppMessage, openWhatsApp } from "@/lib/whatsapp";
 
 type NavbarProps = {
   brandName: string;
@@ -11,6 +12,7 @@ type NavbarProps = {
 const Navbar = ({ brandName, navLinks, ctaLabel }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const whatsappMessage = createDefaultWhatsAppMessage(brandName);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -50,7 +52,7 @@ const Navbar = ({ brandName, navLinks, ctaLabel }: NavbarProps) => {
             </button>
           ))}
           <button
-            onClick={() => handleClick("#contato")}
+            onClick={() => openWhatsApp(whatsappMessage)}
             className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition neon-glow"
           >
             {ctaLabel}
@@ -89,7 +91,7 @@ const Navbar = ({ brandName, navLinks, ctaLabel }: NavbarProps) => {
             </button>
           ))}
           <button
-            onClick={() => handleClick("#contato")}
+            onClick={() => openWhatsApp(whatsappMessage)}
             className="mt-2 w-full bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium"
           >
             {ctaLabel}
