@@ -1,5 +1,5 @@
 /** Dígitos apenas: código do país + DDD + número (sem +, sem espaços). */
-const DEFAULT_WHATSAPP_PHONE = "521966225632";
+const DEFAULT_WHATSAPP_PHONE = "5521966225632";
 
 const getWhatsAppPhoneDigits = (): string => {
   const raw = import.meta.env.VITE_WHATSAPP_PHONE?.trim() || DEFAULT_WHATSAPP_PHONE;

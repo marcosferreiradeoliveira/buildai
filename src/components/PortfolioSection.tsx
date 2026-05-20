@@ -9,6 +9,8 @@ type PortfolioSectionProps = {
 const PortfolioSection = ({ content }: PortfolioSectionProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const gridClass =
+    content.items.length >= 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-3";
 
   return (
     <section id="portfolio" className="relative py-24 sm:py-32 overflow-hidden" ref={ref}>
@@ -36,14 +38,16 @@ const PortfolioSection = ({ content }: PortfolioSectionProps) => {
           </h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className={`grid gap-6 ${gridClass}`}>
           {content.items.map((project, i) => (
             <motion.div
               key={project.title}
               initial={{ opacity: 0, y: 40 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: i * 0.15 }}
-              className="group relative overflow-hidden p-8 rounded-2xl bg-card border border-border neon-border-hover transition-all duration-500"
+              className={`group relative overflow-hidden rounded-2xl bg-card border border-border neon-border-hover transition-all duration-500 ${
+                project.imageSrc ? "p-0" : "p-8"
+              }`}
             >
               {content.backgroundImageSrc ? (
                 <>
@@ -56,7 +60,14 @@ const PortfolioSection = ({ content }: PortfolioSectionProps) => {
                   <div className="absolute inset-0 bg-card/85" />
                 </>
               ) : null}
-              <div className="relative z-10">
+              {project.imageSrc ? (
+                <img
+                  src={project.imageSrc}
+                  alt={project.title}
+                  className="relative z-10 w-full h-40 sm:h-44 object-cover"
+                />
+              ) : null}
+              <div className={`relative z-10 ${project.imageSrc ? "p-6 sm:p-8" : ""}`}>
               <span className="text-[10px] uppercase tracking-widest text-neon-blue font-semibold">
                 {project.category}
               </span>

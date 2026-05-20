@@ -7,6 +7,12 @@ type SeoHeadProps = {
   faviconHref: string;
 };
 
+const toAbsoluteImageUrl = (src: string): string => {
+  if (/^https?:\/\//i.test(src)) return src;
+  if (typeof window === "undefined") return src;
+  return new URL(src, window.location.origin).href;
+};
+
 const ensureMetaTag = (attr: "name" | "property", value: string) => {
   let tag = document.querySelector(`meta[${attr}="${value}"]`) as HTMLMetaElement | null;
   if (!tag) {
@@ -30,8 +36,10 @@ const SeoHead = ({ title, description, previewImageSrc, faviconHref }: SeoHeadPr
     const ogDescription = ensureMetaTag("property", "og:description");
     ogDescription.content = description;
 
+    const previewImageUrl = toAbsoluteImageUrl(previewImageSrc);
+
     const ogImage = ensureMetaTag("property", "og:image");
-    ogImage.content = previewImageSrc;
+    ogImage.content = previewImageUrl;
 
     const twitterCard = ensureMetaTag("name", "twitter:card");
     twitterCard.content = "summary_large_image";
@@ -43,7 +51,7 @@ const SeoHead = ({ title, description, previewImageSrc, faviconHref }: SeoHeadPr
     twitterDescription.content = description;
 
     const twitterImage = ensureMetaTag("name", "twitter:image");
-    twitterImage.content = previewImageSrc;
+    twitterImage.content = previewImageUrl;
 
     let faviconTag = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
     if (!faviconTag) {

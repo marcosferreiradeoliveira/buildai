@@ -33,6 +33,7 @@ export type ProjectItem = {
   category: string;
   metric: string;
   description: string;
+  imageSrc?: string;
 };
 
 export type ContactSocial = {

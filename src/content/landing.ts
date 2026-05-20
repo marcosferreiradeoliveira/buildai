@@ -1,13 +1,18 @@
 import { LandingContent } from "@/types/landing";
 import educationHeroImage from "@/assets/Gemini_Generated_Image_re9l7qre9l7qre9l Small.png";
 import educationCasesImage from "@/assets/Gemini_Generated_Image_jgkljmjgkljmjgkl Small.png";
+import previewImage from "@/assets/preview.jpeg";
+import igScoutCaseImage from "@/assets/case1.jpeg";
+import culturaFluxoCaseImage from "@/assets/fluxo.jpeg";
+import appAmanhaCaseImage from "@/assets/MuseuDoAmanha-300x277-DqxW2IJM.png";
+import contentFactoryCaseImage from "@/assets/Carrossel.png";
 
 export const baseLandingContent: LandingContent = {
   seo: {
     title: "BuildAI | MicroSaaS e IA para Negócios",
     description:
       "A BuildAI cria MicroSaaS, automações com IA e softwares sob medida para acelerar crescimento e eficiência operacional.",
-    previewImageSrc: educationHeroImage,
+    previewImageSrc: previewImage,
     faviconHref: educationCasesImage,
   },
   navbar: {
@@ -73,14 +78,18 @@ export const baseLandingContent: LandingContent = {
   techStack: {
     eyebrow: "Tech Stack",
     items: [
-      { name: "React", icon: "⚛️" },
-      { name: "Next.js", icon: "▲" },
-      { name: "Python", icon: "🐍" },
-      { name: "OpenAI", icon: "🤖" },
-      { name: "Supabase", icon: "⚡" },
+      { name: "React 19", icon: "⚛️" },
+      { name: "Next.js 15", icon: "▲" },
       { name: "TypeScript", icon: "📘" },
-      { name: "Node.js", icon: "🟢" },
-      { name: "PostgreSQL", icon: "🐘" },
+      { name: "Firebase Suite", icon: "🔥" },
+      { name: "Supabase", icon: "⚡" },
+      { name: "OpenAI GPT-4o", icon: "🤖" },
+      { name: "Google Gemini", icon: "✨" },
+      { name: "Claude", icon: "🧠" },
+      { name: "ElevenLabs", icon: "🎙️" },
+      { name: "HeyGen", icon: "🎬" },
+      { name: "Flutter", icon: "💙" },
+      { name: "Dart", icon: "🎯" },
     ],
   },
   portfolio: {
@@ -89,22 +98,37 @@ export const baseLandingContent: LandingContent = {
     highlightedText: "falam por si",
     items: [
       {
-        title: "AutoFlow AI",
+        title: "IG-Scout AI",
         category: "Automação com IA",
-        metric: "Redução de 40% no custo operacional",
-        description: "Sistema de automação inteligente para processos de atendimento ao cliente com agentes de IA.",
+        metric: "Escala em vendas através de prospecção automatizada e qualificada",
+        description:
+          "Ferramenta de prospecção outbound que automatiza a busca, extração de dados e qualificação de perfis. Integração de Web Scraping com análise comercial via OpenAI para geração de mensagens personalizadas.",
+        imageSrc: igScoutCaseImage,
       },
       {
-        title: "MetricHub",
+        title: "Cultura Fluxo Finance",
         category: "MicroSaaS",
-        metric: "3.000 usuários em 90 dias",
-        description: "Dashboard analítico para e-commerces com integrações automáticas e insights em tempo real.",
+        metric: "Automação de processos complexos de prestação de contas com análise de conformidade de documentos",
+        description:
+          "Plataforma B2B para gestão financeira e compliance de projetos culturais financiados por leis de incentivo. Inclui controle de orçamento por rubricas, análise de notas fiscais via IA e gestão de assinaturas.",
+        imageSrc: culturaFluxoCaseImage,
       },
       {
-        title: "LegalDocs Pro",
+        title: "App Amanhã (IoT)",
         category: "Software Sob Medida",
-        metric: "200h/mês economizadas",
-        description: "Plataforma de geração e gestão de documentos jurídicos com IA generativa integrada.",
+        metric: "Premiado como o melhor aplicativo de Internet das Coisas (IoT) do Brasil",
+        description:
+          "Guia interativo para o Museu do Amanhã utilizando tecnologia de beacons para interatividade contextual em tempo real. Arquitetura robusta integrando hardware (IoT) e software mobile de alta performance.",
+        imageSrc: appAmanhaCaseImage,
+      },
+      {
+        title: "Content Factory AI",
+        category: "Content Factory",
+        metric:
+          "Redução drástica de custos eliminando a necessidade de estúdios tradicionais através de avatares digitais",
+        description:
+          "Gerador de pacotes de conteúdo omnichannel que transforma temas em ebooks, podcasts e vídeos.",
+        imageSrc: contentFactoryCaseImage,
       },
     ],
   },
