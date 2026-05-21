@@ -1,18 +1,25 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { NavLink } from "@/types/landing";
-import { createDefaultWhatsAppMessage, openWhatsApp } from "@/lib/whatsapp";
+import {
+  createDefaultWhatsAppMessage,
+  createProspectWhatsAppMessage,
+  openWhatsApp,
+} from "@/lib/whatsapp";
 
 type NavbarProps = {
   brandName: string;
   navLinks: NavLink[];
   ctaLabel: string;
+  prospectCompanyName?: string;
 };
 
-const Navbar = ({ brandName, navLinks, ctaLabel }: NavbarProps) => {
+const Navbar = ({ brandName, navLinks, ctaLabel, prospectCompanyName }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const whatsappMessage = createDefaultWhatsAppMessage(brandName);
+  const whatsappMessage = prospectCompanyName
+    ? createProspectWhatsAppMessage(prospectCompanyName)
+    : createDefaultWhatsAppMessage(brandName);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);

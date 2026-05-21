@@ -2,18 +2,21 @@ import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { LandingContent } from "@/types/landing";
 
+type PortfolioBlock = LandingContent["portfolio"];
+
 type PortfolioSectionProps = {
-  content: LandingContent["portfolio"];
+  content: PortfolioBlock;
+  sectionId?: string;
 };
 
-const PortfolioSection = ({ content }: PortfolioSectionProps) => {
+const PortfolioSection = ({ content, sectionId = "portfolio" }: PortfolioSectionProps) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const gridClass =
     content.items.length >= 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-3";
 
   return (
-    <section id="portfolio" className="relative py-24 sm:py-32 overflow-hidden" ref={ref}>
+    <section id={sectionId} className="relative py-24 sm:py-32 overflow-hidden" ref={ref}>
       {content.backgroundImageSrc ? (
         <>
           <img

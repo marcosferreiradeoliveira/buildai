@@ -28,6 +28,15 @@ export const extractLeadApiPlugin = (): Plugin => ({
   name: "extract-lead-api",
   configureServer(server) {
     server.middlewares.use("/api/extract-lead-from-url", async (req, res, next) => {
+      if (req.method === "OPTIONS") {
+        res.statusCode = 204;
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        res.end();
+        return;
+      }
+
       if (req.method !== "POST") {
         return next();
       }

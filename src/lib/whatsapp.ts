@@ -26,6 +26,9 @@ export const WHATSAPP_URL = createWhatsAppUrl();
 export const createDefaultWhatsAppMessage = (companyName: string): string =>
   `Olá, quero mais informações sobre sistemas e automações para ${companyName}`;
 
+export const createProspectWhatsAppMessage = (prospectCompany: string): string =>
+  `Olá, BuildAI! Vi a proposta para ${prospectCompany} e gostaria de conversar.`;
+
 export const openWhatsApp = (message?: string) => {
   window.open(createWhatsAppUrl(message), "_blank", "noopener,noreferrer");
 };

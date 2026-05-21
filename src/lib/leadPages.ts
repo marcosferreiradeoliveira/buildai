@@ -1,7 +1,7 @@
 import { baseLandingContent, getSegmentLandingContent } from "@/content/landing";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { LeadPageConfig, LeadSolutionCase } from "@/types/lead";
-import { LandingContent } from "@/types/landing";
+import { LandingContent, ProjectItem } from "@/types/landing";
 
 const STORAGE_KEY = "buildai.lead-pages";
 
@@ -166,9 +166,68 @@ export const createLeadSlug = (segmentSlug: string, companyName: string): string
   return `${normalizedCompany || "empresa"}-${normalizedSegment || "segmento"}`;
 };
 
+const inferImplementationCategory = (text: string): string => {
+  const normalized = text.toLowerCase();
+  if (/saas|plataforma|dashboard|portal|assinatura/.test(normalized)) return "MicroSaaS";
+  if (/automa|chatbot|workflow|integra|crm|outbound/.test(normalized)) return "Automação com IA";
+  if (/conteúdo|conteudo|vídeo|video|mídia|midia|marketing|social/.test(normalized)) {
+    return "IA generativa";
+  }
+  return "Software sob medida";
+};
+
+const mapLeadCaseToImplementationIdea = (
+  item: LeadSolutionCase,
+  companyName: string,
+): ProjectItem => {
+  const category = inferImplementationCategory(`${item.title} ${item.description}`);
+
+  return {
+    title: item.title,
+    category,
+    description: `Com base no case "${item.title}" da ${companyName}, a BuildAI pode implementar ${category.toLowerCase()} para escalar operação e resultado.`,
+    metric: `Proposta BuildAI: ${category} aplicado ao contexto da ${companyName}`,
+  };
+};
+
+const getDefaultImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] => {
+  const company = lead.companyName;
+  const goal = lead.primaryGoal?.trim();
+
+  return [
+    {
+      title: "Automação de funis e atendimento",
+      category: "Automação com IA",
+      description: `Para a ${company}, fluxos automatizados com IA para captar, qualificar e responder leads${goal ? ` com foco em ${goal}` : ""}.`,
+      metric: "Redução de trabalho manual e resposta em minutos",
+    },
+    {
+      title: "MicroSaaS de gestão operacional",
+      category: "MicroSaaS",
+      description: `Painel sob medida para a ${company} centralizar indicadores, tarefas e aprovações em um único produto digital.`,
+      metric: "Visibilidade e controle em tempo real",
+    },
+    {
+      title: "Content Factory com IA",
+      category: "IA generativa",
+      description: `Produção assistida de conteúdo (texto, áudio e vídeo) para a ${company} acelerar campanhas sem depender só de estúdio.`,
+      metric: "Mais volume de conteúdo com menor custo",
+    },
+  ];
+};
+
+const buildImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] => {
+  if (lead.solutionCases?.length) {
+    return lead.solutionCases.map((item) => mapLeadCaseToImplementationIdea(item, lead.companyName));
+  }
+
+  return getDefaultImplementationIdeas(lead);
+};
+
 export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingContent => {
   const segmentTemplate = getSegmentLandingContent(lead.segmentSlug) ?? baseLandingContent;
   const content: LandingContent = JSON.parse(JSON.stringify(segmentTemplate));
+  const buildai = baseLandingContent;
 
   const segmentName = lead.segmentSlug.charAt(0).toUpperCase() + lead.segmentSlug.slice(1);
   const cityLabel = lead.city ? ` em ${lead.city}` : "";
@@ -176,45 +235,53 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
     ? ` com foco em ${lead.primaryGoal.trim()}`
     : "";
 
-  content.seo.title = `${lead.companyName} | Soluções de IA para ${segmentName}`;
-  content.seo.description = `${lead.companyName}${cityLabel}: landing personalizada para ${segmentName}${objectiveLabel}.`;
+  content.prospectCompanyName = lead.companyName;
 
-  content.navbar.brandName = lead.companyName;
+  content.seo.title = `BuildAI para ${lead.companyName} | MicroSaaS e IA`;
+  content.seo.description = `Proposta da BuildAI para ${lead.companyName}${cityLabel}: soluções de IA e automação para ${segmentName}${objectiveLabel}.`;
+  content.seo.previewImageSrc = buildai.seo.previewImageSrc;
+  content.seo.faviconHref = buildai.seo.faviconHref;
+
+  content.navbar.brandName = buildai.navbar.brandName;
+  content.navbar.navLinks = [
+    { label: "Serviços", href: "#servicos" },
+    { label: "Processo", href: "#build-in-public" },
+    { label: "Tecnologias", href: "#tech-stack" },
+    { label: "Implementações", href: "#implementacoes" },
+    { label: "Portfólio", href: "#portfolio" },
+    { label: "Contato", href: "#contato" },
+  ];
   content.navbar.ctaLabel = "Agendar consultoria";
 
-  content.hero.badge = `${lead.companyName}${cityLabel}`;
-  content.hero.title = `Construímos o futuro de ${lead.companyName} com`;
-  content.hero.description = `Criamos um plano personalizado para ${lead.companyName}${cityLabel}, usando IA e automação para acelerar resultados${objectiveLabel}.`;
-  content.hero.primaryCtaLabel = `Quero um plano para ${lead.companyName} →`;
+  content.hero.badge = `Proposta BuildAI para ${lead.companyName}`;
+  content.hero.title = `Construímos o futuro da ${lead.companyName} com`;
+  content.hero.description = `A BuildAI preparou um plano sob medida para a ${lead.companyName}${cityLabel}, com IA e automação para acelerar resultados${objectiveLabel}.`;
+  content.hero.primaryCtaLabel = "Falar com a BuildAI →";
 
-  content.services.description = `Soluções recomendadas para ${lead.companyName}${cityLabel}, considerando metas de negócio e maturidade digital.`;
+  content.services.description = `A BuildAI recomenda para a ${lead.companyName}${cityLabel} soluções de IA e automação alinhadas às metas do negócio.`;
 
-  content.portfolio.eyebrow = "Soluções aplicáveis";
-  content.portfolio.title = "O que podemos implementar em";
-  content.portfolio.highlightedText = lead.companyName;
-  content.portfolio.backgroundImageSrc = undefined;
+  content.implementationIdeas = {
+    eyebrow: "Ideias de implementação",
+    title: "O que podemos implementar em",
+    highlightedText: lead.companyName,
+    description: `Com base nos cases e no contexto da ${lead.companyName}, ideias de automação, MicroSaaS e IA que a BuildAI pode implementar para vocês:`,
+    items: buildImplementationIdeas(lead),
+  };
 
-  if (lead.solutionCases?.length) {
-    content.portfolio.description = `Com base nos cases identificados no site da ${lead.companyName}, estas são possíveis soluções com automação e IA:`;
-    content.portfolio.items = lead.solutionCases.map((item) => ({
-      title: item.title,
-      category: item.category ?? "Possível solução",
-      description: item.description,
-      metric:
-        item.metric ??
-        `BuildAI pode aplicar automação e IA para potencializar este case em ${lead.companyName}.`,
-      imageSrc: item.imageSrc,
-    }));
-  } else {
-    content.portfolio.description = `Aqui estão soluções da BuildAI que podem ser aplicadas à realidade da ${lead.companyName}. Confira nosso portfólio:`;
-    content.portfolio.items = baseLandingContent.portfolio.items;
-  }
+  content.portfolio = {
+    ...buildai.portfolio,
+    eyebrow: "Portfólio BuildAI",
+    title: "Confira nosso",
+    highlightedText: "portfólio",
+    description: "Cases reais que a BuildAI já entregou em automação, MicroSaaS e software sob medida.",
+    backgroundImageSrc: undefined,
+  };
 
-  content.contact.title = `Pronto para evoluir a`;
-  content.contact.highlightedText = `operação da ${lead.companyName}`;
-  content.contact.description = `Fale com nosso time para desenhar um roadmap de implementação para ${lead.companyName}${objectiveLabel}.`;
-  content.contact.submitLabel = `Quero esse plano para ${lead.companyName}`;
-  content.contact.copyrightName = lead.companyName;
+  content.contact.title = "Pronto para transformar a";
+  content.contact.highlightedText = lead.companyName;
+  content.contact.description = `Converse com a BuildAI e veja como aplicar IA e automação na ${lead.companyName}${objectiveLabel}.`;
+  content.contact.submitLabel = "Quero conversar com a BuildAI";
+  content.contact.copyrightName = buildai.contact.copyrightName;
 
   return content;
 };

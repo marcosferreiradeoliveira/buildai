@@ -1,14 +1,20 @@
 import { motion } from "framer-motion";
 import { LandingContent } from "@/types/landing";
-import { createDefaultWhatsAppMessage, openWhatsApp } from "@/lib/whatsapp";
+import {
+  createDefaultWhatsAppMessage,
+  createProspectWhatsAppMessage,
+  openWhatsApp,
+} from "@/lib/whatsapp";
 
 type HeroSectionProps = {
   content: LandingContent["hero"];
-  companyName: string;
+  prospectCompanyName?: string;
 };
 
-const HeroSection = ({ content, companyName }: HeroSectionProps) => {
-  const whatsappMessage = createDefaultWhatsAppMessage(companyName);
+const HeroSection = ({ content, prospectCompanyName }: HeroSectionProps) => {
+  const whatsappMessage = prospectCompanyName
+    ? createProspectWhatsAppMessage(prospectCompanyName)
+    : createDefaultWhatsAppMessage("BuildAI");
 
   return (
     <section className="relative min-h-screen flex items-center justify-center hero-gradient overflow-hidden">

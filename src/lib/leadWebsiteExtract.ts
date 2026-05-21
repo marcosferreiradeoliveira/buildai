@@ -290,10 +290,10 @@ export const enrichCasesAsSolutions = (
 ): LeadSolutionCase[] =>
   cases.map((item) => ({
     ...item,
-    category: "Possível solução",
+    category: "Case do lead",
     metric:
       item.metric ??
-      `BuildAI pode aplicar automação e IA para potencializar "${item.title}" em ${companyName}.`,
+      `Contexto identificado no site da ${companyName} — base para ideia de implementação BuildAI.`,
   }));
 
 export const parseLeadFromWebsiteHtml = (html: string, websiteUrl: string): LeadWebsiteExtract => {
@@ -360,36 +360,103 @@ export const fetchWebsiteHtml = async (url: string): Promise<string> => {
   return response.text();
 };
 
-/** Busca HTML no navegador via proxy CORS (produção / fallback). */
-export const fetchWebsiteHtmlViaCorsProxy = async (url: string): Promise<string> => {
+/** Jina Reader: contorna bloqueio de proxies e CORS no navegador. */
+export const fetchWebsiteHtmlViaJina = async (url: string): Promise<string> => {
   const normalized = normalizeWebsiteUrl(url);
-  const proxyUrls = [
-    (target: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
-    (target: string) => `https://corsproxy.io/?${encodeURIComponent(target)}`,
+  const response = await fetchWithTimeout(`https://r.jina.ai/${normalized}`, 30_000);
+
+  if (!response.ok) {
+    throw new Error(`Jina Reader retornou HTTP ${response.status}.`);
+  }
+
+  const text = await response.text();
+  if (text.length < 80) {
+    throw new Error("Jina Reader retornou conteúdo vazio.");
+  }
+
+  const titleMatch = text.match(/^Title:\s*(.+)$/m);
+  const title = titleMatch?.[1]?.trim() ?? "Site do lead";
+  const body = text.replace(/^Title:[\s\S]*?Markdown Content:\s*/m, "").trim();
+
+  const blocks = body
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter((block) => block.length > 20)
+    .slice(0, 12);
+
+  const articles = blocks
+    .map((block) => {
+      const lines = block.split("\n");
+      const heading = lines[0].replace(/^#+\s*/, "").trim();
+      const paragraph = lines.slice(1).join(" ").trim() || heading;
+      return `<article><h3>${heading}</h3><p>${paragraph}</p></article>`;
+    })
+    .join("");
+
+  return `<html><head><title>${title}</title><meta name="description" content="${body.slice(0, 220).replace(/"/g, "'")}" /></head><body>${articles}</body></html>`;
+};
+
+const fetchViaProxy = async (proxyUrl: string, label: string): Promise<string> => {
+  const response = await fetchWithTimeout(proxyUrl, 22_000);
+  if (!response.ok) {
+    throw new Error(`${label} retornou HTTP ${response.status}.`);
+  }
+
+  const html = await response.text();
+  if (html.length < 80) {
+    throw new Error(`${label} retornou resposta vazia.`);
+  }
+
+  return html;
+};
+
+/** Busca HTML no navegador com vários fallbacks. */
+export const fetchWebsiteHtmlForBrowser = async (url: string): Promise<string> => {
+  const normalized = normalizeWebsiteUrl(url);
+  const attempts: Array<{ label: string; run: () => Promise<string> }> = [
+    { label: "Jina Reader", run: () => fetchWebsiteHtmlViaJina(url) },
+    {
+      label: "Codetabs",
+      run: () =>
+        fetchViaProxy(
+          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(normalized)}`,
+          "Codetabs",
+        ),
+    },
+    {
+      label: "AllOrigins",
+      run: () =>
+        fetchViaProxy(
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(normalized)}`,
+          "AllOrigins",
+        ),
+    },
+    {
+      label: "CorsProxy",
+      run: () =>
+        fetchViaProxy(`https://corsproxy.io/?${encodeURIComponent(normalized)}`, "CorsProxy"),
+    },
   ];
 
-  let lastError: Error | undefined;
+  const errors: string[] = [];
 
-  for (const buildProxyUrl of proxyUrls) {
+  for (const attempt of attempts) {
     try {
-      const response = await fetchWithTimeout(buildProxyUrl(normalized), 20_000);
-      if (!response.ok) {
-        throw new Error(`Proxy retornou HTTP ${response.status}.`);
-      }
-
-      const html = await response.text();
-      if (html.length < 80) {
-        throw new Error("Resposta vazia do proxy.");
-      }
-
-      return html;
+      return await attempt.run();
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
+      errors.push(
+        `${attempt.label}: ${error instanceof Error ? error.message : "erro desconhecido"}`,
+      );
     }
   }
 
-  throw lastError ?? new Error("Não foi possível acessar o site do lead.");
+  throw new Error(
+    `Não foi possível acessar o site do lead. ${errors.join(" · ")}`,
+  );
 };
+
+/** @deprecated Use fetchWebsiteHtmlForBrowser */
+export const fetchWebsiteHtmlViaCorsProxy = fetchWebsiteHtmlForBrowser;
 
 export type WebsiteHtmlFetcher = (url: string) => Promise<string>;
 

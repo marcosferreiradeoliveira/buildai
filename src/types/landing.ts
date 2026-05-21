@@ -42,6 +42,8 @@ export type ContactSocial = {
 };
 
 export type LandingContent = {
+  /** Nome da empresa-alvo em landings personalizadas (/lp). A marca exibida continua sendo BuildAI. */
+  prospectCompanyName?: string;
   seo: {
     title: string;
     description: string;
@@ -88,6 +90,14 @@ export type LandingContent = {
     description?: string;
     items: ProjectItem[];
     backgroundImageSrc?: string;
+  };
+  /** Landings /lp: ideias de implementação (automação, SaaS, IA) com base no contexto do lead. */
+  implementationIdeas?: {
+    eyebrow: string;
+    title: string;
+    highlightedText: string;
+    description?: string;
+    items: ProjectItem[];
   };
   contact: {
     eyebrow: string;

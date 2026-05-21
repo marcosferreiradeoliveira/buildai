@@ -25,11 +25,18 @@ const LandingPage = ({ content }: LandingPageProps) => {
         brandName={content.navbar.brandName}
         navLinks={content.navbar.navLinks}
         ctaLabel={content.navbar.ctaLabel}
+        prospectCompanyName={content.prospectCompanyName}
       />
-      <HeroSection content={content.hero} companyName={content.navbar.brandName} />
+      <HeroSection
+        content={content.hero}
+        prospectCompanyName={content.prospectCompanyName}
+      />
       <ServicesSection content={content.services} />
       <BuildInPublicSection content={content.process} />
       <TechStackSection content={content.techStack} />
+      {content.implementationIdeas ? (
+        <PortfolioSection sectionId="implementacoes" content={content.implementationIdeas} />
+      ) : null}
       <PortfolioSection content={content.portfolio} />
       <FooterSection content={content.contact} />
     </div>
