@@ -1,37 +1,23 @@
-import {
-  extractLeadFromWebsite,
-  normalizeWebsiteUrl,
-} from "../lib/leadWebsiteExtract";
-
-type RequestBody = { url?: string };
-
-type ApiRequest = {
-  method?: string;
-  body?: string | RequestBody;
+export const config = {
+  runtime: "edge",
 };
 
-type ApiResponse = {
-  status: (code: number) => ApiResponse;
-  json: (body: unknown) => void;
-};
+import { extractLeadFromWebsite, normalizeWebsiteUrl } from "./lib/leadWebsiteExtract";
 
-export default async function handler(req: ApiRequest, res: ApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+export default async function handler(request: Request): Promise<Response> {
+  if (request.method !== "POST") {
+    return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
   try {
-    const body =
-      typeof req.body === "string"
-        ? (JSON.parse(req.body) as RequestBody)
-        : (req.body ?? {});
+    const body = (await request.json()) as { url?: string };
     const url = typeof body.url === "string" ? body.url : "";
 
     normalizeWebsiteUrl(url);
     const data = await extractLeadFromWebsite(url);
-    return res.status(200).json(data);
+    return Response.json(data);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Falha ao extrair dados do site.";
-    return res.status(400).json({ error: message });
+    return Response.json({ error: message }, { status: 400 });
   }
 }

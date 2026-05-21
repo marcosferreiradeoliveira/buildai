@@ -1,4 +1,4 @@
-export type { LeadSolutionCase, LeadWebsiteExtract } from "../../lib/leadWebsiteExtract";
+export type { LeadSolutionCase, LeadWebsiteExtract } from "../../api/lib/leadWebsiteExtract";
 export {
   discoverPortfolioPageUrls,
   enrichCasesAsSolutions,
@@ -7,4 +7,4 @@ export {
   fetchWebsiteHtml,
   normalizeWebsiteUrl,
   parseLeadFromWebsiteHtml,
-} from "../../lib/leadWebsiteExtract";
+} from "../../api/lib/leadWebsiteExtract";

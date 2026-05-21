@@ -1,6 +1,7 @@
 {
   "functions": {
     "api/extract-lead-from-url.ts": {
+      "runtime": "edge",
       "maxDuration": 30
     }
   },
