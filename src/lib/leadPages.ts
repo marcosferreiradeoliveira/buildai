@@ -166,67 +166,75 @@ export const createLeadSlug = (segmentSlug: string, companyName: string): string
   return `${normalizedCompany || "empresa"}-${normalizedSegment || "segmento"}`;
 };
 
-const inferImplementationCategory = (text: string): string => {
-  const normalized = text.toLowerCase();
-  if (/saas|plataforma|dashboard|portal|assinatura/.test(normalized)) return "MicroSaaS";
-  if (/automa|chatbot|workflow|integra|crm|outbound/.test(normalized)) return "Automação com IA";
-  if (/conteúdo|conteudo|vídeo|video|mídia|midia|marketing|social/.test(normalized)) {
-    return "IA generativa";
-  }
-  return "Software sob medida";
-};
+/** Soluções BuildAI exibidas na LP — independentes do nome do case no site do lead. */
+const IMPLEMENTATION_SOLUTIONS: ReadonlyArray<{
+  category: string;
+  title: string;
+  description: (company: string) => string;
+  metric: string;
+}> = [
+  {
+    category: "Automação com IA",
+    title: "Funil e atendimento com IA",
+    description: (company) =>
+      `Captação, qualificação e roteamento de demandas para a ${company}, com IA resumindo briefings e priorizando oportunidades.`,
+    metric: "Menos trabalho manual no comercial e no atendimento",
+  },
+  {
+    category: "MicroSaaS",
+    title: "Painel de campanhas e entregas",
+    description: (company) =>
+      `Produto digital para a ${company} acompanhar jobs, aprovações, métricas e histórico por cliente em um só lugar.`,
+    metric: "Visibilidade e previsibilidade operacional",
+  },
+  {
+    category: "IA generativa",
+    title: "Content Factory",
+    description: (company) =>
+      `Pautas, roteiros, posts e adaptações multicanal com IA para a ${company} escalar volume sem multiplicar equipe.`,
+    metric: "Mais conteúdo publicado com o mesmo time",
+  },
+  {
+    category: "Software sob medida",
+    title: "Hub de assets e brand kit",
+    description: (company) =>
+      `Repositório com busca inteligente, versionamento e geração de peças on-brand para a ${company} e contas atendidas.`,
+    metric: "Menos retrabalho e mais consistência de marca",
+  },
+];
 
-const mapLeadCaseToImplementationIdea = (
-  item: LeadSolutionCase,
-  companyName: string,
-): ProjectItem => {
-  const category = inferImplementationCategory(`${item.title} ${item.description}`);
+const mapLeadCaseToImplementationIdea = (index: number, companyName: string): ProjectItem => {
+  const template = IMPLEMENTATION_SOLUTIONS[index % IMPLEMENTATION_SOLUTIONS.length];
 
   return {
-    title: item.title,
-    category,
-    description: `Para a ${companyName}: ${item.description}`,
-    metric: `BuildAI pode entregar ${category} para acelerar esse frente de trabalho.`,
+    title: template.title,
+    category: template.category,
+    description: template.description(companyName),
+    metric: template.metric,
   };
 };
 
-const getDefaultImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] => {
-  const company = lead.companyName;
-  const goal = lead.primaryGoal?.trim();
-
-  return [
-    {
-      title: "Automação de funis e atendimento",
-      category: "Automação com IA",
-      description: `Para a ${company}, fluxos automatizados com IA para captar, qualificar e responder leads${goal ? ` com foco em ${goal}` : ""}.`,
-      metric: "Redução de trabalho manual e resposta em minutos",
-    },
-    {
-      title: "MicroSaaS de gestão operacional",
-      category: "MicroSaaS",
-      description: `Painel sob medida para a ${company} centralizar indicadores, tarefas e aprovações em um único produto digital.`,
-      metric: "Visibilidade e controle em tempo real",
-    },
-    {
-      title: "Content Factory com IA",
-      category: "IA generativa",
-      description: `Produção assistida de conteúdo (texto, áudio e vídeo) para a ${company} acelerar campanhas sem depender só de estúdio.`,
-      metric: "Mais volume de conteúdo com menor custo",
-    },
-  ];
-};
+const getDefaultImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] =>
+  IMPLEMENTATION_SOLUTIONS.slice(0, 3).map((template, index) =>
+    mapLeadCaseToImplementationIdea(index, lead.companyName),
+  );
 
 const buildImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] => {
-  const fromSite = (lead.solutionCases ?? [])
-    .filter((item) => item.title.length >= 12 && !item.title.includes("!["))
-    .map((item) => mapLeadCaseToImplementationIdea(item, lead.companyName));
+  const validCaseCount = (lead.solutionCases ?? []).filter(
+    (item) => item.title.length >= 12 && !item.title.includes("!["),
+  ).length;
 
-  if (fromSite.length >= 2) {
-    return fromSite.slice(0, 4);
+  if (validCaseCount >= 2) {
+    return Array.from({ length: Math.min(validCaseCount, 4) }, (_, index) =>
+      mapLeadCaseToImplementationIdea(index, lead.companyName),
+    );
   }
 
-  if (fromSite.length === 1) {
-    return [...fromSite, ...getDefaultImplementationIdeas(lead).slice(0, 2)];
+  if (validCaseCount === 1) {
+    return [
+      mapLeadCaseToImplementationIdea(0, lead.companyName),
+      ...getDefaultImplementationIdeas(lead).slice(1, 3),
+    ];
   }
 
   return getDefaultImplementationIdeas(lead);
@@ -280,7 +288,7 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
     eyebrow: "Ideias de implementação",
     title: "O que podemos implementar em",
     highlightedText: lead.companyName,
-    description: `Com base nos cases e no contexto da ${lead.companyName}, ideias de automação, MicroSaaS e IA que a BuildAI pode implementar para vocês:`,
+    description: `Soluções de automação, MicroSaaS e IA que a BuildAI pode implementar para a ${lead.companyName}:`,
     items: buildImplementationIdeas(lead),
   };
 
