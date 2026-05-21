@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Plugin } from "vite";
-import { extractLeadFromWebsite, normalizeWebsiteUrl } from "./api/lib/leadWebsiteExtract";
+import { extractLeadFromWebsite, normalizeWebsiteUrl } from "./src/lib/leadWebsiteExtract";
 
 const readJsonBody = (req: IncomingMessage): Promise<{ url?: string }> =>
   new Promise((resolve, reject) => {

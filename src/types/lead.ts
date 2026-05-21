@@ -1,4 +1,4 @@
-export type { LeadSolutionCase } from "../../api/lib/leadWebsiteExtract";
+export type { LeadSolutionCase } from "../lib/leadWebsiteExtract";
 
 export type LeadPageConfig = {
   id: string;
