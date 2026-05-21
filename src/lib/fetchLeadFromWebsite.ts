@@ -1,4 +1,8 @@
-import type { LeadWebsiteExtract } from "@/lib/leadWebsiteExtract";
+import {
+  extractLeadFromWebsite,
+  fetchWebsiteHtmlViaCorsProxy,
+  type LeadWebsiteExtract,
+} from "@/lib/leadWebsiteExtract";
 
 const parseApiResponse = async (
   response: Response,
@@ -15,18 +19,29 @@ const parseApiResponse = async (
   }
 };
 
+const fetchViaLocalApi = async (url: string): Promise<LeadWebsiteExtract | null> => {
+  try {
+    const response = await fetch("/api/extract-lead-from-url", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+
+    if (!response.ok) return null;
+
+    const payload = await parseApiResponse(response);
+    return payload;
+  } catch {
+    return null;
+  }
+};
+
+/** Extrai dados do site do lead (proxy no browser em produção; API local no dev). */
 export const fetchLeadFromWebsite = async (url: string): Promise<LeadWebsiteExtract> => {
-  const response = await fetch("/api/extract-lead-from-url", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url }),
-  });
-
-  const payload = await parseApiResponse(response);
-
-  if (!response.ok) {
-    throw new Error(payload.error ?? "Não foi possível extrair informações do site.");
+  if (import.meta.env.DEV) {
+    const fromApi = await fetchViaLocalApi(url);
+    if (fromApi) return fromApi;
   }
 
-  return payload;
+  return extractLeadFromWebsite(url, fetchWebsiteHtmlViaCorsProxy);
 };

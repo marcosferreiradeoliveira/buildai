@@ -5,6 +5,8 @@ export {
   extractCasesFromWebsiteHtml,
   extractLeadFromWebsite,
   fetchWebsiteHtml,
+  fetchWebsiteHtmlViaCorsProxy,
   normalizeWebsiteUrl,
   parseLeadFromWebsiteHtml,
 } from "../../api/lib/leadWebsiteExtract";
+export type { WebsiteHtmlFetcher } from "../../api/lib/leadWebsiteExtract";

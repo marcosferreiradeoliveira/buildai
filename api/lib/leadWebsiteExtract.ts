@@ -360,15 +360,51 @@ export const fetchWebsiteHtml = async (url: string): Promise<string> => {
   return response.text();
 };
 
-export const extractLeadFromWebsite = async (url: string): Promise<LeadWebsiteExtract> => {
+/** Busca HTML no navegador via proxy CORS (produção / fallback). */
+export const fetchWebsiteHtmlViaCorsProxy = async (url: string): Promise<string> => {
+  const normalized = normalizeWebsiteUrl(url);
+  const proxyUrls = [
+    (target: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
+    (target: string) => `https://corsproxy.io/?${encodeURIComponent(target)}`,
+  ];
+
+  let lastError: Error | undefined;
+
+  for (const buildProxyUrl of proxyUrls) {
+    try {
+      const response = await fetchWithTimeout(buildProxyUrl(normalized), 20_000);
+      if (!response.ok) {
+        throw new Error(`Proxy retornou HTTP ${response.status}.`);
+      }
+
+      const html = await response.text();
+      if (html.length < 80) {
+        throw new Error("Resposta vazia do proxy.");
+      }
+
+      return html;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
+  throw lastError ?? new Error("Não foi possível acessar o site do lead.");
+};
+
+export type WebsiteHtmlFetcher = (url: string) => Promise<string>;
+
+export const extractLeadFromWebsite = async (
+  url: string,
+  fetchHtml: WebsiteHtmlFetcher = fetchWebsiteHtml,
+): Promise<LeadWebsiteExtract> => {
   const websiteUrl = normalizeWebsiteUrl(url);
-  const mainHtml = await fetchWebsiteHtml(websiteUrl);
+  const mainHtml = await fetchHtml(websiteUrl);
   let result = parseLeadFromWebsiteHtml(mainHtml, websiteUrl);
 
   const extraUrls = discoverPortfolioPageUrls(mainHtml, websiteUrl);
   for (const pageUrl of extraUrls) {
     try {
-      const html = await fetchWebsiteHtml(pageUrl);
+      const html = await fetchHtml(pageUrl);
       const extraCases = extractCasesFromWebsiteHtml(html, pageUrl);
       const merged = dedupeCases([...result.solutionCases, ...extraCases]);
       const company = result.companyName ?? "sua empresa";
