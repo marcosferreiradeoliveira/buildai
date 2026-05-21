@@ -1,27 +1,30 @@
 import {
   extractLeadFromWebsite,
   normalizeWebsiteUrl,
-} from "../src/lib/leadWebsiteExtract";
+} from "../lib/leadWebsiteExtract";
 
-type VercelRequest = {
+type RequestBody = { url?: string };
+
+type ApiRequest = {
   method?: string;
-  body?: string | Record<string, unknown>;
+  body?: string | RequestBody;
 };
 
-type VercelResponse = {
-  status: (code: number) => VercelResponse;
+type ApiResponse = {
+  status: (code: number) => ApiResponse;
   json: (body: unknown) => void;
-  end: () => void;
 };
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     const body =
-      typeof req.body === "string" ? (JSON.parse(req.body) as { url?: string }) : (req.body ?? {});
+      typeof req.body === "string"
+        ? (JSON.parse(req.body) as RequestBody)
+        : (req.body ?? {});
     const url = typeof body.url === "string" ? body.url : "";
 
     normalizeWebsiteUrl(url);

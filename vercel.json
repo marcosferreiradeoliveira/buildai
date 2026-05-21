@@ -1,3 +1,8 @@
 {
+  "functions": {
+    "api/extract-lead-from-url.ts": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
 }
