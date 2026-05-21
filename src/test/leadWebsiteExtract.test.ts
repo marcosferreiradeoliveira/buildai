@@ -3,6 +3,7 @@ import {
   extractCasesFromWebsiteHtml,
   normalizeWebsiteUrl,
   parseLeadFromWebsiteHtml,
+  sanitizeMarkdownText,
 } from "@/lib/leadWebsiteExtract";
 
 describe("leadWebsiteExtract", () => {
@@ -46,5 +47,15 @@ describe("leadWebsiteExtract", () => {
     expect(cases.length).toBeGreaterThanOrEqual(2);
     expect(cases[0]?.title).toContain("Matrículas");
     expect(cases[0]?.description.length).toBeGreaterThan(20);
+  });
+
+  it("strips markdown images and bold fragments from jina-like text", () => {
+    const dirty =
+      "![Image 1](blob:http://localhost/x) **Relevância, impacto.** **Temos as palavras certas**";
+    const clean = sanitizeMarkdownText(dirty);
+
+    expect(clean).not.toContain("![");
+    expect(clean).not.toContain("blob:");
+    expect(clean).toContain("Relevância, impacto.");
   });
 });

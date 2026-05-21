@@ -105,6 +105,16 @@ const inferCity = (text: string): string | undefined => {
   return match?.[1]?.trim();
 };
 
+const extractAboutSnippet = (html: string): string | undefined => {
+  const aboutMatch = html.match(
+    /<(?:section|div)[^>]*(?:quem-somos|about|sobre)[^>]*>[\s\S]*?<p[^>]*>([^<]{60,500})<\/p>/i,
+  );
+  if (aboutMatch?.[1]) return stripHtml(aboutMatch[1]);
+
+  const firstParagraph = html.match(/<p[^>]*>([^<]{80,400})<\/p>/i);
+  return firstParagraph?.[1] ? stripHtml(firstParagraph[1]) : undefined;
+};
+
 const inferSegmentSlug = (text: string): string | undefined => {
   const normalized = text.toLowerCase();
   let best: { slug: string; score: number } | undefined;
@@ -120,23 +130,69 @@ const inferSegmentSlug = (text: string): string | undefined => {
 };
 
 const stripHtml = (value: string): string =>
-  decodeHtml(
-    value
-      .replace(/<script[\s\S]*?<\/script>/gi, " ")
-      .replace(/<style[\s\S]*?<\/style>/gi, " ")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim(),
+  sanitizeMarkdownText(
+    decodeHtml(
+      value
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim(),
+    ),
   );
 
-const normalizeCaseTitle = (title: string): string => title.toLowerCase().replace(/\s+/g, " ").trim();
+/** Remove lixo de markdown (imagens blob, links, negrito) vindo do Jina Reader. */
+export const sanitizeMarkdownText = (value: string): string =>
+  value
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/`[^`]+`/g, " ")
+    .replace(/blob:[^\s)]+/gi, " ")
+    .replace(/https?:\/\/\S+/gi, " ")
+    .replace(/^[-*•]\s+/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const normalizeCaseTitle = (title: string): string =>
+  sanitizeMarkdownText(title).toLowerCase().replace(/\s+/g, " ").trim();
 
 const isValidCase = (title: string, description: string): boolean => {
-  if (title.length < 4 || title.length > 120) return false;
-  if (description.length < 24 || description.length > 420) return false;
-  if (/^(home|contato|blog|menu|saiba mais)$/i.test(title)) return false;
+  const cleanTitle = sanitizeMarkdownText(title);
+  const cleanDescription = sanitizeMarkdownText(description);
+
+  if (cleanTitle.length < 12 || cleanTitle.length > 100) return false;
+  if (cleanDescription.length < 40 || cleanDescription.length > 420) return false;
+  if (/^(home|contato|blog|menu|saiba mais|quem somos)$/i.test(cleanTitle)) return false;
+  if (/[!\[\]{}]|blob:|\.(png|jpe?g|webp|gif|svg)\b/i.test(cleanTitle)) return false;
+  if (/^\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/i.test(cleanTitle)) return false;
+  if ((cleanTitle.match(/\*\*/g) ?? []).length > 0) return false;
+
+  const titleWords = cleanTitle.split(" ").filter(Boolean);
+  if (titleWords.length < 2) return false;
+  if (titleWords.length < 3 && cleanTitle.length < 18) return false;
+
+  // Frases cortadas típicas de blocos de marketing (não são cases)
+  if (
+    /^(temos as|comunicação que|relevância|impacto|multiplica experiências|informa, educa)/i.test(
+      cleanTitle,
+    )
+  ) {
+    return false;
+  }
+
   return true;
 };
+
+const filterValidCases = (cases: LeadSolutionCase[]): LeadSolutionCase[] =>
+  cases
+    .map((item) => ({
+      ...item,
+      title: sanitizeMarkdownText(item.title),
+      description: sanitizeMarkdownText(item.description),
+    }))
+    .filter((item) => isValidCase(item.title, item.description));
 
 const resolveUrl = (href: string, baseUrl: string): string | null => {
   try {
@@ -312,13 +368,21 @@ export const parseLeadFromWebsiteHtml = (html: string, websiteUrl: string): Lead
   const combinedText = [rawTitle, rawDescription, html.slice(0, 8000)].filter(Boolean).join(" ");
   const company = companyName ?? "sua empresa";
   const rawCases = extractCasesFromWebsiteHtml(html, websiteUrl);
-  const solutionCases = enrichCasesAsSolutions(rawCases, company);
+  const validCases = filterValidCases(rawCases);
+  const solutionCases = enrichCasesAsSolutions(validCases, company);
+  const cleanDescription = sanitizeMarkdownText(rawDescription ?? "");
+  const primaryGoal =
+    cleanDescription.length >= 40
+      ? cleanDescription.slice(0, 180)
+      : sanitizeMarkdownText(
+          extractAboutSnippet(html) ?? "Estratégia de comunicação e presença digital.",
+        ).slice(0, 180);
 
   return {
     websiteUrl,
-    companyName,
+    companyName: companyName ? sanitizeMarkdownText(companyName) : companyName,
     city: inferCity(combinedText),
-    primaryGoal: rawDescription?.slice(0, 220),
+    primaryGoal,
     segmentSlug: inferSegmentSlug(combinedText),
     solutionCases,
     rawTitle,
@@ -375,25 +439,90 @@ export const fetchWebsiteHtmlViaJina = async (url: string): Promise<string> => {
   }
 
   const titleMatch = text.match(/^Title:\s*(.+)$/m);
-  const title = titleMatch?.[1]?.trim() ?? "Site do lead";
+  const title = sanitizeMarkdownText(titleMatch?.[1]?.trim() ?? "Site do lead");
   const body = text.replace(/^Title:[\s\S]*?Markdown Content:\s*/m, "").trim();
 
-  const blocks = body
-    .split(/\n{2,}/)
-    .map((block) => block.trim())
-    .filter((block) => block.length > 20)
-    .slice(0, 12);
+  const sections: Array<{ title: string; description: string }> = [];
+  let current: { title: string; lines: string[] } | null = null;
 
-  const articles = blocks
-    .map((block) => {
-      const lines = block.split("\n");
-      const heading = lines[0].replace(/^#+\s*/, "").trim();
-      const paragraph = lines.slice(1).join(" ").trim() || heading;
-      return `<article><h3>${heading}</h3><p>${paragraph}</p></article>`;
-    })
+  const flushSection = () => {
+    if (!current) return;
+    const description = sanitizeMarkdownText(current.lines.join(" "));
+    const heading = sanitizeMarkdownText(current.title);
+    if (isValidCase(heading, description)) {
+      sections.push({ title: heading, description });
+    }
+    current = null;
+  };
+
+  for (const rawLine of body.split("\n")) {
+    const line = rawLine.trim();
+    if (!line || /^!\[/.test(line)) continue;
+
+    if (/^#{2,3}\s+/.test(line)) {
+      flushSection();
+      current = { title: line.replace(/^#+\s*/, ""), lines: [] };
+      continue;
+    }
+
+    if (/^#{4,6}\s+/.test(line)) {
+      flushSection();
+      const subTitle = sanitizeMarkdownText(line.replace(/^#+\s*/, ""));
+      if (subTitle.length >= 12) {
+        current = { title: subTitle, lines: [] };
+      }
+      continue;
+    }
+
+    if (current) {
+      current.lines.push(line);
+    }
+  }
+
+  flushSection();
+
+  // Posts de blog: linha com título + data
+  const blogPattern =
+    /^\*?\s*(.+?)\s*[–—-]\s*.+?\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/gm;
+  let blogMatch: RegExpExecArray | null;
+  while ((blogMatch = blogPattern.exec(body)) !== null) {
+    const postTitle = sanitizeMarkdownText(blogMatch[1]);
+    if (postTitle.length >= 15 && postTitle.length <= 90) {
+      sections.push({
+        title: postTitle,
+        description: `Iniciativa de conteúdo e comunicação identificada no site: ${postTitle}.`,
+      });
+    }
+  }
+
+  const uniqueSections = filterValidCases(
+    sections.map((section, index) => ({
+      title: section.title,
+      description: section.description,
+      category: "Case identificado",
+      sourceUrl: normalized,
+    })),
+  ).slice(0, MAX_CASES);
+
+  const articles = uniqueSections
+    .map(
+      (section) =>
+        `<article><h3>${section.title}</h3><p>${section.description}</p></article>`,
+    )
     .join("");
 
-  return `<html><head><title>${title}</title><meta name="description" content="${body.slice(0, 220).replace(/"/g, "'")}" /></head><body>${articles}</body></html>`;
+  const aboutText =
+    sanitizeMarkdownText(
+      body
+        .split("\n")
+        .filter((line) => line.trim() && !/^#{1,6}\s/.test(line) && !/^!\[/.test(line))
+        .slice(0, 6)
+        .join(" "),
+    ).slice(0, 220) || "Comunicação estratégica e presença digital.";
+
+  const safeAbout = aboutText.replace(/"/g, "'");
+
+  return `<html><head><title>${title}</title><meta name="description" content="${safeAbout}" /></head><body>${articles}<p>${safeAbout}</p></body></html>`;
 };
 
 const fetchViaProxy = async (proxyUrl: string, label: string): Promise<string> => {
@@ -473,7 +602,7 @@ export const extractLeadFromWebsite = async (
     try {
       const html = await fetchHtml(pageUrl);
       const extraCases = extractCasesFromWebsiteHtml(html, pageUrl);
-      const merged = dedupeCases([...result.solutionCases, ...extraCases]);
+      const merged = filterValidCases(dedupeCases([...result.solutionCases, ...extraCases]));
       const company = result.companyName ?? "sua empresa";
       result = {
         ...result,

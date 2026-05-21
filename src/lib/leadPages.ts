@@ -185,8 +185,8 @@ const mapLeadCaseToImplementationIdea = (
   return {
     title: item.title,
     category,
-    description: `Com base no case "${item.title}" da ${companyName}, a BuildAI pode implementar ${category.toLowerCase()} para escalar operação e resultado.`,
-    metric: `Proposta BuildAI: ${category} aplicado ao contexto da ${companyName}`,
+    description: `Para a ${companyName}: ${item.description}`,
+    metric: `BuildAI pode entregar ${category} para acelerar esse frente de trabalho.`,
   };
 };
 
@@ -217,8 +217,16 @@ const getDefaultImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] => {
 };
 
 const buildImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] => {
-  if (lead.solutionCases?.length) {
-    return lead.solutionCases.map((item) => mapLeadCaseToImplementationIdea(item, lead.companyName));
+  const fromSite = (lead.solutionCases ?? [])
+    .filter((item) => item.title.length >= 12 && !item.title.includes("!["))
+    .map((item) => mapLeadCaseToImplementationIdea(item, lead.companyName));
+
+  if (fromSite.length >= 2) {
+    return fromSite.slice(0, 4);
+  }
+
+  if (fromSite.length === 1) {
+    return [...fromSite, ...getDefaultImplementationIdeas(lead).slice(0, 2)];
   }
 
   return getDefaultImplementationIdeas(lead);
@@ -231,9 +239,11 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
 
   const segmentName = lead.segmentSlug.charAt(0).toUpperCase() + lead.segmentSlug.slice(1);
   const cityLabel = lead.city ? ` em ${lead.city}` : "";
-  const objectiveLabel = lead.primaryGoal?.trim()
-    ? ` com foco em ${lead.primaryGoal.trim()}`
-    : "";
+  const cleanGoalForLabels =
+    lead.primaryGoal?.trim() && !/!\[|blob:/i.test(lead.primaryGoal)
+      ? lead.primaryGoal.trim()
+      : "";
+  const objectiveLabel = cleanGoalForLabels ? ` com foco em ${cleanGoalForLabels}` : "";
 
   content.prospectCompanyName = lead.companyName;
 
@@ -255,7 +265,13 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
 
   content.hero.badge = `Proposta BuildAI para ${lead.companyName}`;
   content.hero.title = `Construímos o futuro da ${lead.companyName} com`;
-  content.hero.description = `A BuildAI preparou um plano sob medida para a ${lead.companyName}${cityLabel}, com IA e automação para acelerar resultados${objectiveLabel}.`;
+  const cleanGoal = lead.primaryGoal?.trim();
+  const goalSuffix =
+    cleanGoal && cleanGoal.length >= 30 && !/!\[|blob:/i.test(cleanGoal)
+      ? ` com foco em ${cleanGoal}`
+      : "";
+
+  content.hero.description = `A BuildAI preparou um plano sob medida para a ${lead.companyName}${cityLabel}, com IA e automação para acelerar resultados${goalSuffix}.`;
   content.hero.primaryCtaLabel = "Falar com a BuildAI →";
 
   content.services.description = `A BuildAI recomenda para a ${lead.companyName}${cityLabel} soluções de IA e automação alinhadas às metas do negócio.`;
