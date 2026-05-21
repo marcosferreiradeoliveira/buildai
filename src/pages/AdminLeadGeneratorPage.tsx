@@ -7,14 +7,18 @@ import {
   loadLeadPages,
   saveLeadPage,
 } from "@/lib/leadPages";
-import { LeadPageConfig } from "@/types/lead";
+import { LeadPageConfig, LeadSolutionCase } from "@/types/lead";
 import { useToast } from "@/hooks/use-toast";
+import { fetchLeadFromWebsite } from "@/lib/fetchLeadFromWebsite";
 
 const AdminLeadGeneratorPage = () => {
   const [segmentSlug, setSegmentSlug] = useState("educacao");
   const [companyName, setCompanyName] = useState("");
   const [city, setCity] = useState("");
   const [primaryGoal, setPrimaryGoal] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [solutionCases, setSolutionCases] = useState<LeadSolutionCase[]>([]);
+  const [extracting, setExtracting] = useState(false);
   const [leads, setLeads] = useState<LeadPageConfig[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const { toast } = useToast();
@@ -52,6 +56,44 @@ const AdminLeadGeneratorPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleExtractFromWebsite = async () => {
+    if (!websiteUrl.trim()) {
+      toast({
+        title: "Informe o site do lead",
+        description: "Cole a URL do site para buscar nome, descrição e segmento sugerido.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setExtracting(true);
+    try {
+      const data = await fetchLeadFromWebsite(websiteUrl);
+      if (data.companyName) setCompanyName(data.companyName);
+      if (data.city) setCity(data.city);
+      if (data.primaryGoal) setPrimaryGoal(data.primaryGoal);
+      if (data.segmentSlug) setSegmentSlug(data.segmentSlug);
+      setSolutionCases(data.solutionCases ?? []);
+
+      toast({
+        title: "Informações importadas",
+        description: data.companyName
+          ? `${data.solutionCases.length} case(s) encontrado(s) para ${data.companyName}. Revise antes de gerar a página.`
+          : data.solutionCases.length
+            ? `${data.solutionCases.length} case(s) encontrado(s). Revise os campos antes de gerar a página.`
+            : "Revise os campos preenchidos antes de gerar a página.",
+      });
+    } catch (err) {
+      toast({
+        title: "Não foi possível puxar o site",
+        description: err instanceof Error ? err.message : "Verifique a URL e tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setExtracting(false);
+    }
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -70,6 +112,8 @@ const AdminLeadGeneratorPage = () => {
         companyName: companyName.trim(),
         city: city.trim() || undefined,
         primaryGoal: primaryGoal.trim() || undefined,
+        websiteUrl: websiteUrl.trim() || undefined,
+        solutionCases: solutionCases.length ? solutionCases : undefined,
       });
 
       setLeads(await loadLeadPages());
@@ -107,6 +151,50 @@ const AdminLeadGeneratorPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-card p-6 md:p-8 space-y-5">
+          <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
+            <label htmlFor="websiteUrl" className="block text-sm font-medium">
+              Site do lead
+            </label>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <input
+                id="websiteUrl"
+                type="url"
+                value={websiteUrl}
+                onChange={(event) => setWebsiteUrl(event.target.value)}
+                placeholder="https://empresa.com.br"
+                className="w-full flex-1 rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:border-primary/50"
+              />
+              <button
+                type="button"
+                disabled={extracting}
+                onClick={() => void handleExtractFromWebsite()}
+                className="rounded-lg border border-primary/40 bg-background px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 transition disabled:opacity-60"
+              >
+                {extracting ? "Buscando…" : "Puxar informações"}
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Lê título, descrição, cases do site e metadados para preencher os campos e montar possíveis
+              soluções na landing.
+            </p>
+          </div>
+
+          {solutionCases.length > 0 ? (
+            <div className="rounded-xl border border-border bg-background/60 p-4 space-y-3">
+              <p className="text-sm font-medium">
+                Possíveis soluções ({solutionCases.length}) — exibidas na landing do lead
+              </p>
+              <ul className="space-y-2 max-h-56 overflow-y-auto">
+                {solutionCases.map((item) => (
+                  <li key={item.title} className="rounded-lg border border-border px-3 py-2 text-sm">
+                    <p className="font-medium">{item.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label htmlFor="segmentSlug" className="mb-2 block text-sm font-medium">

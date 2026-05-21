@@ -85,6 +85,7 @@ export type LandingContent = {
     eyebrow: string;
     title: string;
     highlightedText: string;
+    description?: string;
     items: ProjectItem[];
     backgroundImageSrc?: string;
   };

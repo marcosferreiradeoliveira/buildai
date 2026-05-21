@@ -36,6 +36,11 @@ const PortfolioSection = ({ content }: PortfolioSectionProps) => {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mt-3">
             {content.title} <span className="gradient-text">{content.highlightedText}</span>
           </h2>
+          {content.description ? (
+            <p className="mt-4 text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+              {content.description}
+            </p>
+          ) : null}
         </motion.div>
 
         <div className={`grid gap-6 ${gridClass}`}>

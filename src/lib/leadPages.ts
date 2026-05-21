@@ -1,6 +1,6 @@
 import { baseLandingContent, getSegmentLandingContent } from "@/content/landing";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabaseClient";
-import { LeadPageConfig } from "@/types/lead";
+import { LeadPageConfig, LeadSolutionCase } from "@/types/lead";
 import { LandingContent } from "@/types/landing";
 
 const STORAGE_KEY = "buildai.lead-pages";
@@ -12,6 +12,8 @@ type LeadPageRow = {
   company_name: string;
   city: string | null;
   primary_goal: string | null;
+  website_url: string | null;
+  solution_cases: LeadSolutionCase[] | null;
   created_at: string;
 };
 
@@ -22,6 +24,8 @@ const rowToLead = (row: LeadPageRow): LeadPageConfig => ({
   companyName: row.company_name,
   city: row.city ?? undefined,
   primaryGoal: row.primary_goal ?? undefined,
+  websiteUrl: row.website_url ?? undefined,
+  solutionCases: Array.isArray(row.solution_cases) ? row.solution_cases : undefined,
   createdAt: row.created_at,
 });
 
@@ -114,6 +118,8 @@ export const saveLeadPage = async (
       company_name: lead.companyName,
       city: lead.city ?? null,
       primary_goal: lead.primaryGoal ?? null,
+      website_url: lead.websiteUrl ?? null,
+      solution_cases: lead.solutionCases?.length ? lead.solutionCases : null,
     };
 
     if (existing) {
@@ -174,17 +180,35 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
   content.seo.description = `${lead.companyName}${cityLabel}: landing personalizada para ${segmentName}${objectiveLabel}.`;
 
   content.navbar.brandName = lead.companyName;
-  content.navbar.ctaLabel = `Agendar com ${lead.companyName}`;
+  content.navbar.ctaLabel = "Agendar consultoria";
 
   content.hero.badge = `${lead.companyName}${cityLabel}`;
+  content.hero.title = `Construímos o futuro de ${lead.companyName} com`;
   content.hero.description = `Criamos um plano personalizado para ${lead.companyName}${cityLabel}, usando IA e automação para acelerar resultados${objectiveLabel}.`;
   content.hero.primaryCtaLabel = `Quero um plano para ${lead.companyName} →`;
 
   content.services.description = `Soluções recomendadas para ${lead.companyName}${cityLabel}, considerando metas de negócio e maturidade digital.`;
 
-  content.portfolio.eyebrow = `Ideias para ${lead.companyName}`;
-  content.portfolio.title = "Possíveis iniciativas para";
+  content.portfolio.eyebrow = "Soluções aplicáveis";
+  content.portfolio.title = "O que podemos implementar em";
   content.portfolio.highlightedText = lead.companyName;
+  content.portfolio.backgroundImageSrc = undefined;
+
+  if (lead.solutionCases?.length) {
+    content.portfolio.description = `Com base nos cases identificados no site da ${lead.companyName}, estas são possíveis soluções com automação e IA:`;
+    content.portfolio.items = lead.solutionCases.map((item) => ({
+      title: item.title,
+      category: item.category ?? "Possível solução",
+      description: item.description,
+      metric:
+        item.metric ??
+        `BuildAI pode aplicar automação e IA para potencializar este case em ${lead.companyName}.`,
+      imageSrc: item.imageSrc,
+    }));
+  } else {
+    content.portfolio.description = `Aqui estão soluções da BuildAI que podem ser aplicadas à realidade da ${lead.companyName}. Confira nosso portfólio:`;
+    content.portfolio.items = baseLandingContent.portfolio.items;
+  }
 
   content.contact.title = `Pronto para evoluir a`;
   content.contact.highlightedText = `operação da ${lead.companyName}`;
