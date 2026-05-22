@@ -169,7 +169,15 @@ const deleteLeadPageViaServerApi = async (
     body: JSON.stringify({ slug: lead.slug, id: lead.id }),
   });
 
-  const payload = (await response.json().catch(() => ({}))) as { error?: string };
+  const raw = await response.text();
+  let payload: { error?: string } = {};
+  if (raw) {
+    try {
+      payload = JSON.parse(raw) as { error?: string };
+    } catch {
+      payload = { error: raw.slice(0, 180) };
+    }
+  }
 
   if (response.status === 503) return "unavailable";
 

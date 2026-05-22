@@ -37,7 +37,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       id: typeof body.id === "string" ? body.id : undefined,
     });
 
-    if (result.reason === "no_service_role") {
+    if (!result.ok && result.reason === "no_service_role") {
       return res.status(503).json({
         error:
           "Configure SUPABASE_SERVICE_ROLE_KEY nas variáveis da Vercel (Settings → Environment Variables).",
@@ -50,7 +50,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
     return res.status(200).json({ deleted: true, ids: result.deletedIds });
   } catch (error) {
+    console.error("delete-lead-page:", error);
     const message = error instanceof Error ? error.message : "Falha ao apagar lead.";
-    return res.status(400).json({ error: message });
+    return res.status(500).json({ error: message });
   }
 }
