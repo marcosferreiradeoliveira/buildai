@@ -158,29 +158,61 @@ const removeLeadPageLocal = (slug: string, id?: string) => {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
 };
 
+const deleteLeadPageViaServerApi = async (
+  lead: Pick<LeadPageConfig, "slug" | "id">,
+): Promise<"deleted" | "unavailable"> => {
+  if (typeof window === "undefined") return "unavailable";
+
+  const response = await fetch("/api/delete-lead-page", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slug: lead.slug, id: lead.id }),
+  });
+
+  const payload = (await response.json().catch(() => ({}))) as { error?: string };
+
+  if (response.status === 503) return "unavailable";
+
+  if (!response.ok) {
+    throw new Error(payload.error ?? `Falha ao apagar (HTTP ${response.status}).`);
+  }
+
+  return "deleted";
+};
+
+const deleteLeadPageWithAnonKey = async (lead: Pick<LeadPageConfig, "slug" | "id">): Promise<void> => {
+  const sb = getSupabase();
+  if (!sb) throw new Error("Supabase não configurado.");
+
+  let query = sb.from("lead_pages").delete();
+  if (lead.id) {
+    query = query.eq("id", lead.id);
+  } else {
+    query = query.eq("slug", lead.slug.trim());
+  }
+
+  const { data, error } = await query.select("id");
+  if (error) throw error;
+
+  if (!data?.length) {
+    throw new Error(
+      "Sem permissão para apagar (anon). Adicione SUPABASE_SERVICE_ROLE_KEY na Vercel ou rode a migration lead_pages_delete_policy no Supabase.",
+    );
+  }
+};
+
 export const deleteLeadPage = async (lead: Pick<LeadPageConfig, "slug" | "id">): Promise<void> => {
   const normalizedSlug = lead.slug.trim();
   if (!normalizedSlug) throw new Error("Slug inválido.");
 
-  const sb = getSupabase();
-  if (sb) {
-    let query = sb.from("lead_pages").delete();
-
-    if (lead.id) {
-      query = query.eq("id", lead.id);
-    } else {
-      query = query.eq("slug", normalizedSlug);
+  if (isSupabaseConfigured()) {
+    const viaApi = await deleteLeadPageViaServerApi(lead);
+    if (viaApi === "deleted") {
+      removeLeadPageLocal(normalizedSlug, lead.id);
+      return;
     }
 
-    const { data, error } = await query.select("id");
-    if (error) throw error;
-
-    if (!data?.length) {
-      throw new Error(
-        "Não foi possível apagar no Supabase (0 linhas). Rode no SQL Editor: supabase/migrations/20260521110000_lead_pages_delete_policy.sql",
-      );
-    }
-
+    await deleteLeadPageWithAnonKey(lead);
     removeLeadPageLocal(normalizedSlug, lead.id);
     return;
   }
