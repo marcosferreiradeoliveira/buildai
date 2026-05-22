@@ -149,14 +149,39 @@ export const saveLeadPage = async (
   return saveLeadPageLocal(lead);
 };
 
-export const deleteLeadPage = async (slug: string): Promise<void> => {
-  const normalizedSlug = slug.trim();
+const removeLeadPageLocal = (slug: string, id?: string) => {
+  if (typeof window === "undefined") return;
+
+  const leads = getLeadPagesLocal().filter(
+    (item) => item.slug !== slug && (!id || item.id !== id),
+  );
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+};
+
+export const deleteLeadPage = async (lead: Pick<LeadPageConfig, "slug" | "id">): Promise<void> => {
+  const normalizedSlug = lead.slug.trim();
   if (!normalizedSlug) throw new Error("Slug inválido.");
 
   const sb = getSupabase();
   if (sb) {
-    const { error } = await sb.from("lead_pages").delete().eq("slug", normalizedSlug);
+    let query = sb.from("lead_pages").delete();
+
+    if (lead.id) {
+      query = query.eq("id", lead.id);
+    } else {
+      query = query.eq("slug", normalizedSlug);
+    }
+
+    const { data, error } = await query.select("id");
     if (error) throw error;
+
+    if (!data?.length) {
+      throw new Error(
+        "Não foi possível apagar no Supabase (0 linhas). Rode no SQL Editor: supabase/migrations/20260521110000_lead_pages_delete_policy.sql",
+      );
+    }
+
+    removeLeadPageLocal(normalizedSlug, lead.id);
     return;
   }
 
@@ -164,8 +189,7 @@ export const deleteLeadPage = async (slug: string): Promise<void> => {
     throw new Error("deleteLeadPage só pode ser usado no navegador.");
   }
 
-  const leads = getLeadPagesLocal().filter((item) => item.slug !== normalizedSlug);
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+  removeLeadPageLocal(normalizedSlug, lead.id);
 };
 
 export { isSupabaseConfigured };

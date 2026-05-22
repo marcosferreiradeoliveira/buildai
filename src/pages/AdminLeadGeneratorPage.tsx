@@ -107,11 +107,11 @@ const AdminLeadGeneratorPage = () => {
 
     setDeletingSlug(lead.slug);
     try {
-      await deleteLeadPage(lead.slug);
-      setLeads((current) => current.filter((item) => item.slug !== lead.slug));
+      await deleteLeadPage(lead);
+      setLeads(await loadLeadPages());
       toast({
         title: "Landing apagada",
-        description: `A página /lp/${lead.slug} foi removida.`,
+        description: `A página /lp/${lead.slug} foi removida do banco.`,
       });
     } catch (err) {
       toast({
