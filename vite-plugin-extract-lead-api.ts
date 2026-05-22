@@ -27,6 +27,7 @@ const sendJson = (res: ServerResponse, status: number, body: unknown) => {
 
 export const extractLeadApiPlugin = (): Plugin => ({
   name: "extract-lead-api",
+  apply: "serve",
   configureServer(server) {
     const env = loadEnv(server.config.mode, server.config.envDir, "");
     if (env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY) {

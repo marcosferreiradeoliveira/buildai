@@ -2,7 +2,7 @@ import {
   filterValidCases,
   type LeadSolutionCase,
   type LeadWebsiteExtract,
-} from "@/lib/leadWebsiteExtract";
+} from "./leadWebsiteExtract";
 
 const ALLOWED_SEGMENTS = [
   "educacao",
