@@ -9,9 +9,10 @@ import {
 type HeroSectionProps = {
   content: LandingContent["hero"];
   prospectCompanyName?: string;
+  secondaryCtaHref?: string;
 };
 
-const HeroSection = ({ content, prospectCompanyName }: HeroSectionProps) => {
+const HeroSection = ({ content, prospectCompanyName, secondaryCtaHref = "#portfolio" }: HeroSectionProps) => {
   const whatsappMessage = prospectCompanyName
     ? createProspectWhatsAppMessage(prospectCompanyName)
     : createDefaultWhatsAppMessage("BuildAI");
@@ -89,7 +90,9 @@ const HeroSection = ({ content, prospectCompanyName }: HeroSectionProps) => {
             </button>
             <button
               type="button"
-              onClick={() => document.querySelector("#portfolio")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() =>
+                document.querySelector(secondaryCtaHref)?.scrollIntoView({ behavior: "smooth" })
+              }
               className="px-8 py-3.5 rounded-lg font-semibold text-base border border-border text-foreground hover:bg-secondary transition"
             >
               {content.secondaryCtaLabel}

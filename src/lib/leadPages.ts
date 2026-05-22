@@ -319,11 +319,11 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
 
   content.navbar.brandName = buildai.navbar.brandName;
   content.navbar.navLinks = [
+    { label: "Implementações", href: "#implementacoes" },
+    { label: "Portfólio", href: "#portfolio" },
     { label: "Serviços", href: "#servicos" },
     { label: "Processo", href: "#build-in-public" },
     { label: "Tecnologias", href: "#tech-stack" },
-    { label: "Implementações", href: "#implementacoes" },
-    { label: "Portfólio", href: "#portfolio" },
     { label: "Contato", href: "#contato" },
   ];
   content.navbar.ctaLabel = "Agendar consultoria";
@@ -338,6 +338,7 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
 
   content.hero.description = `A BuildAI preparou um plano sob medida para a ${lead.companyName}${cityLabel}, com IA e automação para acelerar resultados${goalSuffix}.`;
   content.hero.primaryCtaLabel = "Falar com a BuildAI →";
+  content.hero.secondaryCtaLabel = "Ver implementações";
 
   content.services.description = `A BuildAI recomenda para a ${lead.companyName}${cityLabel} soluções de IA e automação alinhadas às metas do negócio.`;
 

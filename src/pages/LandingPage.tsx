@@ -30,14 +30,15 @@ const LandingPage = ({ content }: LandingPageProps) => {
       <HeroSection
         content={content.hero}
         prospectCompanyName={content.prospectCompanyName}
+        secondaryCtaHref={content.implementationIdeas ? "#implementacoes" : "#portfolio"}
       />
-      <ServicesSection content={content.services} />
-      <BuildInPublicSection content={content.process} />
-      <TechStackSection content={content.techStack} />
       {content.implementationIdeas ? (
         <PortfolioSection sectionId="implementacoes" content={content.implementationIdeas} />
       ) : null}
       <PortfolioSection content={content.portfolio} />
+      <ServicesSection content={content.services} />
+      <BuildInPublicSection content={content.process} />
+      <TechStackSection content={content.techStack} />
       <FooterSection content={content.contact} />
     </div>
   );
