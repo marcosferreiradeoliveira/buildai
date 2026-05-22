@@ -1,6 +1,6 @@
 import { baseLandingContent, getSegmentLandingContent } from "@/content/landing";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabaseClient";
-import { LeadPageConfig, LeadSolutionCase } from "@/types/lead";
+import { LeadImplementationIdea, LeadPageConfig } from "@/types/lead";
 import { LandingContent, ProjectItem } from "@/types/landing";
 
 const STORAGE_KEY = "buildai.lead-pages";
@@ -14,6 +14,7 @@ type LeadPageRow = {
   primary_goal: string | null;
   website_url: string | null;
   solution_cases: LeadSolutionCase[] | null;
+  implementation_ideas: LeadImplementationIdea[] | null;
   created_at: string;
 };
 
@@ -26,6 +27,7 @@ const rowToLead = (row: LeadPageRow): LeadPageConfig => ({
   primaryGoal: row.primary_goal ?? undefined,
   websiteUrl: row.website_url ?? undefined,
   solutionCases: Array.isArray(row.solution_cases) ? row.solution_cases : undefined,
+  implementationIdeas: Array.isArray(row.implementation_ideas) ? row.implementation_ideas : undefined,
   createdAt: row.created_at,
 });
 
@@ -120,6 +122,7 @@ export const saveLeadPage = async (
       primary_goal: lead.primaryGoal ?? null,
       website_url: lead.websiteUrl ?? null,
       solution_cases: lead.solutionCases?.length ? lead.solutionCases : null,
+      implementation_ideas: lead.implementationIdeas?.length ? lead.implementationIdeas : null,
     };
 
     if (existing) {
@@ -146,6 +149,25 @@ export const saveLeadPage = async (
   return saveLeadPageLocal(lead);
 };
 
+export const deleteLeadPage = async (slug: string): Promise<void> => {
+  const normalizedSlug = slug.trim();
+  if (!normalizedSlug) throw new Error("Slug inválido.");
+
+  const sb = getSupabase();
+  if (sb) {
+    const { error } = await sb.from("lead_pages").delete().eq("slug", normalizedSlug);
+    if (error) throw error;
+    return;
+  }
+
+  if (typeof window === "undefined") {
+    throw new Error("deleteLeadPage só pode ser usado no navegador.");
+  }
+
+  const leads = getLeadPagesLocal().filter((item) => item.slug !== normalizedSlug);
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+};
+
 export { isSupabaseConfigured };
 
 export const createLeadSlug = (segmentSlug: string, companyName: string): string => {
@@ -166,78 +188,113 @@ export const createLeadSlug = (segmentSlug: string, companyName: string): string
   return `${normalizedCompany || "empresa"}-${normalizedSegment || "segmento"}`;
 };
 
-/** Soluções BuildAI exibidas na LP — independentes do nome do case no site do lead. */
-const IMPLEMENTATION_SOLUTIONS: ReadonlyArray<{
-  category: string;
-  title: string;
-  description: (company: string) => string;
-  metric: string;
-}> = [
-  {
-    category: "Automação com IA",
-    title: "Funil e atendimento com IA",
-    description: (company) =>
-      `Captação, qualificação e roteamento de demandas para a ${company}, com IA resumindo briefings e priorizando oportunidades.`,
-    metric: "Menos trabalho manual no comercial e no atendimento",
-  },
-  {
-    category: "MicroSaaS",
-    title: "Painel de campanhas e entregas",
-    description: (company) =>
-      `Produto digital para a ${company} acompanhar jobs, aprovações, métricas e histórico por cliente em um só lugar.`,
-    metric: "Visibilidade e previsibilidade operacional",
-  },
-  {
-    category: "IA generativa",
-    title: "Content Factory",
-    description: (company) =>
-      `Pautas, roteiros, posts e adaptações multicanal com IA para a ${company} escalar volume sem multiplicar equipe.`,
-    metric: "Mais conteúdo publicado com o mesmo time",
-  },
-  {
-    category: "Software sob medida",
-    title: "Hub de assets e brand kit",
-    description: (company) =>
-      `Repositório com busca inteligente, versionamento e geração de peças on-brand para a ${company} e contas atendidas.`,
-    metric: "Menos retrabalho e mais consistência de marca",
-  },
-];
+const toProjectItems = (ideas: LeadImplementationIdea[]): ProjectItem[] =>
+  ideas.map((item) => ({
+    title: item.title,
+    category: item.category,
+    description: item.description,
+    metric: item.metric,
+  }));
 
-const mapLeadCaseToImplementationIdea = (index: number, companyName: string): ProjectItem => {
-  const template = IMPLEMENTATION_SOLUTIONS[index % IMPLEMENTATION_SOLUTIONS.length];
-
-  return {
-    title: template.title,
-    category: template.category,
-    description: template.description(companyName),
-    metric: template.metric,
+/** Fallback por segmento quando IA não rodou ou lead antigo sem implementation_ideas. */
+const buildSegmentImplementationFallback = (
+  segmentSlug: string,
+  company: string,
+): LeadImplementationIdea[] => {
+  const c = company;
+  const bySegment: Record<string, LeadImplementationIdea[]> = {
+    juridico: [
+      {
+        category: "Automação com IA",
+        title: "Triagem inteligente de demandas",
+        description: `Classificação e priorização automática de relatos recebidos pela ${c}, com IA identificando tema, urgência e próximo passo.`,
+        metric: "Atendimento mais rápido com menos esforço manual",
+      },
+      {
+        category: "MicroSaaS",
+        title: "Base de conhecimento assistida",
+        description: `Portal para a ${c} consultar legislação, precedentes e respostas padronizadas com busca semântica e atualização centralizada.`,
+        metric: "Equipe alinhada e respostas consistentes",
+      },
+      {
+        category: "IA generativa",
+        title: "Assistente de orientação ao cidadão",
+        description: `Chatbot com IA que orienta consumidores com linguagem clara, encaminhando casos complexos para especialistas da ${c}.`,
+        metric: "Mais alcance sem aumentar fila humana",
+      },
+    ],
+    educacao: [
+      {
+        category: "Automação com IA",
+        title: "Funil de matrículas com IA",
+        description: `Captação, qualificação e follow-up de leads educacionais para a ${c}, com respostas automáticas e scoring de intenção.`,
+        metric: "Mais matrículas com menos trabalho manual",
+      },
+      {
+        category: "MicroSaaS",
+        title: "Painel pedagógico e operacional",
+        description: `Dashboard para a ${c} unificar indicadores de evasão, turmas, metas e tarefas entre equipes.`,
+        metric: "Decisão baseada em dados em tempo real",
+      },
+      {
+        category: "IA generativa",
+        title: "Conteúdo educacional em escala",
+        description: `Geração assistida de materiais, comunicados e campanhas para a ${c} personalizados por segmento de aluno.`,
+        metric: "Mais comunicação com o mesmo time",
+      },
+    ],
+    comunicacao: [
+      {
+        category: "Automação com IA",
+        title: "Operação de jobs e briefings",
+        description: `Fluxos para a ${c} receber briefings, aprovar pautas e distribuir tarefas entre equipes com resumos gerados por IA.`,
+        metric: "Menos retrabalho na operação diária",
+      },
+      {
+        category: "MicroSaaS",
+        title: "Painel de campanhas e clientes",
+        description: `Produto digital para a ${c} acompanhar entregas, status e métricas por conta em um só lugar.`,
+        metric: "Visibilidade ponta a ponta",
+      },
+      {
+        category: "IA generativa",
+        title: "Content Factory",
+        description: `Pautas, roteiros e adaptações multicanal com IA para a ${c} aumentar volume de peças sem expandir headcount.`,
+        metric: "Mais entregas no mesmo prazo",
+      },
+    ],
   };
+
+  const generic: LeadImplementationIdea[] = [
+    {
+      category: "Automação com IA",
+      title: "Processos e atendimento com IA",
+      description: `Automação de fluxos repetitivos e triagem de demandas para a ${c}, liberando o time para o estratégico.`,
+      metric: "Ganho de produtividade operacional",
+    },
+    {
+      category: "MicroSaaS",
+      title: "Produto digital sob medida",
+      description: `Plataforma exclusiva para a ${c} centralizar operação, indicadores e experiência do cliente/usuário.`,
+      metric: "Operação escalável em um só sistema",
+    },
+    {
+      category: "IA generativa",
+      title: "Copiloto de conteúdo e análise",
+      description: `IA aplicada aos dados e comunicação da ${c} para acelerar decisões e produção de materiais.`,
+      metric: "Resultados mais rápidos com IA",
+    },
+  ];
+
+  return bySegment[segmentSlug] ?? generic;
 };
 
-const getDefaultImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] =>
-  IMPLEMENTATION_SOLUTIONS.slice(0, 3).map((template, index) =>
-    mapLeadCaseToImplementationIdea(index, lead.companyName),
-  );
-
 const buildImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] => {
-  const validCaseCount = (lead.solutionCases ?? []).filter(
-    (item) => item.title.length >= 12 && !item.title.includes("!["),
-  ).length;
-
-  if (validCaseCount >= 2) {
-    return Array.from({ length: Math.min(validCaseCount, 4) }, (_, index) =>
-      mapLeadCaseToImplementationIdea(index, lead.companyName),
-    );
+  if (lead.implementationIdeas?.length) {
+    return toProjectItems(lead.implementationIdeas.slice(0, 4));
   }
 
-  if (validCaseCount === 1) {
-    return [
-      mapLeadCaseToImplementationIdea(0, lead.companyName),
-      ...getDefaultImplementationIdeas(lead).slice(1, 3),
-    ];
-  }
-
-  return getDefaultImplementationIdeas(lead);
+  return toProjectItems(buildSegmentImplementationFallback(lead.segmentSlug, lead.companyName));
 };
 
 export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingContent => {
@@ -288,7 +345,7 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
     eyebrow: "Ideias de implementação",
     title: "O que podemos implementar em",
     highlightedText: lead.companyName,
-    description: `Soluções de automação, MicroSaaS e IA que a BuildAI pode implementar para a ${lead.companyName}:`,
+    description: `Propostas de automação, MicroSaaS e IA sob medida para a ${lead.companyName}, com base no contexto do negócio:`,
     items: buildImplementationIdeas(lead),
   };
 

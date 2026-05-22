@@ -5,6 +5,7 @@ import {
   parseLeadFromWebsiteHtml,
   sanitizeMarkdownText,
 } from "@/lib/leadWebsiteExtract";
+import { parseImplementationIdeas } from "@/lib/leadWebsiteExtractAi";
 
 describe("leadWebsiteExtract", () => {
   it("normalizes urls without protocol", () => {
@@ -83,6 +84,29 @@ describe("leadWebsiteExtract", () => {
     `;
     const result = parseLeadFromWebsiteHtml(html, "https://idc.org.br");
     expect(result.segmentSlug).toBe("juridico");
+  });
+
+  it("parses AI implementation ideas with valid shape", () => {
+    const ideas = parseImplementationIdeas([
+      {
+        category: "Automação com IA",
+        title: "Triagem de demandas do consumidor",
+        description:
+          "Classificação automática de relatos recebidos pelo instituto, com priorização por tema e urgência para a equipe jurídica.",
+        metric: "Menos tempo na triagem manual",
+      },
+      {
+        category: "MicroSaaS",
+        title: "Base de conhecimento jurídica",
+        description:
+          "Portal com busca semântica em legislação e orientações para padronizar respostas da equipe de defesa do consumidor.",
+        metric: "Respostas consistentes em escala",
+      },
+    ]);
+
+    expect(ideas).toHaveLength(2);
+    expect(ideas[0]?.category).toBe("Automação com IA");
+    expect(ideas[0]?.title).toContain("Triagem");
   });
 
   it("strips markdown images and bold fragments from jina-like text", () => {

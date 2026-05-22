@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import { landingContentBySegment } from "@/content/landing";
 import {
   createLeadSlug,
+  deleteLeadPage,
   isSupabaseConfigured,
   loadLeadPages,
   saveLeadPage,
 } from "@/lib/leadPages";
-import { LeadPageConfig, LeadSolutionCase } from "@/types/lead";
+import { LeadImplementationIdea, LeadPageConfig, LeadSolutionCase } from "@/types/lead";
 import { useToast } from "@/hooks/use-toast";
 import { fetchLeadFromWebsite } from "@/lib/fetchLeadFromWebsite";
 
@@ -18,9 +19,11 @@ const AdminLeadGeneratorPage = () => {
   const [primaryGoal, setPrimaryGoal] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [solutionCases, setSolutionCases] = useState<LeadSolutionCase[]>([]);
+  const [implementationIdeas, setImplementationIdeas] = useState<LeadImplementationIdea[]>([]);
   const [extracting, setExtracting] = useState(false);
   const [leads, setLeads] = useState<LeadPageConfig[]>([]);
   const [listLoading, setListLoading] = useState(true);
+  const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
   const { toast } = useToast();
 
   const knownSegments = useMemo(() => Object.keys(landingContentBySegment), []);
@@ -74,16 +77,16 @@ const AdminLeadGeneratorPage = () => {
       if (data.primaryGoal) setPrimaryGoal(data.primaryGoal);
       if (data.segmentSlug) setSegmentSlug(data.segmentSlug);
       setSolutionCases(data.solutionCases ?? []);
+      setImplementationIdeas(data.implementationIdeas ?? []);
 
+      const ideasCount = data.implementationIdeas?.length ?? 0;
       toast({
         title: "Informações importadas",
-        description: data.solutionCases.length
-          ? data.companyName
-            ? `${data.solutionCases.length} case(s) de portfólio para ${data.companyName}. Revise antes de gerar.`
-            : `${data.solutionCases.length} case(s) de portfólio. Revise antes de gerar.`
+        description: ideasCount
+          ? `${ideasCount} proposta(s) para "O que podemos implementar" gerada(s) com IA. Revise e salve a página.`
           : data.companyName
-            ? `Dados de ${data.companyName} importados (sem cases no site). A LP usará soluções padrão BuildAI.`
-            : "Dados importados. Nenhum case de portfólio detectado — a LP usará soluções padrão BuildAI.",
+            ? `Dados de ${data.companyName} importados. Configure OPENAI_API_KEY na Vercel para gerar propostas com IA.`
+            : "Dados importados. Sem IA, a LP usa fallback por segmento.",
       });
     } catch (err) {
       toast({
@@ -93,6 +96,31 @@ const AdminLeadGeneratorPage = () => {
       });
     } finally {
       setExtracting(false);
+    }
+  };
+
+  const handleDeleteLead = async (lead: LeadPageConfig) => {
+    const confirmed = window.confirm(
+      `Apagar a landing de "${lead.companyName}"?\n\n/lp/${lead.slug}\n\nEsta ação não pode ser desfeita.`,
+    );
+    if (!confirmed) return;
+
+    setDeletingSlug(lead.slug);
+    try {
+      await deleteLeadPage(lead.slug);
+      setLeads((current) => current.filter((item) => item.slug !== lead.slug));
+      toast({
+        title: "Landing apagada",
+        description: `A página /lp/${lead.slug} foi removida.`,
+      });
+    } catch (err) {
+      toast({
+        title: "Erro ao apagar",
+        description: err instanceof Error ? err.message : "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingSlug(null);
     }
   };
 
@@ -116,6 +144,7 @@ const AdminLeadGeneratorPage = () => {
         primaryGoal: primaryGoal.trim() || undefined,
         websiteUrl: websiteUrl.trim() || undefined,
         solutionCases: solutionCases.length ? solutionCases : undefined,
+        implementationIdeas: implementationIdeas.length ? implementationIdeas : undefined,
       });
 
       setLeads(await loadLeadPages());
@@ -176,15 +205,35 @@ const AdminLeadGeneratorPage = () => {
               </button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Lê título, descrição, cases do site e metadados para preencher os campos e montar possíveis
-              soluções na landing.
+              Usa IA (OpenAI na API) para preencher campos e gerar a seção &quot;O que podemos implementar&quot;
+              com propostas sob medida para o negócio.
             </p>
           </div>
 
+          {implementationIdeas.length > 0 ? (
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+              <p className="text-sm font-medium">
+                O que podemos implementar ({implementationIdeas.length}) — exibido na landing
+              </p>
+              <ul className="space-y-2 max-h-64 overflow-y-auto">
+                {implementationIdeas.map((item) => (
+                  <li key={item.title} className="rounded-lg border border-border px-3 py-2 text-sm">
+                    <p className="text-[10px] uppercase tracking-wider text-primary font-semibold">
+                      {item.category}
+                    </p>
+                    <p className="font-medium mt-1">{item.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                    <p className="text-xs gradient-text font-semibold mt-1">{item.metric}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           {solutionCases.length > 0 ? (
             <div className="rounded-xl border border-border bg-background/60 p-4 space-y-3">
-              <p className="text-sm font-medium">
-                Possíveis soluções ({solutionCases.length}) — exibidas na landing do lead
+              <p className="text-sm font-medium text-muted-foreground">
+                Cases no site ({solutionCases.length}) — referência interna, não vão para a seção de implementação
               </p>
               <ul className="space-y-2 max-h-56 overflow-y-auto">
                 {solutionCases.map((item) => (
@@ -321,6 +370,14 @@ const AdminLeadGeneratorPage = () => {
                       }}
                     >
                       Copiar link
+                    </button>
+                    <button
+                      type="button"
+                      disabled={deletingSlug === lead.slug}
+                      className="text-sm text-destructive hover:text-destructive/80 transition-colors disabled:opacity-50"
+                      onClick={() => void handleDeleteLead(lead)}
+                    >
+                      {deletingSlug === lead.slug ? "Apagando…" : "Apagar"}
                     </button>
                   </div>
                 </div>

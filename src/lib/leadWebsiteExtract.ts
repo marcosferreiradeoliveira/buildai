@@ -7,6 +7,13 @@ export type LeadSolutionCase = {
   sourceUrl?: string;
 };
 
+export type LeadImplementationIdea = {
+  title: string;
+  category: string;
+  description: string;
+  metric: string;
+};
+
 export type LeadWebsiteExtract = {
   websiteUrl: string;
   companyName?: string;
@@ -14,6 +21,7 @@ export type LeadWebsiteExtract = {
   primaryGoal?: string;
   segmentSlug?: string;
   solutionCases: LeadSolutionCase[];
+  implementationIdeas?: LeadImplementationIdea[];
   rawTitle?: string;
   rawDescription?: string;
 };

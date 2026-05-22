@@ -1,5 +1,6 @@
 import {
   filterValidCases,
+  type LeadImplementationIdea,
   type LeadSolutionCase,
   type LeadWebsiteExtract,
 } from "./leadWebsiteExtract";
@@ -12,6 +13,13 @@ const ALLOWED_SEGMENTS = [
   "tecnologia",
   "juridico",
   "comunicacao",
+] as const;
+
+const ALLOWED_CATEGORIES = [
+  "Automação com IA",
+  "MicroSaaS",
+  "IA generativa",
+  "Software sob medida",
 ] as const;
 
 const MAX_INPUT_CHARS = 14_000;
@@ -28,6 +36,12 @@ type AiLeadPayload = {
   primaryGoal?: string;
   segmentSlug?: string;
   solutionCases?: Array<{ title?: string; description?: string }>;
+  implementationIdeas?: Array<{
+    title?: string;
+    category?: string;
+    description?: string;
+    metric?: string;
+  }>;
 };
 
 const stripHtmlToText = (html: string): string =>
@@ -45,6 +59,7 @@ export const buildPageTextForAi = (html: string, extract: LeadWebsiteExtract): s
     extract.rawTitle ? `Título: ${extract.rawTitle}` : "",
     extract.rawDescription ? `Meta: ${extract.rawDescription}` : "",
     extract.companyName ? `Empresa (heurística): ${extract.companyName}` : "",
+    extract.segmentSlug ? `Segmento sugerido: ${extract.segmentSlug}` : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -73,6 +88,47 @@ const parseAiCases = (items: AiLeadPayload["solutionCases"], websiteUrl: string)
   return filterValidCases(mapped).slice(0, 4);
 };
 
+const normalizeCategory = (value: string | undefined): string => {
+  const trimmed = value?.trim() ?? "";
+  const match = ALLOWED_CATEGORIES.find((c) => c.toLowerCase() === trimmed.toLowerCase());
+  return match ?? "Software sob medida";
+};
+
+export const parseImplementationIdeas = (
+  items: AiLeadPayload["implementationIdeas"],
+): LeadImplementationIdea[] => {
+  if (!Array.isArray(items)) return [];
+
+  const parsed = items
+    .map((item) => ({
+      title: typeof item.title === "string" ? item.title.trim() : "",
+      category: normalizeCategory(item.category),
+      description: typeof item.description === "string" ? item.description.trim() : "",
+      metric: typeof item.metric === "string" ? item.metric.trim() : "",
+    }))
+    .filter(
+      (item) =>
+        item.title.length >= 8 &&
+        item.title.length <= 90 &&
+        item.description.length >= 40 &&
+        item.description.length <= 320 &&
+        item.metric.length >= 8 &&
+        item.metric.length <= 120,
+    );
+
+  const seen = new Set<string>();
+  const unique: LeadImplementationIdea[] = [];
+  for (const item of parsed) {
+    const key = item.title.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(item);
+    if (unique.length >= 4) break;
+  }
+
+  return unique;
+};
+
 const normalizeAiPayload = (payload: AiLeadPayload, fallback: LeadWebsiteExtract): LeadWebsiteExtract => {
   const segmentSlug = ALLOWED_SEGMENTS.includes(
     payload.segmentSlug?.toLowerCase() as (typeof ALLOWED_SEGMENTS)[number],
@@ -81,6 +137,7 @@ const normalizeAiPayload = (payload: AiLeadPayload, fallback: LeadWebsiteExtract
     : fallback.segmentSlug;
 
   const solutionCases = parseAiCases(payload.solutionCases, fallback.websiteUrl);
+  const implementationIdeas = parseImplementationIdeas(payload.implementationIdeas);
 
   return {
     ...fallback,
@@ -89,8 +146,22 @@ const normalizeAiPayload = (payload: AiLeadPayload, fallback: LeadWebsiteExtract
     primaryGoal: payload.primaryGoal?.trim()?.slice(0, 220) || fallback.primaryGoal,
     segmentSlug,
     solutionCases: solutionCases.length ? solutionCases : fallback.solutionCases,
+    implementationIdeas: implementationIdeas.length
+      ? implementationIdeas
+      : fallback.implementationIdeas,
   };
 };
+
+const SYSTEM_PROMPT = `Você extrai dados de sites de empresas/instituições para montar landing pages B2B da BuildAI (IA, automação, MicroSaaS).
+Responda APENAS JSON válido com:
+- companyName, city (cidade sede se explícita, senão null), primaryGoal (missão/oferta em 1 frase, máx 180 caracteres)
+- segmentSlug (${ALLOWED_SEGMENTS.join("|")})
+- solutionCases (0 a 4): produtos/serviços/cases REAIS listados no site (title + description). Não inclua FAQ, artigos jurídicos genéricos, busca do site.
+- implementationIdeas (exatamente 3 ou 4): propostas que a BuildAI pode IMPLEMENTAR para ESTE negócio (foco em solução digital, não em descrever cases que eles já têm).
+  Cada item: category (uma de: ${ALLOWED_CATEGORIES.map((c) => `"${c}"`).join(", ")}), title (nome curto da solução), description (2 frases: o que a BuildAI entrega para este cliente), metric (benefício em poucas palavras).
+  Adapte ao contexto: instituto/ONG de defesa do consumidor → triagem de demandas, base de conhecimento, chatbot orientação, automação de atendimento (NÃO "painel de campanhas" nem "content factory" genérico de agência).
+  Escola → matrículas, retenção; clínica → agendamento; agência → conteúdo e operação; varejo → conversão e estoque.
+NÃO repita o mesmo tipo de solução com títulos parecidos. Varie as categorias quando fizer sentido.`;
 
 export const enrichLeadExtractWithAi = async (
   input: LeadAiExtractInput,
@@ -109,17 +180,10 @@ export const enrichLeadExtractWithAi = async (
     },
     body: JSON.stringify({
       model,
-      temperature: 0.2,
+      temperature: 0.35,
       response_format: { type: "json_object" },
       messages: [
-        {
-          role: "system",
-          content: `Você extrai dados de sites de empresas para montar landing pages B2B da BuildAI (IA, automação, MicroSaaS).
-Responda APENAS JSON válido com: companyName, city (cidade sede se explícita, senão null), primaryGoal (missão/oferta em 1 frase, máx 180 caracteres), segmentSlug (${ALLOWED_SEGMENTS.join("|")}), solutionCases (0 a 4 itens).
-Cada solutionCase: title (nome do produto/serviço/case real da empresa) e description (o que entregam, 1-2 frases).
-NÃO inclua: artigos de FAQ, direito do consumidor genérico, textos de busca ("qual seu problema"), menus, posts jurídicos educativos que não são portfólio da empresa.
-Se o site for instituto/ONG de consumidor, segmentSlug=juridico e solutionCases=[] salvo se houver projetos reais listados.`,
-        },
+        { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userContent },
       ],
     }),
