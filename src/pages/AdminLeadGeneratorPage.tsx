@@ -77,11 +77,13 @@ const AdminLeadGeneratorPage = () => {
 
       toast({
         title: "Informações importadas",
-        description: data.companyName
-          ? `${data.solutionCases.length} case(s) encontrado(s) para ${data.companyName}. Revise antes de gerar a página.`
-          : data.solutionCases.length
-            ? `${data.solutionCases.length} case(s) encontrado(s). Revise os campos antes de gerar a página.`
-            : "Revise os campos preenchidos antes de gerar a página.",
+        description: data.solutionCases.length
+          ? data.companyName
+            ? `${data.solutionCases.length} case(s) de portfólio para ${data.companyName}. Revise antes de gerar.`
+            : `${data.solutionCases.length} case(s) de portfólio. Revise antes de gerar.`
+          : data.companyName
+            ? `Dados de ${data.companyName} importados (sem cases no site). A LP usará soluções padrão BuildAI.`
+            : "Dados importados. Nenhum case de portfólio detectado — a LP usará soluções padrão BuildAI.",
       });
     } catch (err) {
       toast({

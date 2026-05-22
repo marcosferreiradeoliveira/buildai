@@ -49,6 +49,42 @@ describe("leadWebsiteExtract", () => {
     expect(cases[0]?.description.length).toBeGreaterThan(20);
   });
 
+  it("rejects consumer FAQ articles as portfolio cases", () => {
+    const html = `
+      <h3>Direito ao arrependimento de compra ou serviço</h3>
+      <p>O direito de arrependimento vale, em regra, para contratações feitas fora do estabelecimento comercial, conforme o Código de Defesa do Consumidor artigo 49.</p>
+      <h3>Qual seu problema de consumo?</h3>
+      <p>Digite seu problema de consumo Ordenar por relevância.</p>
+    `;
+
+    const cases = extractCasesFromWebsiteHtml(html, "https://idc.org.br");
+    expect(cases).toEqual([]);
+  });
+
+  it("does not infer city from em regra", () => {
+    const html = `
+      <html>
+        <head><title>IDC</title></head>
+        <body><p>O direito vale, em regra, para contratações em São Paulo.</p></body>
+      </html>
+    `;
+    const result = parseLeadFromWebsiteHtml(html, "https://idc.org.br");
+    expect(result.city).toBe("São Paulo");
+  });
+
+  it("infers juridico segment for consumer defense sites", () => {
+    const html = `
+      <html>
+        <head>
+          <title>Instituto de Defesa de Consumidores</title>
+          <meta name="description" content="Defesa do consumidor e orientação jurídica." />
+        </head>
+      </html>
+    `;
+    const result = parseLeadFromWebsiteHtml(html, "https://idc.org.br");
+    expect(result.segmentSlug).toBe("juridico");
+  });
+
   it("strips markdown images and bold fragments from jina-like text", () => {
     const dirty =
       "![Image 1](blob:http://localhost/x) **Relevância, impacto.** **Temos as palavras certas**";

@@ -19,16 +19,38 @@ export type LeadWebsiteExtract = {
 };
 
 const CASE_SECTION_HINTS =
-  /portfolio|cases|case|projetos|projeto|clientes|solu[cç][õo]es|trabalhos|servi[cç]os/i;
+  /portfolio|cases|case|projetos|projeto|clientes|solu[cç][õo]es|trabalhos/i;
+const SKIP_PAGE_PATH_HINTS =
+  /problema|consumidor|direito|faq|artigo|noticia|notícia|blog\/|tag\/|categoria|pesquisa|busca|ajuda|suporte|termos|privacidade/i;
 const MAX_CASES = 6;
 const MAX_EXTRA_PAGES = 2;
 
+/** Títulos/descrições típicos de FAQ, artigos jurídicos e busca — não são cases de portfólio. */
+const NON_PORTFOLIO_TEXT =
+  /qual\s+seu\s+problema|ordenar\s+por|digite\s+seu|pesquisar|resultados?\s+para|menu\s+principal/i;
+const NON_PORTFOLIO_TITLE =
+  /^(direito|cancelamento|defeito|plano\s+individual|negativa\s+de|o\s+direito|há\s+duas)/i;
+const NON_PORTFOLIO_LEGAL =
+  /consumidor|arrependimento|c[oó]digo de defesa|\bcdc\b|fornecedor descumpre|artigo\s+\d+|plano de sa[uú]de|procon|defesa do consumidor|contrata[cç][aã]o feita fora/i;
+
+const INVALID_CITY_WORDS = new Set([
+  "regra",
+  "caso",
+  "geral",
+  "seguida",
+  "primeiro",
+  "momento",
+  "prazo",
+]);
+
 const SEGMENT_KEYWORDS: Record<string, string[]> = {
-  educacao: ["educação", "educacao", "escola", "universidade", "ensino", "matrícula", "matricula", "acadêmico"],
+  educacao: ["educação", "educacao", "escola", "universidade", "ensino", "matrícula", "matricula", "pedagógico"],
   saude: ["saúde", "saude", "clínica", "clinica", "hospital", "médico", "medico", "paciente"],
   varejo: ["varejo", "e-commerce", "ecommerce", "loja", "produtos", "varejista"],
   cultura: ["cultura", "cultural", "museu", "artes", "incentivo", "leis de incentivo"],
   tecnologia: ["software", "tecnologia", "saas", "startup", "digital", "ti"],
+  juridico: ["advocacia", "jurídico", "juridico", "defesa do consumidor", "direito do consumidor", "procon"],
+  comunicacao: ["comunicação", "comunicacao", "agência", "agencia", "branding", "assessoria de imprensa"],
 };
 
 export const normalizeWebsiteUrl = (input: string): string => {
@@ -99,11 +121,35 @@ const cleanCompanyName = (value: string): string => {
 };
 
 const inferCity = (text: string): string | undefined => {
-  const match = text.match(
-    /\b(?:em|sede em|localizada em|localizado em)\s+([A-ZÁÉÍÓÚÂÊÔÃÇ][\wáéíóúâêôãç]+(?:\s+[A-ZÁÉÍÓÚÂÊÔÃÇ][\wáéíóúâêôãç]+)?)/i,
-  );
-  return match?.[1]?.trim();
+  const cityRegex =
+    /\b(?:em|sede em|localizada em|localizado em)\s+([A-ZÁÉÍÓÚÂÊÔÃÇ][\wáéíóúâêôãç]+(?:\s+(?:(?:do|de|da)\s+)?[A-ZÁÉÍÓÚÂÊÔÃÇ][\wáéíóúâêôãç]+)?)/gi;
+
+  let match: RegExpExecArray | null;
+  while ((match = cityRegex.exec(text)) !== null) {
+    const city = match[1]?.trim();
+    if (!city) continue;
+
+    const firstWord = city.split(/\s+/)[0]?.toLowerCase();
+    if (firstWord && INVALID_CITY_WORDS.has(firstWord)) continue;
+    if (city.length < 4 || city.length > 40) continue;
+
+    return city;
+  }
+
+  return undefined;
 };
+
+const isLegalOrFaqContent = (title: string, description: string): boolean => {
+  const combined = `${title} ${description}`.toLowerCase();
+  return (
+    NON_PORTFOLIO_TEXT.test(combined) ||
+    NON_PORTFOLIO_TITLE.test(title) ||
+    NON_PORTFOLIO_LEGAL.test(combined)
+  );
+};
+
+const isLikelyLegalSnippet = (text: string): boolean =>
+  NON_PORTFOLIO_LEGAL.test(text) || /\bartigo\s+\d+\b/i.test(text) || /em regra,?\s+para/i.test(text);
 
 const extractAboutSnippet = (html: string): string | undefined => {
   const aboutMatch = html.match(
@@ -117,6 +163,11 @@ const extractAboutSnippet = (html: string): string | undefined => {
 
 const inferSegmentSlug = (text: string): string | undefined => {
   const normalized = text.toLowerCase();
+
+  if (/defesa do consumidor|instituto.*consumidor|direito do consumidor|procon\b/i.test(normalized)) {
+    return "juridico";
+  }
+
   let best: { slug: string; score: number } | undefined;
 
   for (const [slug, keywords] of Object.entries(SEGMENT_KEYWORDS)) {
@@ -124,6 +175,11 @@ const inferSegmentSlug = (text: string): string | undefined => {
     if (score > 0 && (!best || score > best.score)) {
       best = { slug, score };
     }
+  }
+
+  // "academia" em artigo de consumidor não deve classificar como educação
+  if (best?.slug === "educacao" && NON_PORTFOLIO_LEGAL.test(normalized)) {
+    return "juridico";
   }
 
   return best?.slug;
@@ -182,10 +238,12 @@ const isValidCase = (title: string, description: string): boolean => {
     return false;
   }
 
+  if (isLegalOrFaqContent(cleanTitle, cleanDescription)) return false;
+
   return true;
 };
 
-const filterValidCases = (cases: LeadSolutionCase[]): LeadSolutionCase[] =>
+export const filterValidCases = (cases: LeadSolutionCase[]): LeadSolutionCase[] =>
   cases
     .map((item) => ({
       ...item,
@@ -310,12 +368,20 @@ const extractCasesFromJsonLd = (html: string, sourceUrl: string): LeadSolutionCa
   return cases;
 };
 
-export const extractCasesFromWebsiteHtml = (html: string, sourceUrl: string): LeadSolutionCase[] =>
-  dedupeCases([
+export const extractCasesFromWebsiteHtml = (html: string, sourceUrl: string): LeadSolutionCase[] => {
+  const fromPortfolio = dedupeCases([
     ...extractCasesFromJsonLd(html, sourceUrl),
     ...extractCasesFromSections(html, sourceUrl),
-    ...extractPairsFromChunk(html.slice(0, 120_000), sourceUrl),
   ]);
+  if (fromPortfolio.length) return fromPortfolio;
+
+  // HTML sintético do Jina (só <article> com cases já filtrados)
+  if (/<article[^>]*>[\s\S]*?<h[2-4]/i.test(html)) {
+    return dedupeCases(extractPairsFromChunk(html, sourceUrl));
+  }
+
+  return [];
+};
 
 export const discoverPortfolioPageUrls = (html: string, baseUrl: string): string[] => {
   const urls = new Set<string>();
@@ -331,13 +397,15 @@ export const discoverPortfolioPageUrls = (html: string, baseUrl: string): string
     if (resolved) urls.add(resolved);
   }
 
-  const defaults = ["/portfolio", "/cases", "/projetos", "/clientes", "/solucoes", "/servicos"];
+  const defaults = ["/portfolio", "/cases", "/projetos", "/clientes"];
   for (const path of defaults) {
     const resolved = resolveUrl(path, baseUrl);
     if (resolved) urls.add(resolved);
   }
 
-  return [...urls].filter((url) => url !== baseUrl).slice(0, MAX_EXTRA_PAGES);
+  return [...urls]
+    .filter((url) => url !== baseUrl && !SKIP_PAGE_PATH_HINTS.test(url))
+    .slice(0, MAX_EXTRA_PAGES);
 };
 
 export const enrichCasesAsSolutions = (
@@ -371,12 +439,16 @@ export const parseLeadFromWebsiteHtml = (html: string, websiteUrl: string): Lead
   const validCases = filterValidCases(rawCases);
   const solutionCases = enrichCasesAsSolutions(validCases, company);
   const cleanDescription = sanitizeMarkdownText(rawDescription ?? "");
-  const primaryGoal =
-    cleanDescription.length >= 40
+  const aboutSnippet = sanitizeMarkdownText(extractAboutSnippet(html) ?? "");
+  const primaryGoalCandidate =
+    cleanDescription.length >= 40 && !isLikelyLegalSnippet(cleanDescription)
       ? cleanDescription.slice(0, 180)
-      : sanitizeMarkdownText(
-          extractAboutSnippet(html) ?? "Estratégia de comunicação e presença digital.",
-        ).slice(0, 180);
+      : aboutSnippet.length >= 40 && !isLikelyLegalSnippet(aboutSnippet)
+        ? aboutSnippet.slice(0, 180)
+        : sanitizeMarkdownText(
+            `${company} — presença digital e operação com foco em resultado.`,
+          ).slice(0, 180);
+  const primaryGoal = primaryGoalCandidate;
 
   return {
     websiteUrl,
@@ -467,10 +539,6 @@ export const fetchWebsiteHtmlViaJina = async (url: string): Promise<string> => {
 
     if (/^#{4,6}\s+/.test(line)) {
       flushSection();
-      const subTitle = sanitizeMarkdownText(line.replace(/^#+\s*/, ""));
-      if (subTitle.length >= 12) {
-        current = { title: subTitle, lines: [] };
-      }
       continue;
     }
 
@@ -480,20 +548,6 @@ export const fetchWebsiteHtmlViaJina = async (url: string): Promise<string> => {
   }
 
   flushSection();
-
-  // Posts de blog: linha com título + data
-  const blogPattern =
-    /^\*?\s*(.+?)\s*[–—-]\s*.+?\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/gm;
-  let blogMatch: RegExpExecArray | null;
-  while ((blogMatch = blogPattern.exec(body)) !== null) {
-    const postTitle = sanitizeMarkdownText(blogMatch[1]);
-    if (postTitle.length >= 15 && postTitle.length <= 90) {
-      sections.push({
-        title: postTitle,
-        description: `Iniciativa de conteúdo e comunicação identificada no site: ${postTitle}.`,
-      });
-    }
-  }
 
   const uniqueSections = filterValidCases(
     sections.map((section, index) => ({
@@ -610,6 +664,19 @@ export const extractLeadFromWebsite = async (
       };
     } catch {
       // ignora páginas de cases inacessíveis
+    }
+  }
+
+  if (typeof process !== "undefined" && process.env.OPENAI_API_KEY?.trim()) {
+    try {
+      const { enrichLeadExtractWithAi } = await import("./leadWebsiteExtractAi");
+      result = await enrichLeadExtractWithAi({
+        websiteUrl,
+        pageText: mainHtml,
+        fallback: result,
+      });
+    } catch (error) {
+      console.error("Lead extract AI enrichment skipped:", error);
     }
   }
 

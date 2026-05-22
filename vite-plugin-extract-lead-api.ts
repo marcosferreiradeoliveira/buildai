@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Plugin } from "vite";
+import { loadEnv } from "vite";
 import { extractLeadFromWebsite, normalizeWebsiteUrl } from "./src/lib/leadWebsiteExtract";
 
 const readJsonBody = (req: IncomingMessage): Promise<{ url?: string }> =>
@@ -27,6 +28,14 @@ const sendJson = (res: ServerResponse, status: number, body: unknown) => {
 export const extractLeadApiPlugin = (): Plugin => ({
   name: "extract-lead-api",
   configureServer(server) {
+    const env = loadEnv(server.config.mode, server.config.envDir, "");
+    if (env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY) {
+      process.env.OPENAI_API_KEY = env.OPENAI_API_KEY;
+    }
+    if (env.OPENAI_MODEL && !process.env.OPENAI_MODEL) {
+      process.env.OPENAI_MODEL = env.OPENAI_MODEL;
+    }
+
     server.middlewares.use("/api/extract-lead-from-url", async (req, res, next) => {
       if (req.method === "OPTIONS") {
         res.statusCode = 204;
