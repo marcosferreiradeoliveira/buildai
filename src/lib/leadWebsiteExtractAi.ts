@@ -16,6 +16,7 @@ const ALLOWED_SEGMENTS = [
   "tecnologia",
   "juridico",
   "comunicacao",
+  "esg",
 ] as const;
 
 const ALLOWED_CATEGORIES = [

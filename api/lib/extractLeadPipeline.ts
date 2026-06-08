@@ -8,8 +8,19 @@ import {
   type LeadWebsiteExtract,
 } from "../../src/lib/leadWebsiteExtract";
 import { enrichLeadExtractWithAi } from "../../src/lib/leadWebsiteExtractAi";
+import { mergeImplementationIdeas } from "../../src/lib/leadSegmentSolutions";
 import { generateImplementationIdeasServer } from "./implementationIdeasServer";
 import { enrichLeadMetadataServer } from "./leadMetadataServer";
+
+const ensureImplementationIdeas = (result: LeadWebsiteExtract): LeadWebsiteExtract => {
+  const ideas = mergeImplementationIdeas(
+    result.implementationIdeas ?? [],
+    result.segmentSlug,
+    result.companyName ?? "Cliente",
+  );
+  if (ideas.length === (result.implementationIdeas?.length ?? 0)) return result;
+  return { ...result, implementationIdeas: ideas };
+};
 
 const applyMetadata = async (
   result: LeadWebsiteExtract,
@@ -92,6 +103,7 @@ export const runExtractLeadPipeline = async (url: string): Promise<LeadWebsiteEx
     }
 
     result = await applyMetadata(result, pageText);
+    result = ensureImplementationIdeas(result);
   } catch (error) {
     console.error("extractLeadPipeline AI step failed:", error);
   }

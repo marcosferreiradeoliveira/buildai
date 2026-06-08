@@ -1,4 +1,8 @@
 import { baseLandingContent, getSegmentLandingContent } from "@/content/landing";
+import {
+  getSegmentImplementationIdeas,
+  mergeImplementationIdeas,
+} from "@/lib/leadSegmentSolutions";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { LeadImplementationIdea, LeadPageConfig, LeadSolutionCase } from "@/types/lead";
 import { LandingContent, ProjectItem } from "@/types/landing";
@@ -234,20 +238,21 @@ export const deleteLeadPage = async (lead: Pick<LeadPageConfig, "slug" | "id">):
 
 export { isSupabaseConfigured };
 
-const truncateAtWord = (text: string, max: number): string => {
-  const trimmed = text.trim();
-  if (trimmed.length <= max) return trimmed;
-  const slice = trimmed.slice(0, max);
-  const boundary = slice.lastIndexOf(" ");
-  return `${(boundary > 0 ? slice.slice(0, boundary) : slice).trim()}…`;
-};
-
+/** Frase completa para o hero — sem reticências nem corte no meio. */
 const toHeroGoalLine = (goal: string | undefined): string | null => {
   if (!goal?.trim() || /!\[|blob:/i.test(goal)) return null;
 
-  const firstSentence = goal.match(/^[^.!?]+[.!?]/)?.[0]?.trim() ?? goal.trim();
-  const shortened = truncateAtWord(firstSentence, 110);
-  return shortened.length >= 20 ? shortened : null;
+  const clean = goal.trim().replace(/…+/g, "").trim();
+  const sentences = clean.match(/[^.!?]+[.!?]+/g)?.map((s) => s.trim()) ?? [];
+
+  if (sentences.length > 0) {
+    const first = sentences[0];
+    return first.length >= 20 ? first : null;
+  }
+
+  if (/[.!?]$/.test(clean) && clean.length >= 20) return clean;
+
+  return null;
 };
 
 export const createLeadSlug = (segmentSlug: string, companyName: string): string => {
@@ -275,99 +280,6 @@ const toProjectItems = (ideas: LeadImplementationIdea[]): ProjectItem[] =>
     description: item.description,
     metric: item.metric,
   }));
-
-/** Fallback por segmento quando IA não rodou ou lead antigo sem implementation_ideas. */
-const buildSegmentImplementationFallback = (
-  segmentSlug: string,
-  company: string,
-): LeadImplementationIdea[] => {
-  const c = company;
-  const bySegment: Record<string, LeadImplementationIdea[]> = {
-    juridico: [
-      {
-        category: "Automação com IA",
-        title: "Triagem inteligente de demandas",
-        description: `Classificação e priorização automática de relatos recebidos pela ${c}, com IA identificando tema, urgência e próximo passo.`,
-        metric: "Atendimento mais rápido com menos esforço manual",
-      },
-      {
-        category: "MicroSaaS",
-        title: "Base de conhecimento assistida",
-        description: `Portal para a ${c} consultar legislação, precedentes e respostas padronizadas com busca semântica e atualização centralizada.`,
-        metric: "Equipe alinhada e respostas consistentes",
-      },
-      {
-        category: "IA generativa",
-        title: "Assistente de orientação ao cidadão",
-        description: `Chatbot com IA que orienta consumidores com linguagem clara, encaminhando casos complexos para especialistas da ${c}.`,
-        metric: "Mais alcance sem aumentar fila humana",
-      },
-    ],
-    educacao: [
-      {
-        category: "Automação com IA",
-        title: "Funil de matrículas com IA",
-        description: `Captação, qualificação e follow-up de leads educacionais para a ${c}, com respostas automáticas e scoring de intenção.`,
-        metric: "Mais matrículas com menos trabalho manual",
-      },
-      {
-        category: "MicroSaaS",
-        title: "Painel pedagógico e operacional",
-        description: `Dashboard para a ${c} unificar indicadores de evasão, turmas, metas e tarefas entre equipes.`,
-        metric: "Decisão baseada em dados em tempo real",
-      },
-      {
-        category: "IA generativa",
-        title: "Conteúdo educacional em escala",
-        description: `Geração assistida de materiais, comunicados e campanhas para a ${c} personalizados por segmento de aluno.`,
-        metric: "Mais comunicação com o mesmo time",
-      },
-    ],
-    comunicacao: [
-      {
-        category: "Automação com IA",
-        title: "Operação de jobs e briefings",
-        description: `Fluxos para a ${c} receber briefings, aprovar pautas e distribuir tarefas entre equipes com resumos gerados por IA.`,
-        metric: "Menos retrabalho na operação diária",
-      },
-      {
-        category: "MicroSaaS",
-        title: "Painel de campanhas e clientes",
-        description: `Produto digital para a ${c} acompanhar entregas, status e métricas por conta em um só lugar.`,
-        metric: "Visibilidade ponta a ponta",
-      },
-      {
-        category: "IA generativa",
-        title: "Content Factory",
-        description: `Pautas, roteiros e adaptações multicanal com IA para a ${c} aumentar volume de peças sem expandir headcount.`,
-        metric: "Mais entregas no mesmo prazo",
-      },
-    ],
-  };
-
-  const generic: LeadImplementationIdea[] = [
-    {
-      category: "Automação com IA",
-      title: "Processos e atendimento com IA",
-      description: `Automação de fluxos repetitivos e triagem de demandas para a ${c}, liberando o time para o estratégico.`,
-      metric: "Ganho de produtividade operacional",
-    },
-    {
-      category: "MicroSaaS",
-      title: "Produto digital sob medida",
-      description: `Plataforma exclusiva para a ${c} centralizar operação, indicadores e experiência do cliente/usuário.`,
-      metric: "Operação escalável em um só sistema",
-    },
-    {
-      category: "IA generativa",
-      title: "Copiloto de conteúdo e análise",
-      description: `IA aplicada aos dados e comunicação da ${c} para acelerar decisões e produção de materiais.`,
-      metric: "Resultados mais rápidos com IA",
-    },
-  ];
-
-  return bySegment[segmentSlug] ?? generic;
-};
 
 const shortCaseLabel = (title: string): string =>
   title.length > 48 ? `${title.slice(0, 45).trim()}…` : title;
@@ -412,7 +324,9 @@ const buildIdeasFromSolutionCases = (lead: LeadPageConfig): LeadImplementationId
 
 const buildImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] => {
   if (lead.implementationIdeas?.length) {
-    return toProjectItems(lead.implementationIdeas.slice(0, 4));
+    return toProjectItems(
+      mergeImplementationIdeas(lead.implementationIdeas, lead.segmentSlug, lead.companyName),
+    );
   }
 
   const fromCases = buildIdeasFromSolutionCases(lead);
@@ -420,7 +334,7 @@ const buildImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] => {
     return toProjectItems(fromCases);
   }
 
-  return toProjectItems(buildSegmentImplementationFallback(lead.segmentSlug, lead.companyName));
+  return toProjectItems(getSegmentImplementationIdeas(lead.segmentSlug, lead.companyName));
 };
 
 export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingContent => {

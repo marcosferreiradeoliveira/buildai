@@ -134,7 +134,7 @@ describe("leadWebsiteExtract", () => {
 
     const result = parseLeadFromWebsiteHtml(html, "https://esgexpert.com.br");
     expect(result.primaryGoal).toMatch(/\.$/);
-    expect(result.primaryGoal).not.toContain("todas as…");
+    expect(result.primaryGoal).not.toContain("…");
     expect(result.primaryGoal).toContain("ESG");
   });
 

@@ -1,3 +1,8 @@
+import {
+  buildImplementationIdeasSystemPrompt,
+  buildImplementationIdeasUserPrompt,
+} from "./leadImplementationIdeasPrompt";
+import { mergeImplementationIdeas } from "./leadSegmentSolutions";
 import type { LeadImplementationIdea, LeadSolutionCase, LeadWebsiteExtract } from "./leadWebsiteExtract";
 import { getOpenAiApiKey, parseImplementationIdeas } from "./leadWebsiteExtractAi";
 
@@ -9,45 +14,6 @@ export type ImplementationIdeasContext = {
   solutionCases?: LeadSolutionCase[];
   pageText?: string;
 };
-
-const stripHtmlToText = (html: string): string =>
-  html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const buildPrompt = (ctx: ImplementationIdeasContext): string => {
-  const casesBlock =
-    ctx.solutionCases?.length ?
-      ctx.solutionCases
-        .slice(0, 8)
-        .map((item, index) => `${index + 1}. ${item.title} — ${item.description.slice(0, 200)}`)
-        .join("\n")
-    : "Nenhum case estruturado (inferir do texto do site).";
-
-  const siteExcerpt = ctx.pageText ? stripHtmlToText(ctx.pageText).slice(0, 10_000) : "";
-
-  return [
-    `Empresa: ${ctx.companyName}`,
-    `Segmento: ${ctx.segmentSlug ?? "não informado"}`,
-    `Site: ${ctx.websiteUrl}`,
-    `Missão/contexto: ${ctx.primaryGoal ?? "não informado"}`,
-    "",
-    "Cases, projetos, campanhas ou frentes identificadas no site:",
-    casesBlock,
-    "",
-    siteExcerpt ? `Trecho do site:\n${siteExcerpt}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
-};
-
-const SYSTEM_PROMPT = `Você é consultor da BuildAI. Gere implementationIdeas: 3 ou 4 propostas do que a BuildAI pode IMPLEMENTAR para este cliente.
-Use contexto REAL do site. Não seja genérico.
-Responda APENAS JSON: { "implementationIdeas": [ { "category", "title", "description", "metric" }, ... ] }
-Categorias: "Automação com IA", "MicroSaaS", "IA generativa", "Software sob medida".`;
 
 export const generateImplementationIdeasWithAi = async (
   ctx: ImplementationIdeasContext,
@@ -67,8 +33,8 @@ export const generateImplementationIdeasWithAi = async (
       temperature: 0.45,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildPrompt(ctx) },
+        { role: "system", content: buildImplementationIdeasSystemPrompt(ctx) },
+        { role: "user", content: buildImplementationIdeasUserPrompt(ctx) },
       ],
     }),
   });
@@ -83,9 +49,10 @@ export const generateImplementationIdeasWithAi = async (
 
   try {
     const parsed = JSON.parse(content) as { implementationIdeas?: unknown };
-    return parseImplementationIdeas(
+    const ideas = parseImplementationIdeas(
       parsed.implementationIdeas as Parameters<typeof parseImplementationIdeas>[0],
     );
+    return mergeImplementationIdeas(ideas, ctx.segmentSlug, ctx.companyName);
   } catch {
     return [];
   }
@@ -95,10 +62,21 @@ export const enrichExtractWithImplementationIdeas = async (
   extract: LeadWebsiteExtract,
   pageText?: string,
 ): Promise<LeadWebsiteExtract> => {
-  if (extract.implementationIdeas?.length >= 3) return extract;
+  const company = extract.companyName ?? "Cliente";
+
+  if (extract.implementationIdeas && extract.implementationIdeas.length >= 3) {
+    return {
+      ...extract,
+      implementationIdeas: mergeImplementationIdeas(
+        extract.implementationIdeas,
+        extract.segmentSlug,
+        company,
+      ),
+    };
+  }
 
   const ideas = await generateImplementationIdeasWithAi({
-    companyName: extract.companyName ?? "Cliente",
+    companyName: company,
     segmentSlug: extract.segmentSlug,
     primaryGoal: extract.primaryGoal,
     websiteUrl: extract.websiteUrl,
@@ -106,6 +84,11 @@ export const enrichExtractWithImplementationIdeas = async (
     pageText,
   });
 
-  if (!ideas.length) return extract;
-  return { ...extract, implementationIdeas: ideas };
+  const merged =
+    ideas.length ?
+      ideas
+    : mergeImplementationIdeas([], extract.segmentSlug, company);
+
+  if (!merged.length) return extract;
+  return { ...extract, implementationIdeas: merged };
 };

@@ -22,6 +22,7 @@ const ALLOWED_SEGMENTS = [
   "tecnologia",
   "juridico",
   "comunicacao",
+  "esg",
 ];
 
 const stripHtml = (html: string): string =>

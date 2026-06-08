@@ -85,6 +85,21 @@ const SEGMENT_KEYWORDS: Record<string, string[]> = {
     "conteúdo",
     "conteudo",
   ],
+  esg: [
+    "esg",
+    "sustentabilidade",
+    "sustentável",
+    "sustentavel",
+    "governança",
+    "governanca",
+    "ambiental",
+    "social",
+    "carbono",
+    "emissões",
+    "emissoes",
+    "relatório de sustentabilidade",
+    "relatorio de sustentabilidade",
+  ],
 };
 
 export const normalizeWebsiteUrl = (input: string): string => {
@@ -222,22 +237,24 @@ const resolveCompanyName = (
   return companyNameFromHostname(websiteUrl);
 };
 
-/** Resume missão/oferta em 1–2 frases completas (sem cortar no meio). */
+/** Resume missão/oferta em 1–2 frases completas (sem reticências). */
 export const summarizePrimaryGoal = (text: string, maxChars = 220): string => {
-  const clean = sanitizeMarkdownText(text);
+  const clean = sanitizeMarkdownText(text).replace(/…+/g, "").trim();
   if (!clean) return "";
 
   const sentences = clean.match(/[^.!?]+[.!?]+/g)?.map((s) => s.trim()) ?? [];
   if (sentences.length) {
-    let summary = sentences[0];
-    if (summary.length < 80 && sentences[1]) {
-      summary = `${summary} ${sentences[1]}`.trim();
-    }
-    if (summary.length <= maxChars) return summary;
-    return truncateAtWord(summary, maxChars);
+    const first = sentences[0];
+    const two = sentences[1] ? `${first} ${sentences[1]}`.trim() : first;
+    if (two.length <= maxChars) return two;
+    return first;
   }
 
-  return truncateAtWord(clean, maxChars);
+  if (clean.length <= maxChars) return clean;
+
+  const slice = clean.slice(0, maxChars);
+  const boundary = slice.lastIndexOf(" ");
+  return (boundary > 0 ? slice.slice(0, boundary) : slice).trim();
 };
 
 const inferCity = (text: string): string | undefined => {
