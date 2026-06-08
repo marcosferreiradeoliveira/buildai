@@ -109,6 +109,35 @@ describe("leadWebsiteExtract", () => {
     expect(ideas[0]?.title).toContain("Triagem");
   });
 
+  it("rejects Home as company name and uses hostname brand", () => {
+    const html = `
+      <html>
+        <head><title>Home</title></head>
+        <body><p>ESG e sustentabilidade corporativa.</p></body>
+      </html>
+    `;
+
+    const result = parseLeadFromWebsiteHtml(html, "https://www.esgexpert.com.br");
+    expect(result.companyName?.toLowerCase()).not.toBe("home");
+    expect(result.companyName).toBeTruthy();
+  });
+
+  it("summarizes primary goal in complete sentences", () => {
+    const html = `
+      <html>
+        <head>
+          <title>ESG Expert</title>
+          <meta name="description" content="Da transmissão do conhecimento à aplicação prática em ESG, sua organização terá acesso a suporte digital de especialistas em todas as etapas da jornada ESG. Oferecemos todas as ferramentas necessárias para evoluir." />
+        </head>
+      </html>
+    `;
+
+    const result = parseLeadFromWebsiteHtml(html, "https://esgexpert.com.br");
+    expect(result.primaryGoal).toMatch(/\.$/);
+    expect(result.primaryGoal).not.toContain("todas as…");
+    expect(result.primaryGoal).toContain("ESG");
+  });
+
   it("strips markdown images and bold fragments from jina-like text", () => {
     const dirty =
       "![Image 1](blob:http://localhost/x) **Relevância, impacto.** **Temos as palavras certas**";

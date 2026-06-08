@@ -1,8 +1,15 @@
 import {
   extractLeadFromWebsite,
   fetchWebsiteHtmlForBrowser,
+  isInvalidCompanyName,
+  summarizePrimaryGoal,
   type LeadWebsiteExtract,
 } from "@/lib/leadWebsiteExtract";
+
+export type FetchLeadFromWebsiteResult = {
+  data: LeadWebsiteExtract;
+  warnings: string[];
+};
 
 const parseApiResponse = async (
   response: Response,
@@ -17,7 +24,9 @@ const parseApiResponse = async (
   }
 };
 
-const fetchViaServerApi = async (url: string): Promise<LeadWebsiteExtract | null> => {
+const fetchViaServerApi = async (
+  url: string,
+): Promise<{ data: LeadWebsiteExtract | null; warning?: string }> => {
   try {
     const response = await fetch("/api/extract-lead-from-url", {
       method: "POST",
@@ -28,19 +37,83 @@ const fetchViaServerApi = async (url: string): Promise<LeadWebsiteExtract | null
     const payload = await parseApiResponse(response);
 
     if (!response.ok) {
-      throw new Error(payload.error ?? `API retornou HTTP ${response.status}.`);
+      return {
+        data: null,
+        warning: `API de extração falhou (HTTP ${response.status}): ${payload.error ?? "erro desconhecido"}`,
+      };
     }
 
-    return payload;
-  } catch {
-    return null;
+    return { data: payload };
+  } catch (error) {
+    return {
+      data: null,
+      warning: `API de extração indisponível: ${error instanceof Error ? error.message : "erro de rede"}`,
+    };
+  }
+};
+
+const needsMetadataEnrichment = (extract: LeadWebsiteExtract): boolean =>
+  isInvalidCompanyName(extract.companyName) ||
+  !extract.primaryGoal?.trim() ||
+  extract.primaryGoal.endsWith("…") ||
+  extract.primaryGoal.includes("todas as…");
+
+const enrichMetadataFromApi = async (
+  extract: LeadWebsiteExtract,
+): Promise<{ data: LeadWebsiteExtract; warning?: string }> => {
+  if (!needsMetadataEnrichment(extract)) return { data: extract };
+
+  try {
+    const response = await fetch("/api/enrich-lead-metadata", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        websiteUrl: extract.websiteUrl,
+        scrapedCompanyName: extract.companyName,
+        scrapedPrimaryGoal: extract.primaryGoal,
+        scrapedTitle: extract.rawTitle,
+        scrapedDescription: extract.rawDescription,
+      }),
+    });
+
+    const payload = (await response.json()) as {
+      companyName?: string;
+      primaryGoal?: string;
+      segmentSlug?: string;
+      error?: string;
+    };
+
+    if (!response.ok) {
+      return { data: extract, warning: payload.error };
+    }
+
+    return {
+      data: {
+        ...extract,
+        companyName:
+          payload.companyName && !isInvalidCompanyName(payload.companyName)
+            ? payload.companyName
+            : extract.companyName,
+        primaryGoal: payload.primaryGoal
+          ? summarizePrimaryGoal(payload.primaryGoal, 220)
+          : extract.primaryGoal,
+        segmentSlug: payload.segmentSlug ?? extract.segmentSlug,
+      },
+    };
+  } catch (error) {
+    return {
+      data: extract,
+      warning: `Enriquecimento de metadados indisponível: ${error instanceof Error ? error.message : "erro"}`,
+    };
   }
 };
 
 const fetchImplementationIdeasFromApi = async (
   extract: LeadWebsiteExtract,
-): Promise<LeadWebsiteExtract> => {
-  if (extract.implementationIdeas?.length >= 3) return extract;
+): Promise<{ data: LeadWebsiteExtract; warning?: string }> => {
+  if (extract.implementationIdeas?.length >= 3) {
+    return { data: extract };
+  }
 
   try {
     const response = await fetch("/api/generate-implementation-ideas", {
@@ -55,26 +128,60 @@ const fetchImplementationIdeasFromApi = async (
       }),
     });
 
-    const payload = (await response.json()) as {
+    const raw = await response.text();
+    let payload: {
       implementationIdeas?: LeadWebsiteExtract["implementationIdeas"];
       error?: string;
-    };
+    } = {};
+
+    if (raw) {
+      try {
+        payload = JSON.parse(raw) as typeof payload;
+      } catch {
+        payload = { error: raw.slice(0, 180) };
+      }
+    }
 
     if (response.ok && payload.implementationIdeas?.length) {
-      return { ...extract, implementationIdeas: payload.implementationIdeas };
+      return { data: { ...extract, implementationIdeas: payload.implementationIdeas } };
     }
-  } catch {
-    // segue com dados já extraídos
-  }
 
-  return extract;
+    return {
+      data: extract,
+      warning:
+        payload.error ??
+        `API de propostas retornou HTTP ${response.status} sem ideias.`,
+    };
+  } catch (error) {
+    return {
+      data: extract,
+      warning: `API de propostas indisponível: ${error instanceof Error ? error.message : "erro de rede"}`,
+    };
+  }
 };
 
 /** Extrai dados do site: API serverless (quando disponível) → fallbacks no navegador. */
-export const fetchLeadFromWebsite = async (url: string): Promise<LeadWebsiteExtract> => {
-  const fromApi = await fetchViaServerApi(url);
-  const base =
-    fromApi ?? (await extractLeadFromWebsite(url, fetchWebsiteHtmlForBrowser));
+export const fetchLeadFromWebsite = async (url: string): Promise<FetchLeadFromWebsiteResult> => {
+  const warnings: string[] = [];
 
-  return fetchImplementationIdeasFromApi(base);
+  const apiAttempt = await fetchViaServerApi(url);
+  if (apiAttempt.warning) warnings.push(apiAttempt.warning);
+
+  const base =
+    apiAttempt.data ?? (await extractLeadFromWebsite(url, fetchWebsiteHtmlForBrowser));
+
+  if (!apiAttempt.data) {
+    warnings.push("Extração no navegador — nome e propostas passam por IA na API.");
+  }
+
+  const metadataAttempt =
+    !apiAttempt.data || needsMetadataEnrichment(base)
+      ? await enrichMetadataFromApi(base)
+      : { data: base };
+  if (metadataAttempt.warning) warnings.push(metadataAttempt.warning);
+
+  const ideasAttempt = await fetchImplementationIdeasFromApi(metadataAttempt.data);
+  if (ideasAttempt.warning) warnings.push(ideasAttempt.warning);
+
+  return { data: ideasAttempt.data, warnings };
 };

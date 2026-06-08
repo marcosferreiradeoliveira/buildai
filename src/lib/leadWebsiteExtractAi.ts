@@ -1,5 +1,7 @@
 import {
   filterValidCases,
+  isInvalidCompanyName,
+  summarizePrimaryGoal,
   type LeadImplementationIdea,
   type LeadSolutionCase,
   type LeadWebsiteExtract,
@@ -24,11 +26,16 @@ const ALLOWED_CATEGORIES = [
 
 const MAX_INPUT_CHARS = 14_000;
 
-const truncateGoal = (text: string, max: number): string => {
-  if (text.length <= max) return text;
-  const slice = text.slice(0, max);
-  const boundary = slice.lastIndexOf(" ");
-  return `${(boundary > 0 ? slice.slice(0, boundary) : slice).trim()}…`;
+const normalizeCompanyName = (
+  aiName: string | undefined,
+  fallback: LeadWebsiteExtract,
+): string | undefined => {
+  const trimmed = aiName?.trim();
+  if (trimmed && !isInvalidCompanyName(trimmed)) return trimmed;
+  if (fallback.companyName && !isInvalidCompanyName(fallback.companyName)) {
+    return fallback.companyName;
+  }
+  return undefined;
 };
 
 export type LeadAiExtractInput = {
@@ -152,14 +159,16 @@ const normalizeAiPayload = (payload: AiLeadPayload, fallback: LeadWebsiteExtract
   const solutionCases = parseAiCases(payload.solutionCases, fallback.websiteUrl);
   const implementationIdeas = parseImplementationIdeas(payload.implementationIdeas);
 
+  const companyName = normalizeCompanyName(payload.companyName, fallback) ?? fallback.companyName;
+  const primaryGoal = payload.primaryGoal?.trim()
+    ? summarizePrimaryGoal(payload.primaryGoal, 220)
+    : fallback.primaryGoal;
+
   return {
     ...fallback,
-    companyName: payload.companyName?.trim() || fallback.companyName,
+    companyName,
     city: payload.city?.trim() || fallback.city,
-    primaryGoal:
-      payload.primaryGoal?.trim()
-        ? truncateGoal(payload.primaryGoal.trim(), 180)
-        : fallback.primaryGoal,
+    primaryGoal,
     segmentSlug,
     solutionCases: solutionCases.length ? solutionCases : fallback.solutionCases,
     implementationIdeas: implementationIdeas.length
@@ -170,7 +179,9 @@ const normalizeAiPayload = (payload: AiLeadPayload, fallback: LeadWebsiteExtract
 
 const SYSTEM_PROMPT = `Você extrai dados de sites de empresas/instituições para montar landing pages B2B da BuildAI (IA, automação, MicroSaaS).
 Responda APENAS JSON válido com:
-- companyName, city (cidade sede se explícita, senão null), primaryGoal (missão/oferta em 1 frase, máx 180 caracteres)
+- companyName: nome REAL da marca/empresa (NUNCA "Home", "Menu", "Contato" ou título de seção do site)
+- city (cidade sede se explícita, senão null)
+- primaryGoal: 1 ou 2 frases COMPLETAS com missão/oferta de valor (sintetize, não copie trecho cortado)
 - segmentSlug (${ALLOWED_SEGMENTS.join("|")})
 - solutionCases (0 a 4): produtos/serviços/cases REAIS listados no site (title + description). Não inclua FAQ, artigos jurídicos genéricos, busca do site.
 - implementationIdeas (exatamente 3 ou 4): propostas que a BuildAI pode IMPLEMENTAR para ESTE negócio (foco em solução digital, não em descrever cases que eles já têm).

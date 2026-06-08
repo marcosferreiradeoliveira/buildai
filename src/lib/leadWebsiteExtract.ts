@@ -134,9 +134,95 @@ const readJsonLdOrganizationName = (html: string): string | undefined => {
   return undefined;
 };
 
+const INVALID_COMPANY_NAMES = new Set([
+  "home",
+  "início",
+  "inicio",
+  "página inicial",
+  "pagina inicial",
+  "menu",
+  "contato",
+  "sobre",
+  "quem somos",
+  "blog",
+  "portfolio",
+  "portfólio",
+  "serviços",
+  "servicos",
+  "produtos",
+  "soluções",
+  "solucoes",
+  "welcome",
+  "index",
+]);
+
+export const isInvalidCompanyName = (value: string | undefined): boolean => {
+  if (!value?.trim()) return true;
+  const normalized = value.trim().toLowerCase();
+  if (INVALID_COMPANY_NAMES.has(normalized)) return true;
+  if (normalized.length < 3) return true;
+  if (/^https?:\/\//i.test(normalized)) return true;
+  if (/\.(com|br|org|net)$/i.test(normalized) && !normalized.includes(" ")) return true;
+  return false;
+};
+
+const companyNameFromHostname = (websiteUrl: string): string => {
+  try {
+    const host = new URL(websiteUrl).hostname.replace(/^www\./, "");
+    const brand = host.split(".")[0] ?? host;
+    return brand
+      .replace(/[-_]+/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase())
+      .trim();
+  } catch {
+    return "Empresa";
+  }
+};
+
 const cleanCompanyName = (value: string): string => {
-  const withoutSuffix = value.split(/\s*[|\-–—]\s*/)[0]?.trim() ?? value.trim();
-  return withoutSuffix.replace(/\s+(home|início|inicio|página inicial)$/i, "").trim();
+  const parts = value.split(/\s*[|\-–—:]\s*/).map((part) => part.trim()).filter(Boolean);
+  const meaningful = parts.find((part) => !isInvalidCompanyName(part));
+  const chosen = meaningful ?? parts[0] ?? value.trim();
+  return chosen.replace(/\s+(home|início|inicio|página inicial)$/i, "").trim();
+};
+
+const resolveCompanyName = (
+  html: string,
+  websiteUrl: string,
+  rawTitle?: string,
+): string => {
+  const candidates = [
+    readMetaContent(html, "og:site_name"),
+    readJsonLdOrganizationName(html),
+    rawTitle ? cleanCompanyName(rawTitle) : undefined,
+    companyNameFromHostname(websiteUrl),
+  ];
+
+  for (const candidate of candidates) {
+    if (candidate && !isInvalidCompanyName(candidate)) {
+      return sanitizeMarkdownText(candidate);
+    }
+  }
+
+  return companyNameFromHostname(websiteUrl);
+};
+
+/** Resume missão/oferta em 1–2 frases completas (sem cortar no meio). */
+export const summarizePrimaryGoal = (text: string, maxChars = 220): string => {
+  const clean = sanitizeMarkdownText(text);
+  if (!clean) return "";
+
+  const sentences = clean.match(/[^.!?]+[.!?]+/g)?.map((s) => s.trim()) ?? [];
+  if (sentences.length) {
+    let summary = sentences[0];
+    if (summary.length < 80 && sentences[1]) {
+      summary = `${summary} ${sentences[1]}`.trim();
+    }
+    if (summary.length <= maxChars) return summary;
+    return truncateAtWord(summary, maxChars);
+  }
+
+  return truncateAtWord(clean, maxChars);
 };
 
 const inferCity = (text: string): string | undefined => {
@@ -454,11 +540,7 @@ export const parseLeadFromWebsiteHtml = (html: string, websiteUrl: string): Lead
     readMetaContent(html, "description") ??
     readMetaContent(html, "twitter:description");
 
-  const companyName =
-    readMetaContent(html, "og:site_name") ??
-    readJsonLdOrganizationName(html) ??
-    (rawTitle ? cleanCompanyName(rawTitle) : undefined) ??
-    cleanCompanyName(new URL(websiteUrl).hostname.replace(/^www\./, ""));
+  const companyName = resolveCompanyName(html, websiteUrl, rawTitle);
 
   const combinedText = [rawTitle, rawDescription, html.slice(0, 8000)].filter(Boolean).join(" ");
   const company = companyName ?? "sua empresa";
@@ -467,22 +549,17 @@ export const parseLeadFromWebsiteHtml = (html: string, websiteUrl: string): Lead
   const solutionCases = enrichCasesAsSolutions(validCases, company);
   const cleanDescription = sanitizeMarkdownText(rawDescription ?? "");
   const aboutSnippet = sanitizeMarkdownText(extractAboutSnippet(html) ?? "");
-  const primaryGoalCandidate =
+  const goalSource =
     cleanDescription.length >= 40 && !isLikelyLegalSnippet(cleanDescription)
-      ? truncateAtWord(cleanDescription, 180)
+      ? cleanDescription
       : aboutSnippet.length >= 40 && !isLikelyLegalSnippet(aboutSnippet)
-        ? truncateAtWord(aboutSnippet, 180)
-        : truncateAtWord(
-            sanitizeMarkdownText(
-              `${company} — presença digital e operação com foco em resultado.`,
-            ),
-            180,
-          );
-  const primaryGoal = primaryGoalCandidate;
+        ? aboutSnippet
+        : `${company} — presença digital e operação com foco em resultado.`;
+  const primaryGoal = summarizePrimaryGoal(goalSource, 220);
 
   return {
     websiteUrl,
-    companyName: companyName ? sanitizeMarkdownText(companyName) : companyName,
+    companyName,
     city: inferCity(combinedText),
     primaryGoal,
     segmentSlug: inferSegmentSlug(combinedText),
@@ -541,7 +618,13 @@ export const fetchWebsiteHtmlViaJina = async (url: string): Promise<string> => {
   }
 
   const titleMatch = text.match(/^Title:\s*(.+)$/m);
-  const title = sanitizeMarkdownText(titleMatch?.[1]?.trim() ?? "Site do lead");
+  const descriptionMatch = text.match(/^Description:\s*(.+)$/m);
+  const rawJinaTitle = titleMatch?.[1]?.trim() ?? "";
+  const jinaDescription = sanitizeMarkdownText(descriptionMatch?.[1]?.trim() ?? "");
+  const titleFromUrl = companyNameFromHostname(normalized);
+  const title = isInvalidCompanyName(rawJinaTitle)
+    ? titleFromUrl
+    : sanitizeMarkdownText(cleanCompanyName(rawJinaTitle));
   const body = text.replace(/^Title:[\s\S]*?Markdown Content:\s*/m, "").trim();
 
   const sections: Array<{ title: string; description: string }> = [];
@@ -595,18 +678,21 @@ export const fetchWebsiteHtmlViaJina = async (url: string): Promise<string> => {
     )
     .join("");
 
+  const bodySnippet = sanitizeMarkdownText(
+    body
+      .split("\n")
+      .filter((line) => line.trim() && !/^#{1,6}\s/.test(line) && !/^!\[/.test(line))
+      .slice(0, 8)
+      .join(" "),
+  );
   const aboutText =
-    sanitizeMarkdownText(
-      body
-        .split("\n")
-        .filter((line) => line.trim() && !/^#{1,6}\s/.test(line) && !/^!\[/.test(line))
-        .slice(0, 6)
-        .join(" "),
-    ).slice(0, 220) || "Comunicação estratégica e presença digital.";
+    summarizePrimaryGoal(jinaDescription || bodySnippet, 280) ||
+    "Comunicação estratégica e presença digital.";
 
   const safeAbout = aboutText.replace(/"/g, "'");
+  const safeSiteName = title.replace(/"/g, "'");
 
-  return `<html><head><title>${title}</title><meta name="description" content="${safeAbout}" /></head><body>${articles}<p>${safeAbout}</p></body></html>`;
+  return `<html><head><title>${title}</title><meta property="og:site_name" content="${safeSiteName}" /><meta name="description" content="${safeAbout}" /></head><body>${articles}<p>${safeAbout}</p></body></html>`;
 };
 
 const fetchViaProxy = async (proxyUrl: string, label: string): Promise<string> => {
@@ -708,6 +794,31 @@ export const extractLeadFromWebsite = async (
         fallback: result,
       });
       result = await enrichExtractWithImplementationIdeas(result, mainHtml);
+
+      if (isInvalidCompanyName(result.companyName) || !result.primaryGoal?.includes(".")) {
+        const { enrichLeadMetadataServer } = await import("../../api/lib/leadMetadataServer");
+        const meta = await enrichLeadMetadataServer({
+          websiteUrl,
+          scrapedCompanyName: result.companyName,
+          scrapedPrimaryGoal: result.primaryGoal,
+          scrapedTitle: result.rawTitle,
+          scrapedDescription: result.rawDescription,
+          pageText: mainHtml,
+        });
+        if (meta.ok) {
+          result = {
+            ...result,
+            companyName:
+              meta.data.companyName && !isInvalidCompanyName(meta.data.companyName)
+                ? meta.data.companyName
+                : result.companyName,
+            primaryGoal: meta.data.primaryGoal
+              ? summarizePrimaryGoal(meta.data.primaryGoal, 220)
+              : result.primaryGoal,
+            segmentSlug: meta.data.segmentSlug ?? result.segmentSlug,
+          };
+        }
+      }
     } catch (error) {
       console.error("Lead extract AI enrichment skipped:", error);
     }

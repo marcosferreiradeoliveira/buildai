@@ -2,10 +2,11 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Plugin } from "vite";
 import { loadEnv } from "vite";
 import { deleteLeadPageServer } from "./api/lib/deleteLeadPageServer";
+import { enrichLeadMetadataServer } from "./api/lib/leadMetadataServer";
 import {
-  generateImplementationIdeasWithAi,
+  generateImplementationIdeasServer,
   type ImplementationIdeasContext,
-} from "./src/lib/leadImplementationIdeasAi";
+} from "./api/lib/implementationIdeasServer";
 import { extractLeadFromWebsite, normalizeWebsiteUrl } from "./src/lib/leadWebsiteExtract";
 
 const readJsonBody = <T extends Record<string, unknown>>(req: IncomingMessage): Promise<T> =>
@@ -51,6 +52,43 @@ export const extractLeadApiPlugin = (): Plugin => ({
       process.env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL;
     }
 
+    server.middlewares.use("/api/enrich-lead-metadata", async (req, res, next) => {
+      if (req.method === "OPTIONS") {
+        res.statusCode = 204;
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        res.end();
+        return;
+      }
+
+      if (req.method !== "POST") {
+        return next();
+      }
+
+      try {
+        const body = await readJsonBody<{
+          websiteUrl?: string;
+          scrapedCompanyName?: string;
+          scrapedPrimaryGoal?: string;
+          scrapedTitle?: string;
+          scrapedDescription?: string;
+          pageText?: string;
+        }>(req);
+
+        const result = await enrichLeadMetadataServer(body);
+        if (!result.ok) {
+          sendJson(res, 503, { error: `Enriquecimento indisponível (${result.reason}).` });
+          return;
+        }
+
+        sendJson(res, 200, result.data);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Falha ao enriquecer metadados.";
+        sendJson(res, 500, { error: message });
+      }
+    });
+
     server.middlewares.use("/api/generate-implementation-ideas", async (req, res, next) => {
       if (req.method === "OPTIONS") {
         res.statusCode = 204;
@@ -72,16 +110,19 @@ export const extractLeadApiPlugin = (): Plugin => ({
           return;
         }
 
-        const ideas = await generateImplementationIdeasWithAi(body);
-        if (!ideas.length) {
+        const result = await generateImplementationIdeasServer(body);
+        if (!result.ok) {
           sendJson(res, 503, {
-            error: "Configure OPENAI_API_KEY no .env.local para gerar propostas.",
+            error:
+              result.reason === "no_api_key"
+                ? "Configure OPENAI_API_KEY no .env.local para gerar propostas."
+                : `Falha ao gerar propostas (${result.reason}).${result.detail ? ` ${result.detail}` : ""}`,
             implementationIdeas: [],
           });
           return;
         }
 
-        sendJson(res, 200, { implementationIdeas: ideas });
+        sendJson(res, 200, { implementationIdeas: result.ideas });
       } catch (error) {
         const message = error instanceof Error ? error.message : "Falha ao gerar propostas.";
         sendJson(res, 500, { error: message });

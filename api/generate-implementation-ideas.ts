@@ -1,12 +1,12 @@
-import { fetchWebsiteHtml } from "../src/lib/leadWebsiteExtract";
 import {
-  generateImplementationIdeasWithAi,
+  fetchSiteHtml,
+  generateImplementationIdeasServer,
   type ImplementationIdeasContext,
-} from "../src/lib/leadImplementationIdeasAi";
+} from "./lib/implementationIdeasServer";
 
 type ApiRequest = {
   method?: string;
-  body?: string | ImplementationIdeasContext & { websiteUrl?: string };
+  body?: string | ImplementationIdeasContext;
 };
 
 type ApiResponse = {
@@ -43,22 +43,29 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     let pageText = body.pageText;
     if (!pageText && body.websiteUrl?.trim()) {
       try {
-        pageText = await fetchWebsiteHtml(body.websiteUrl);
+        pageText = await fetchSiteHtml(body.websiteUrl);
       } catch {
-        // segue sem HTML completo
+        // segue com cases e metadados
       }
     }
 
-    const ideas = await generateImplementationIdeasWithAi({ ...body, pageText });
+    const result = await generateImplementationIdeasServer({ ...body, pageText });
 
-    if (!ideas.length) {
+    if (!result.ok) {
+      if (result.reason === "no_api_key") {
+        return res.status(503).json({
+          error:
+            "OPENAI_API_KEY não encontrada no servidor. Adicione em Vercel → Environment Variables (Production) e faça redeploy.",
+        });
+      }
+
       return res.status(503).json({
-        error: "Não foi possível gerar propostas. Verifique OPENAI_API_KEY na Vercel.",
+        error: `Não foi possível gerar propostas (${result.reason}).${result.detail ? ` ${result.detail}` : ""}`,
         implementationIdeas: [],
       });
     }
 
-    return res.status(200).json({ implementationIdeas: ideas });
+    return res.status(200).json({ implementationIdeas: result.ideas });
   } catch (error) {
     console.error("generate-implementation-ideas:", error);
     const message = error instanceof Error ? error.message : "Falha ao gerar propostas.";

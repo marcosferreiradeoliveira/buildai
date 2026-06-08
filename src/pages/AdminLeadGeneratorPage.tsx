@@ -71,7 +71,7 @@ const AdminLeadGeneratorPage = () => {
 
     setExtracting(true);
     try {
-      const data = await fetchLeadFromWebsite(websiteUrl);
+      const { data, warnings } = await fetchLeadFromWebsite(websiteUrl);
       if (data.companyName) setCompanyName(data.companyName);
       if (data.city) setCity(data.city);
       if (data.primaryGoal) setPrimaryGoal(data.primaryGoal);
@@ -80,13 +80,16 @@ const AdminLeadGeneratorPage = () => {
       setImplementationIdeas(data.implementationIdeas ?? []);
 
       const ideasCount = data.implementationIdeas?.length ?? 0;
+      const warningText = warnings.length ? ` ${warnings.join(" ")}` : "";
+
       toast({
         title: "Informações importadas",
         description: ideasCount
           ? `${ideasCount} proposta(s) para "O que podemos implementar" gerada(s) com IA. Revise e salve a página.`
           : data.companyName
-            ? `Dados de ${data.companyName} importados. Configure OPENAI_API_KEY na Vercel para gerar propostas com IA.`
-            : "Dados importados. Sem IA, a LP usa fallback por segmento.",
+            ? `Dados de ${data.companyName} importados, mas propostas com IA não foram geradas.${warningText || " Verifique OPENAI_API_KEY na Vercel (Production) e faça redeploy."}`
+            : `Dados importados.${warningText || " Propostas com IA não geradas."}`,
+        variant: ideasCount ? "default" : warnings.length ? "destructive" : "default",
       });
     } catch (err) {
       toast({

@@ -1,4 +1,15 @@
 {
+  "functions": {
+    "api/extract-lead-from-url.ts": {
+      "maxDuration": 60
+    },
+    "api/generate-implementation-ideas.ts": {
+      "maxDuration": 60
+    },
+    "api/enrich-lead-metadata.ts": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
