@@ -37,10 +37,44 @@ const fetchViaServerApi = async (url: string): Promise<LeadWebsiteExtract | null
   }
 };
 
+const fetchImplementationIdeasFromApi = async (
+  extract: LeadWebsiteExtract,
+): Promise<LeadWebsiteExtract> => {
+  if (extract.implementationIdeas?.length >= 3) return extract;
+
+  try {
+    const response = await fetch("/api/generate-implementation-ideas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        companyName: extract.companyName ?? "Cliente",
+        segmentSlug: extract.segmentSlug,
+        primaryGoal: extract.primaryGoal,
+        websiteUrl: extract.websiteUrl,
+        solutionCases: extract.solutionCases,
+      }),
+    });
+
+    const payload = (await response.json()) as {
+      implementationIdeas?: LeadWebsiteExtract["implementationIdeas"];
+      error?: string;
+    };
+
+    if (response.ok && payload.implementationIdeas?.length) {
+      return { ...extract, implementationIdeas: payload.implementationIdeas };
+    }
+  } catch {
+    // segue com dados já extraídos
+  }
+
+  return extract;
+};
+
 /** Extrai dados do site: API serverless (quando disponível) → fallbacks no navegador. */
 export const fetchLeadFromWebsite = async (url: string): Promise<LeadWebsiteExtract> => {
   const fromApi = await fetchViaServerApi(url);
-  if (fromApi) return fromApi;
+  const base =
+    fromApi ?? (await extractLeadFromWebsite(url, fetchWebsiteHtmlForBrowser));
 
-  return extractLeadFromWebsite(url, fetchWebsiteHtmlForBrowser);
+  return fetchImplementationIdeasFromApi(base);
 };

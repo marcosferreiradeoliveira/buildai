@@ -58,7 +58,18 @@ const SEGMENT_KEYWORDS: Record<string, string[]> = {
   cultura: ["cultura", "cultural", "museu", "artes", "incentivo", "leis de incentivo"],
   tecnologia: ["software", "tecnologia", "saas", "startup", "digital", "ti"],
   juridico: ["advocacia", "jurídico", "juridico", "defesa do consumidor", "direito do consumidor", "procon"],
-  comunicacao: ["comunicação", "comunicacao", "agência", "agencia", "branding", "assessoria de imprensa"],
+  comunicacao: [
+    "comunicação",
+    "comunicacao",
+    "agência",
+    "agencia",
+    "branding",
+    "assessoria de imprensa",
+    "reputação",
+    "campanha",
+    "conteúdo",
+    "conteudo",
+  ],
 };
 
 export const normalizeWebsiteUrl = (input: string): string => {
@@ -158,6 +169,14 @@ const isLegalOrFaqContent = (title: string, description: string): boolean => {
 
 const isLikelyLegalSnippet = (text: string): boolean =>
   NON_PORTFOLIO_LEGAL.test(text) || /\bartigo\s+\d+\b/i.test(text) || /em regra,?\s+para/i.test(text);
+
+const truncateAtWord = (text: string, max: number): string => {
+  const trimmed = text.trim();
+  if (trimmed.length <= max) return trimmed;
+  const slice = trimmed.slice(0, max);
+  const boundary = slice.lastIndexOf(" ");
+  return `${(boundary > 0 ? slice.slice(0, boundary) : slice).trim()}…`;
+};
 
 const extractAboutSnippet = (html: string): string | undefined => {
   const aboutMatch = html.match(
@@ -450,12 +469,15 @@ export const parseLeadFromWebsiteHtml = (html: string, websiteUrl: string): Lead
   const aboutSnippet = sanitizeMarkdownText(extractAboutSnippet(html) ?? "");
   const primaryGoalCandidate =
     cleanDescription.length >= 40 && !isLikelyLegalSnippet(cleanDescription)
-      ? cleanDescription.slice(0, 180)
+      ? truncateAtWord(cleanDescription, 180)
       : aboutSnippet.length >= 40 && !isLikelyLegalSnippet(aboutSnippet)
-        ? aboutSnippet.slice(0, 180)
-        : sanitizeMarkdownText(
-            `${company} — presença digital e operação com foco em resultado.`,
-          ).slice(0, 180);
+        ? truncateAtWord(aboutSnippet, 180)
+        : truncateAtWord(
+            sanitizeMarkdownText(
+              `${company} — presença digital e operação com foco em resultado.`,
+            ),
+            180,
+          );
   const primaryGoal = primaryGoalCandidate;
 
   return {
@@ -678,11 +700,14 @@ export const extractLeadFromWebsite = async (
   if (typeof process !== "undefined" && process.env.OPENAI_API_KEY?.trim()) {
     try {
       const { enrichLeadExtractWithAi } = await import("./leadWebsiteExtractAi");
+      const { enrichExtractWithImplementationIdeas } = await import("./leadImplementationIdeasAi");
+
       result = await enrichLeadExtractWithAi({
         websiteUrl,
         pageText: mainHtml,
         fallback: result,
       });
+      result = await enrichExtractWithImplementationIdeas(result, mainHtml);
     } catch (error) {
       console.error("Lead extract AI enrichment skipped:", error);
     }

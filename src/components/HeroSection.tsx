@@ -63,7 +63,17 @@ const HeroSection = ({ content, prospectCompanyName, secondaryCtaHref = "#portfo
             transition={{ duration: 0.8, delay: 0.15 }}
             className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold leading-tight mb-6"
           >
-            {content.title} <span className="gradient-text">{content.highlightedText}</span>
+            {content.titleSuffix ? (
+              <>
+                {content.title}{" "}
+                <span className="prospect-company-highlight">{content.highlightedText}</span>
+                {content.titleSuffix}
+              </>
+            ) : (
+              <>
+                {content.title} <span className="gradient-text">{content.highlightedText}</span>
+              </>
+            )}
           </motion.h1>
 
           <motion.p

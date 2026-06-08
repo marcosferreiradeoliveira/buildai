@@ -24,6 +24,13 @@ const ALLOWED_CATEGORIES = [
 
 const MAX_INPUT_CHARS = 14_000;
 
+const truncateGoal = (text: string, max: number): string => {
+  if (text.length <= max) return text;
+  const slice = text.slice(0, max);
+  const boundary = slice.lastIndexOf(" ");
+  return `${(boundary > 0 ? slice.slice(0, boundary) : slice).trim()}…`;
+};
+
 export type LeadAiExtractInput = {
   websiteUrl: string;
   pageText: string;
@@ -54,12 +61,18 @@ const stripHtmlToText = (html: string): string =>
 
 export const buildPageTextForAi = (html: string, extract: LeadWebsiteExtract): string => {
   const plain = stripHtmlToText(html);
+  const casesSummary = extract.solutionCases
+    .slice(0, 6)
+    .map((item, index) => `${index + 1}. ${item.title}`)
+    .join("\n");
+
   const header = [
     `URL: ${extract.websiteUrl}`,
     extract.rawTitle ? `Título: ${extract.rawTitle}` : "",
     extract.rawDescription ? `Meta: ${extract.rawDescription}` : "",
     extract.companyName ? `Empresa (heurística): ${extract.companyName}` : "",
     extract.segmentSlug ? `Segmento sugerido: ${extract.segmentSlug}` : "",
+    casesSummary ? `Cases no site:\n${casesSummary}` : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -143,7 +156,10 @@ const normalizeAiPayload = (payload: AiLeadPayload, fallback: LeadWebsiteExtract
     ...fallback,
     companyName: payload.companyName?.trim() || fallback.companyName,
     city: payload.city?.trim() || fallback.city,
-    primaryGoal: payload.primaryGoal?.trim()?.slice(0, 220) || fallback.primaryGoal,
+    primaryGoal:
+      payload.primaryGoal?.trim()
+        ? truncateGoal(payload.primaryGoal.trim(), 180)
+        : fallback.primaryGoal,
     segmentSlug,
     solutionCases: solutionCases.length ? solutionCases : fallback.solutionCases,
     implementationIdeas: implementationIdeas.length

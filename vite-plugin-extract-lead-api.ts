@@ -2,6 +2,10 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Plugin } from "vite";
 import { loadEnv } from "vite";
 import { deleteLeadPageServer } from "./api/lib/deleteLeadPageServer";
+import {
+  generateImplementationIdeasWithAi,
+  type ImplementationIdeasContext,
+} from "./src/lib/leadImplementationIdeasAi";
 import { extractLeadFromWebsite, normalizeWebsiteUrl } from "./src/lib/leadWebsiteExtract";
 
 const readJsonBody = <T extends Record<string, unknown>>(req: IncomingMessage): Promise<T> =>
@@ -46,6 +50,43 @@ export const extractLeadApiPlugin = (): Plugin => ({
     if (env.VITE_SUPABASE_URL && !process.env.VITE_SUPABASE_URL) {
       process.env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL;
     }
+
+    server.middlewares.use("/api/generate-implementation-ideas", async (req, res, next) => {
+      if (req.method === "OPTIONS") {
+        res.statusCode = 204;
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        res.end();
+        return;
+      }
+
+      if (req.method !== "POST") {
+        return next();
+      }
+
+      try {
+        const body = await readJsonBody<ImplementationIdeasContext>(req);
+        if (!body.companyName?.trim()) {
+          sendJson(res, 400, { error: "Informe companyName." });
+          return;
+        }
+
+        const ideas = await generateImplementationIdeasWithAi(body);
+        if (!ideas.length) {
+          sendJson(res, 503, {
+            error: "Configure OPENAI_API_KEY no .env.local para gerar propostas.",
+            implementationIdeas: [],
+          });
+          return;
+        }
+
+        sendJson(res, 200, { implementationIdeas: ideas });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Falha ao gerar propostas.";
+        sendJson(res, 500, { error: message });
+      }
+    });
 
     server.middlewares.use("/api/delete-lead-page", async (req, res, next) => {
       if (req.method === "OPTIONS") {

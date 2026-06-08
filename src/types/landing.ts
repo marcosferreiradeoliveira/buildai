@@ -59,6 +59,7 @@ export type LandingContent = {
     badge: string;
     title: string;
     highlightedText: string;
+    titleSuffix?: string;
     description: string;
     primaryCtaLabel: string;
     secondaryCtaLabel: string;
