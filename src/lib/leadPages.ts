@@ -1,10 +1,7 @@
 import { baseLandingContent, getSegmentLandingContent } from "@/content/landing";
-import {
-  getSegmentImplementationIdeas,
-  mergeImplementationIdeas,
-} from "@/lib/leadSegmentSolutions";
+import { resolveImplementationIdeas } from "@/lib/leadSegmentSolutions";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabaseClient";
-import { LeadImplementationIdea, LeadPageConfig, LeadSolutionCase } from "@/types/lead";
+import { LeadImplementationIdea, LeadPageConfig } from "@/types/lead";
 import { LandingContent, ProjectItem } from "@/types/landing";
 
 const STORAGE_KEY = "buildai.lead-pages";
@@ -281,61 +278,16 @@ const toProjectItems = (ideas: LeadImplementationIdea[]): ProjectItem[] =>
     metric: item.metric,
   }));
 
-const shortCaseLabel = (title: string): string =>
-  title.length > 48 ? `${title.slice(0, 45).trim()}…` : title;
-
-/** Fallback contextual a partir dos cases extraídos do site (sem IA). */
-const buildIdeasFromSolutionCases = (lead: LeadPageConfig): LeadImplementationIdea[] | null => {
-  const cases = (lead.solutionCases ?? []).filter(
-    (item) => item.title.length >= 8 && !item.title.includes("!["),
+const buildImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] =>
+  toProjectItems(
+    resolveImplementationIdeas({
+      implementationIdeas: lead.implementationIdeas,
+      solutionCases: lead.solutionCases,
+      segmentSlug: lead.segmentSlug,
+      companyName: lead.companyName,
+      primaryGoal: lead.primaryGoal,
+    }),
   );
-  if (!cases.length) return null;
-
-  const company = lead.companyName;
-  const templates = [
-    (item: LeadSolutionCase): LeadImplementationIdea => ({
-      category: "Automação com IA",
-      title: `Operação automatizada: ${shortCaseLabel(item.title)}`,
-      description: `Para a ${company}, fluxos com IA para acelerar a frente "${item.title}" — triagem de demandas, aprovações e handoff entre equipes sem retrabalho.`,
-      metric: "Menos tempo operacional por entrega",
-    }),
-    (item: LeadSolutionCase): LeadImplementationIdea => ({
-      category: "MicroSaaS",
-      title: `Painel de gestão: ${shortCaseLabel(item.title)}`,
-      description: `Produto digital para a ${company} acompanhar status, prazos e indicadores da linha "${item.title}" com visão única para o time e clientes.`,
-      metric: "Controle e previsibilidade da operação",
-    }),
-    (item: LeadSolutionCase): LeadImplementationIdea => ({
-      category: "IA generativa",
-      title: `Content Factory: ${shortCaseLabel(item.title)}`,
-      description: `Produção assistida de peças e variações para a ${company} escalar "${item.title}" em múltiplos canais com IA, mantendo consistência de marca.`,
-      metric: "Mais volume sem aumentar headcount",
-    }),
-    (item: LeadSolutionCase): LeadImplementationIdea => ({
-      category: "Software sob medida",
-      title: `Hub dedicado: ${shortCaseLabel(item.title)}`,
-      description: `Repositório e workflow sob medida para a ${company} organizar assets, versões e entregas ligadas a "${item.title}".`,
-      metric: "Menos fricção entre equipes e clientes",
-    }),
-  ];
-
-  return cases.slice(0, 4).map((item, index) => templates[index % templates.length](item));
-};
-
-const buildImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] => {
-  if (lead.implementationIdeas?.length) {
-    return toProjectItems(
-      mergeImplementationIdeas(lead.implementationIdeas, lead.segmentSlug, lead.companyName),
-    );
-  }
-
-  const fromCases = buildIdeasFromSolutionCases(lead);
-  if (fromCases?.length) {
-    return toProjectItems(fromCases);
-  }
-
-  return toProjectItems(getSegmentImplementationIdeas(lead.segmentSlug, lead.companyName));
-};
 
 export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingContent => {
   const segmentTemplate = getSegmentLandingContent(lead.segmentSlug) ?? baseLandingContent;

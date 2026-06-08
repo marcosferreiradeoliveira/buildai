@@ -6,6 +6,7 @@ import {
   summarizePrimaryGoal,
   type LeadWebsiteExtract,
 } from "@/lib/leadWebsiteExtract";
+import { resolveImplementationIdeas } from "@/lib/leadSegmentSolutions";
 
 export type FetchLeadFromWebsiteResult = {
   data: LeadWebsiteExtract;
@@ -200,5 +201,16 @@ export const fetchLeadFromWebsite = async (url: string): Promise<FetchLeadFromWe
   const ideasAttempt = await fetchImplementationIdeasFromApi(metadataAttempt.data);
   if (ideasAttempt.warning) warnings.push(ideasAttempt.warning);
 
-  return { data: ideasAttempt.data, warnings };
+  const resolved = resolveImplementationIdeas({
+    implementationIdeas: ideasAttempt.data.implementationIdeas,
+    solutionCases: ideasAttempt.data.solutionCases,
+    segmentSlug: ideasAttempt.data.segmentSlug,
+    companyName: ideasAttempt.data.companyName ?? "Cliente",
+    primaryGoal: ideasAttempt.data.primaryGoal,
+  });
+
+  return {
+    data: { ...ideasAttempt.data, implementationIdeas: resolved },
+    warnings,
+  };
 };

@@ -1,4 +1,18 @@
-import type { LeadImplementationIdea } from "./leadWebsiteExtract";
+import type { LeadImplementationIdea, LeadSolutionCase } from "./leadWebsiteExtract";
+
+const shortCaseLabel = (title: string): string =>
+  title.length > 48 ? `${title.slice(0, 45).trim()}…` : title;
+
+/** Ajusta segmento para fallbacks quando o slug heurístico não reflete o negócio (ex: ESG). */
+export const inferSegmentForIdeas = (
+  segmentSlug: string | undefined,
+  companyName: string,
+  primaryGoal?: string,
+): string | undefined => {
+  const text = `${companyName} ${primaryGoal ?? ""}`.toLowerCase();
+  if (/\besg\b|sustentab|governança|governanca|carbono|emiss/i.test(text)) return "esg";
+  return segmentSlug;
+};
 
 export const IMPLEMENTATION_SEGMENT_SLUGS = [
   "educacao",
@@ -220,11 +234,13 @@ export const mergeImplementationIdeas = (
   segmentSlug: string | undefined,
   companyName: string,
   minCount = 3,
+  primaryGoal?: string,
 ): LeadImplementationIdea[] => {
   const seen = new Set(ideas.map((item) => item.title.toLowerCase()));
   const merged = [...ideas];
+  const segment = inferSegmentForIdeas(segmentSlug, companyName, primaryGoal);
 
-  for (const fallback of getSegmentImplementationIdeas(segmentSlug, companyName)) {
+  for (const fallback of getSegmentImplementationIdeas(segment, companyName)) {
     if (merged.length >= minCount) break;
     const key = fallback.title.toLowerCase();
     if (seen.has(key)) continue;
@@ -233,4 +249,79 @@ export const mergeImplementationIdeas = (
   }
 
   return merged.slice(0, 4);
+};
+
+/** Gera até 4 propostas a partir dos cases do site (com 1 case, varia os templates). */
+export const buildIdeasFromSolutionCases = (
+  cases: LeadSolutionCase[] | undefined,
+  companyName: string,
+): LeadImplementationIdea[] => {
+  const valid = (cases ?? []).filter(
+    (item) => item.title.length >= 8 && !item.title.includes("!["),
+  );
+  if (!valid.length) return [];
+
+  const templates = [
+    (item: LeadSolutionCase): LeadImplementationIdea => ({
+      category: "Automação com IA",
+      title: `Operação automatizada: ${shortCaseLabel(item.title)}`,
+      description: `Para a ${companyName}, fluxos com IA para acelerar a frente "${item.title}" — triagem de demandas, aprovações e handoff entre equipes sem retrabalho.`,
+      metric: "Menos tempo operacional por entrega",
+    }),
+    (item: LeadSolutionCase): LeadImplementationIdea => ({
+      category: "MicroSaaS",
+      title: `Painel de gestão: ${shortCaseLabel(item.title)}`,
+      description: `Produto digital para a ${companyName} acompanhar status, prazos e indicadores da linha "${item.title}" com visão única para o time e clientes.`,
+      metric: "Controle e previsibilidade da operação",
+    }),
+    (item: LeadSolutionCase): LeadImplementationIdea => ({
+      category: "IA generativa",
+      title: `Produção assistida: ${shortCaseLabel(item.title)}`,
+      description: `IA para a ${companyName} acelerar entregas e variações ligadas a "${item.title}", mantendo consistência e qualidade.`,
+      metric: "Mais volume sem aumentar headcount",
+    }),
+    (item: LeadSolutionCase): LeadImplementationIdea => ({
+      category: "Software sob medida",
+      title: `Hub dedicado: ${shortCaseLabel(item.title)}`,
+      description: `Repositório e workflow sob medida para a ${companyName} organizar assets, versões e entregas ligadas a "${item.title}".`,
+      metric: "Menos fricção entre equipes e clientes",
+    }),
+  ];
+
+  const ideas: LeadImplementationIdea[] = [];
+  for (let i = 0; i < 4; i++) {
+    ideas.push(templates[i](valid[i % valid.length]));
+  }
+
+  return ideas;
+};
+
+export const resolveImplementationIdeas = (input: {
+  implementationIdeas?: LeadImplementationIdea[];
+  solutionCases?: LeadSolutionCase[];
+  segmentSlug?: string;
+  companyName: string;
+  primaryGoal?: string;
+}): LeadImplementationIdea[] => {
+  const { companyName, segmentSlug, primaryGoal, solutionCases } = input;
+
+  if (input.implementationIdeas?.length) {
+    return mergeImplementationIdeas(
+      input.implementationIdeas,
+      segmentSlug,
+      companyName,
+      3,
+      primaryGoal,
+    );
+  }
+
+  const fromCases = buildIdeasFromSolutionCases(solutionCases, companyName);
+  if (fromCases.length) {
+    return mergeImplementationIdeas(fromCases, segmentSlug, companyName, 3, primaryGoal);
+  }
+
+  return getSegmentImplementationIdeas(
+    inferSegmentForIdeas(segmentSlug, companyName, primaryGoal),
+    companyName,
+  );
 };
