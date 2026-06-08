@@ -1,4 +1,4 @@
-import { countValidSolutionCases } from "./leadSegmentSolutions.js";
+import { countValidSolutionCases } from "./leadSegmentSolutions";
 
 export type ImplementationIdeasPromptContext = {
   companyName: string;

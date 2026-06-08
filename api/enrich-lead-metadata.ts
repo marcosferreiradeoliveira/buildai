@@ -1,24 +1,40 @@
-import { enrichLeadMetadataServer, type LeadMetadataInput } from "./lib/leadMetadataServer.js";
-import { jsonResponse, optionsResponse, parseJsonBody } from "./lib/apiResponse.js";
+import { enrichLeadMetadataServer, type LeadMetadataInput } from "./lib/leadMetadataServer";
+import { handleOptions, parseBody } from "./lib/apiResponse";
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method === "OPTIONS") return optionsResponse();
+type ApiRequest = {
+  method?: string;
+  body?: string | LeadMetadataInput;
+};
 
-  if (request.method !== "POST") {
-    return jsonResponse({ error: "Method not allowed" }, 405);
+type ApiResponse = {
+  status: (code: number) => ApiResponse;
+  json: (body: unknown) => void;
+  setHeader?: (key: string, value: string) => void;
+  end?: (body?: string) => void;
+};
+
+export default async function handler(req: ApiRequest, res: ApiResponse) {
+  if (req.method === "OPTIONS") {
+    handleOptions(res);
+    return;
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const body = await parseJsonBody<LeadMetadataInput>(request);
+    const body = parseBody<LeadMetadataInput>(req);
     const result = await enrichLeadMetadataServer(body);
 
     if (!result.ok) {
-      return jsonResponse({ error: `Enriquecimento indisponível (${result.reason}).` }, 503);
+      return res.status(503).json({ error: `Enriquecimento indisponível (${result.reason}).` });
     }
 
-    return jsonResponse(result.data);
+    return res.status(200).json(result.data);
   } catch (error) {
+    console.error("enrich-lead-metadata:", error);
     const message = error instanceof Error ? error.message : "Falha ao enriquecer metadados.";
-    return jsonResponse({ error: message }, 500);
+    return res.status(500).json({ error: message });
   }
 }

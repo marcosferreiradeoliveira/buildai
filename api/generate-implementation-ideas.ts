@@ -2,21 +2,36 @@ import {
   fetchSiteHtml,
   generateImplementationIdeasServer,
   type ImplementationIdeasContext,
-} from "./lib/implementationIdeasServer.js";
-import { jsonResponse, optionsResponse, parseJsonBody } from "./lib/apiResponse.js";
+} from "./lib/implementationIdeasServer";
+import { handleOptions, parseBody } from "./lib/apiResponse";
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method === "OPTIONS") return optionsResponse();
+type ApiRequest = {
+  method?: string;
+  body?: string | ImplementationIdeasContext;
+};
 
-  if (request.method !== "POST") {
-    return jsonResponse({ error: "Method not allowed" }, 405);
+type ApiResponse = {
+  status: (code: number) => ApiResponse;
+  json: (body: unknown) => void;
+  setHeader?: (key: string, value: string) => void;
+  end?: (body?: string) => void;
+};
+
+export default async function handler(req: ApiRequest, res: ApiResponse) {
+  if (req.method === "OPTIONS") {
+    handleOptions(res);
+    return;
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const body = await parseJsonBody<ImplementationIdeasContext>(request);
+    const body = parseBody<ImplementationIdeasContext>(req);
 
     if (!body.companyName?.trim()) {
-      return jsonResponse({ error: "Informe companyName." }, 400);
+      return res.status(400).json({ error: "Informe companyName." });
     }
 
     let pageText = body.pageText;
@@ -32,28 +47,22 @@ export default async function handler(request: Request): Promise<Response> {
 
     if (!result.ok) {
       if (result.reason === "no_api_key") {
-        return jsonResponse(
-          {
-            error:
-              "OPENAI_API_KEY não encontrada no servidor. Adicione em Vercel → Environment Variables (Production) e faça redeploy.",
-          },
-          503,
-        );
+        return res.status(503).json({
+          error:
+            "OPENAI_API_KEY não encontrada no servidor. Adicione em Vercel → Environment Variables (Production) e faça redeploy.",
+        });
       }
 
-      return jsonResponse(
-        {
-          error: `Não foi possível gerar propostas (${result.reason}).${result.detail ? ` ${result.detail}` : ""}`,
-          implementationIdeas: [],
-        },
-        503,
-      );
+      return res.status(503).json({
+        error: `Não foi possível gerar propostas (${result.reason}).${result.detail ? ` ${result.detail}` : ""}`,
+        implementationIdeas: [],
+      });
     }
 
-    return jsonResponse({ implementationIdeas: result.ideas });
+    return res.status(200).json({ implementationIdeas: result.ideas });
   } catch (error) {
     console.error("generate-implementation-ideas:", error);
     const message = error instanceof Error ? error.message : "Falha ao gerar propostas.";
-    return jsonResponse({ error: message }, 500);
+    return res.status(500).json({ error: message });
   }
 }

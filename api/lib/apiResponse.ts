@@ -1,17 +1,25 @@
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+type ApiResponse = {
+  status: (code: number) => ApiResponse;
+  json: (body: unknown) => void;
+  setHeader?: (key: string, value: string) => void;
+  end?: (body?: string) => void;
 };
 
-export const jsonResponse = (body: unknown, status = 200): Response =>
-  Response.json(body, { status, headers: corsHeaders });
+export const setCorsHeaders = (res: ApiResponse) => {
+  res.setHeader?.("Access-Control-Allow-Origin", "*");
+  res.setHeader?.("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader?.("Access-Control-Allow-Headers", "Content-Type");
+};
 
-export const optionsResponse = (): Response =>
-  new Response(null, { status: 204, headers: corsHeaders });
+export const handleOptions = (res: ApiResponse) => {
+  setCorsHeaders(res);
+  res.status(204);
+  res.end?.("");
+};
 
-export const parseJsonBody = async <T>(request: Request): Promise<T> => {
-  const text = await request.text();
-  if (!text.trim()) return {} as T;
-  return JSON.parse(text) as T;
+export const parseBody = <T>(req: { body?: string | T }): T => {
+  if (typeof req.body === "string") {
+    return req.body ? (JSON.parse(req.body) as T) : ({} as T);
+  }
+  return (req.body ?? {}) as T;
 };

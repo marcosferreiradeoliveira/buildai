@@ -1,15 +1,30 @@
-import { deleteLeadPageServer } from "./lib/deleteLeadPageServer.js";
-import { jsonResponse, optionsResponse, parseJsonBody } from "./lib/apiResponse.js";
+import { deleteLeadPageServer } from "./lib/deleteLeadPageServer";
+import { handleOptions, parseBody } from "./lib/apiResponse";
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method === "OPTIONS") return optionsResponse();
+type ApiRequest = {
+  method?: string;
+  body?: string | { slug?: string; id?: string };
+};
 
-  if (request.method !== "POST") {
-    return jsonResponse({ error: "Method not allowed" }, 405);
+type ApiResponse = {
+  status: (code: number) => ApiResponse;
+  json: (body: unknown) => void;
+  setHeader?: (key: string, value: string) => void;
+  end?: (body?: string) => void;
+};
+
+export default async function handler(req: ApiRequest, res: ApiResponse) {
+  if (req.method === "OPTIONS") {
+    handleOptions(res);
+    return;
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const body = await parseJsonBody<{ slug?: string; id?: string }>(request);
+    const body = parseBody<{ slug?: string; id?: string }>(req);
 
     const result = await deleteLeadPageServer({
       slug: typeof body.slug === "string" ? body.slug : undefined,
@@ -17,23 +32,20 @@ export default async function handler(request: Request): Promise<Response> {
     });
 
     if (!result.ok && result.reason === "no_service_role") {
-      return jsonResponse(
-        {
-          error:
-            "Configure SUPABASE_SERVICE_ROLE_KEY nas variáveis da Vercel (Settings → Environment Variables).",
-        },
-        503,
-      );
+      return res.status(503).json({
+        error:
+          "Configure SUPABASE_SERVICE_ROLE_KEY nas variáveis da Vercel (Settings → Environment Variables).",
+      });
     }
 
     if (!result.ok) {
-      return jsonResponse({ error: "Lead não encontrado no banco." }, 404);
+      return res.status(404).json({ error: "Lead não encontrado no banco." });
     }
 
-    return jsonResponse({ deleted: true, ids: result.deletedIds });
+    return res.status(200).json({ deleted: true, ids: result.deletedIds });
   } catch (error) {
     console.error("delete-lead-page:", error);
     const message = error instanceof Error ? error.message : "Falha ao apagar lead.";
-    return jsonResponse({ error: message }, 500);
+    return res.status(500).json({ error: message });
   }
 }
