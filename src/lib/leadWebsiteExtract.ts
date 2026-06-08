@@ -49,7 +49,22 @@ const INVALID_CITY_WORDS = new Set([
   "primeiro",
   "momento",
   "prazo",
+  "todas",
+  "etapas",
+  "jornada",
+  "acesso",
+  "oferecemos",
 ]);
+
+export const isInvalidCity = (city: string | undefined): boolean => {
+  if (!city?.trim()) return true;
+  const normalized = city.trim().toLowerCase();
+  if (normalized.length < 4 || normalized.length > 40) return true;
+  const first = normalized.split(/\s+/)[0];
+  if (first && INVALID_CITY_WORDS.has(first)) return true;
+  if (/todas|etapas|jornada|oferecemos/i.test(normalized)) return true;
+  return false;
+};
 
 const SEGMENT_KEYWORDS: Record<string, string[]> = {
   educacao: ["educação", "educacao", "escola", "universidade", "ensino", "matrícula", "matricula", "pedagógico"],
@@ -234,9 +249,7 @@ const inferCity = (text: string): string | undefined => {
     const city = match[1]?.trim();
     if (!city) continue;
 
-    const firstWord = city.split(/\s+/)[0]?.toLowerCase();
-    if (firstWord && INVALID_CITY_WORDS.has(firstWord)) continue;
-    if (city.length < 4 || city.length > 40) continue;
+    if (isInvalidCity(city)) continue;
 
     return city;
   }
@@ -560,7 +573,10 @@ export const parseLeadFromWebsiteHtml = (html: string, websiteUrl: string): Lead
   return {
     websiteUrl,
     companyName,
-    city: inferCity(combinedText),
+    city: (() => {
+      const city = inferCity(combinedText);
+      return city && !isInvalidCity(city) ? city : undefined;
+    })(),
     primaryGoal,
     segmentSlug: inferSegmentSlug(combinedText),
     solutionCases,
@@ -780,47 +796,6 @@ export const extractLeadFromWebsite = async (
       };
     } catch {
       // ignora páginas de cases inacessíveis
-    }
-  }
-
-  if (typeof process !== "undefined" && process.env.OPENAI_API_KEY?.trim()) {
-    try {
-      const { enrichLeadExtractWithAi } = await import("./leadWebsiteExtractAi");
-      const { enrichExtractWithImplementationIdeas } = await import("./leadImplementationIdeasAi");
-
-      result = await enrichLeadExtractWithAi({
-        websiteUrl,
-        pageText: mainHtml,
-        fallback: result,
-      });
-      result = await enrichExtractWithImplementationIdeas(result, mainHtml);
-
-      if (isInvalidCompanyName(result.companyName) || !result.primaryGoal?.includes(".")) {
-        const { enrichLeadMetadataServer } = await import("../../api/lib/leadMetadataServer");
-        const meta = await enrichLeadMetadataServer({
-          websiteUrl,
-          scrapedCompanyName: result.companyName,
-          scrapedPrimaryGoal: result.primaryGoal,
-          scrapedTitle: result.rawTitle,
-          scrapedDescription: result.rawDescription,
-          pageText: mainHtml,
-        });
-        if (meta.ok) {
-          result = {
-            ...result,
-            companyName:
-              meta.data.companyName && !isInvalidCompanyName(meta.data.companyName)
-                ? meta.data.companyName
-                : result.companyName,
-            primaryGoal: meta.data.primaryGoal
-              ? summarizePrimaryGoal(meta.data.primaryGoal, 220)
-              : result.primaryGoal,
-            segmentSlug: meta.data.segmentSlug ?? result.segmentSlug,
-          };
-        }
-      }
-    } catch (error) {
-      console.error("Lead extract AI enrichment skipped:", error);
     }
   }
 

@@ -11,6 +11,7 @@ export type LeadMetadataResult = {
   companyName?: string;
   primaryGoal?: string;
   segmentSlug?: string;
+  city?: string | null;
 };
 
 const ALLOWED_SEGMENTS = [
@@ -32,12 +33,13 @@ const stripHtml = (html: string): string =>
     .trim();
 
 const SYSTEM_PROMPT = `Você identifica dados de empresas a partir de sites para landing pages B2B.
-Responda APENAS JSON: { "companyName", "primaryGoal", "segmentSlug" }
+Responda APENAS JSON: { "companyName", "primaryGoal", "segmentSlug", "city" }
 
 Regras:
 - companyName: nome REAL da empresa/instituição (marca), NÃO título de seção ("Home", "Menu", "Contato", "Quem somos").
 - primaryGoal: 1 ou 2 frases COMPLETAS resumindo missão, oferta principal ou proposta de valor. Não copie trecho cortado; sintetize.
 - segmentSlug: um de ${ALLOWED_SEGMENTS.join("|")}
+- city: cidade sede só se explícita (ex: São Paulo). Senão null. NUNCA "todas as", "etapas" ou trecho de frase.
 - Use URL, título, meta e conteúdo do site. Se o nome extraído for "Home" ou genérico, infira o nome correto do conteúdo.`;
 
 export const enrichLeadMetadataServer = async (

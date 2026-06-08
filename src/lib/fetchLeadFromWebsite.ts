@@ -1,6 +1,7 @@
 import {
   extractLeadFromWebsite,
   fetchWebsiteHtmlForBrowser,
+  isInvalidCity,
   isInvalidCompanyName,
   summarizePrimaryGoal,
   type LeadWebsiteExtract,
@@ -54,9 +55,10 @@ const fetchViaServerApi = async (
 
 const needsMetadataEnrichment = (extract: LeadWebsiteExtract): boolean =>
   isInvalidCompanyName(extract.companyName) ||
+  isInvalidCity(extract.city) ||
   !extract.primaryGoal?.trim() ||
   extract.primaryGoal.endsWith("…") ||
-  extract.primaryGoal.includes("todas as…");
+  !extract.primaryGoal.includes(".");
 
 const enrichMetadataFromApi = async (
   extract: LeadWebsiteExtract,
@@ -80,6 +82,7 @@ const enrichMetadataFromApi = async (
       companyName?: string;
       primaryGoal?: string;
       segmentSlug?: string;
+      city?: string | null;
       error?: string;
     };
 
@@ -98,6 +101,8 @@ const enrichMetadataFromApi = async (
           ? summarizePrimaryGoal(payload.primaryGoal, 220)
           : extract.primaryGoal,
         segmentSlug: payload.segmentSlug ?? extract.segmentSlug,
+        city:
+          payload.city && !isInvalidCity(payload.city) ? payload.city : extract.city,
       },
     };
   } catch (error) {

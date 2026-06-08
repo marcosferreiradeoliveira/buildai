@@ -1,5 +1,6 @@
 import {
   filterValidCases,
+  isInvalidCity,
   isInvalidCompanyName,
   summarizePrimaryGoal,
   type LeadImplementationIdea,
@@ -167,7 +168,8 @@ const normalizeAiPayload = (payload: AiLeadPayload, fallback: LeadWebsiteExtract
   return {
     ...fallback,
     companyName,
-    city: payload.city?.trim() || fallback.city,
+    city:
+      payload.city?.trim() && !isInvalidCity(payload.city) ? payload.city.trim() : fallback.city,
     primaryGoal,
     segmentSlug,
     solutionCases: solutionCases.length ? solutionCases : fallback.solutionCases,

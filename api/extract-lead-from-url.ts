@@ -1,4 +1,5 @@
-import { extractLeadFromWebsite, normalizeWebsiteUrl } from "../src/lib/leadWebsiteExtract";
+import { runExtractLeadPipeline } from "./lib/extractLeadPipeline";
+import { normalizeWebsiteUrl } from "../src/lib/leadWebsiteExtract";
 
 type ApiRequest = {
   method?: string;
@@ -34,7 +35,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const url = typeof body.url === "string" ? body.url : "";
 
     normalizeWebsiteUrl(url);
-    const data = await extractLeadFromWebsite(url);
+    const data = await runExtractLeadPipeline(url);
     return res.status(200).json(data);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Falha ao extrair dados do site.";

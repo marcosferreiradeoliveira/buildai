@@ -7,7 +7,8 @@ import {
   generateImplementationIdeasServer,
   type ImplementationIdeasContext,
 } from "./api/lib/implementationIdeasServer";
-import { extractLeadFromWebsite, normalizeWebsiteUrl } from "./src/lib/leadWebsiteExtract";
+import { runExtractLeadPipeline } from "./api/lib/extractLeadPipeline";
+import { normalizeWebsiteUrl } from "./src/lib/leadWebsiteExtract";
 
 const readJsonBody = <T extends Record<string, unknown>>(req: IncomingMessage): Promise<T> =>
   new Promise((resolve, reject) => {
@@ -187,7 +188,7 @@ export const extractLeadApiPlugin = (): Plugin => ({
         const body = await readJsonBody<{ url?: string }>(req);
         const url = typeof body.url === "string" ? body.url : "";
         normalizeWebsiteUrl(url);
-        const data = await extractLeadFromWebsite(url);
+        const data = await runExtractLeadPipeline(url);
         sendJson(res, 200, data);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Falha ao extrair dados do site.";
