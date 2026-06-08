@@ -1,46 +1,24 @@
-import { enrichLeadMetadataServer, type LeadMetadataInput } from "./lib/leadMetadataServer";
+import { enrichLeadMetadataServer, type LeadMetadataInput } from "./lib/leadMetadataServer.js";
+import { jsonResponse, optionsResponse, parseJsonBody } from "./lib/apiResponse.js";
 
-type ApiRequest = {
-  method?: string;
-  body?: string | LeadMetadataInput;
-};
+export default async function handler(request: Request): Promise<Response> {
+  if (request.method === "OPTIONS") return optionsResponse();
 
-type ApiResponse = {
-  status: (code: number) => ApiResponse;
-  json: (body: unknown) => void;
-  setHeader?: (key: string, value: string) => void;
-  end?: (body?: string) => void;
-};
-
-export default async function handler(req: ApiRequest, res: ApiResponse) {
-  if (req.method === "OPTIONS") {
-    res.status?.(204);
-    res.setHeader?.("Access-Control-Allow-Origin", "*");
-    res.setHeader?.("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader?.("Access-Control-Allow-Headers", "Content-Type");
-    res.end?.("");
-    return;
-  }
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  if (request.method !== "POST") {
+    return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
   try {
-    const body =
-      typeof req.body === "string"
-        ? (JSON.parse(req.body) as LeadMetadataInput)
-        : ((req.body ?? {}) as LeadMetadataInput);
-
+    const body = await parseJsonBody<LeadMetadataInput>(request);
     const result = await enrichLeadMetadataServer(body);
 
     if (!result.ok) {
-      return res.status(503).json({ error: `Enriquecimento indisponível (${result.reason}).` });
+      return jsonResponse({ error: `Enriquecimento indisponível (${result.reason}).` }, 503);
     }
 
-    return res.status(200).json(result.data);
+    return jsonResponse(result.data);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Falha ao enriquecer metadados.";
-    return res.status(500).json({ error: message });
+    return jsonResponse({ error: message }, 500);
   }
 }

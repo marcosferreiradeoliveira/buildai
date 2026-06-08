@@ -78,13 +78,25 @@ const enrichMetadataFromApi = async (
       }),
     });
 
-    const payload = (await response.json()) as {
+    const raw = await response.text();
+    let payload: {
       companyName?: string;
       primaryGoal?: string;
       segmentSlug?: string;
       city?: string | null;
       error?: string;
-    };
+    } = {};
+
+    if (raw) {
+      try {
+        payload = JSON.parse(raw) as typeof payload;
+      } catch {
+        return {
+          data: extract,
+          warning: `Enriquecimento de metadados indisponível: ${raw.replace(/\s+/g, " ").trim().slice(0, 180)}`,
+        };
+      }
+    }
 
     if (!response.ok) {
       return { data: extract, warning: payload.error };

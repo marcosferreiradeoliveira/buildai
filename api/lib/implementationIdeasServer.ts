@@ -1,8 +1,8 @@
 import {
   buildImplementationIdeasSystemPrompt,
   buildImplementationIdeasUserPrompt,
-} from "../../src/lib/leadImplementationIdeasPrompt";
-import { mergeImplementationIdeas } from "../../src/lib/leadSegmentSolutions";
+} from "./leadImplementationIdeasPrompt.js";
+import { mergeImplementationIdeas } from "./leadSegmentSolutions.js";
 
 export type ImplementationIdea = {
   title: string;

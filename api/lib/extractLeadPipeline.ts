@@ -6,11 +6,11 @@ import {
   normalizeWebsiteUrl,
   summarizePrimaryGoal,
   type LeadWebsiteExtract,
-} from "../../src/lib/leadWebsiteExtract";
-import { enrichLeadExtractWithAi } from "../../src/lib/leadWebsiteExtractAi";
-import { mergeImplementationIdeas } from "../../src/lib/leadSegmentSolutions";
-import { generateImplementationIdeasServer } from "./implementationIdeasServer";
-import { enrichLeadMetadataServer } from "./leadMetadataServer";
+} from "../../src/lib/leadWebsiteExtract.js";
+import { enrichLeadExtractWithAi } from "../../src/lib/leadWebsiteExtractAi.js";
+import { mergeImplementationIdeas } from "./leadSegmentSolutions.js";
+import { generateImplementationIdeasServer } from "./implementationIdeasServer.js";
+import { enrichLeadMetadataServer } from "./leadMetadataServer.js";
 
 const ensureImplementationIdeas = (result: LeadWebsiteExtract): LeadWebsiteExtract => {
   const ideas = mergeImplementationIdeas(
