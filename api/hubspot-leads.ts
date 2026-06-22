@@ -1,5 +1,5 @@
-import { fetchHubspotLeads } from "./lib/hubspotServer";
-import { handleOptions } from "./lib/apiResponse";
+import { fetchHubspotLeads } from "../server/lib/hubspotServer";
+import { handleOptions } from "../server/lib/apiResponse";
 
 type ApiRequest = {
   method?: string;

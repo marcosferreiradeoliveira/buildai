@@ -1,6 +1,6 @@
-import { runExtractLeadPipeline } from "./lib/extractLeadPipeline";
+import { runExtractLeadPipeline } from "../server/lib/extractLeadPipeline";
 import { normalizeWebsiteUrl } from "../src/lib/leadWebsiteExtract";
-import { handleOptions, parseBody } from "./lib/apiResponse";
+import { handleOptions, parseBody } from "../server/lib/apiResponse";
 
 type ApiRequest = {
   method?: string;

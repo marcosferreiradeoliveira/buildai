@@ -2,34 +2,43 @@
   "functions": {
     "api/extract-lead-from-url.ts": {
       "maxDuration": 60,
-      "includeFiles": "src/lib/**"
+      "includeFiles": "src/lib/**,server/lib/**"
     },
     "api/generate-implementation-ideas.ts": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "includeFiles": "server/lib/**"
     },
     "api/enrich-lead-metadata.ts": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "includeFiles": "server/lib/**"
     },
     "api/delete-lead-page.ts": {
-      "maxDuration": 15
+      "maxDuration": 15,
+      "includeFiles": "server/lib/**"
     },
     "api/hubspot-leads.ts": {
-      "maxDuration": 15
+      "maxDuration": 15,
+      "includeFiles": "server/lib/**"
     },
     "api/gmail-oauth-start.ts": {
-      "maxDuration": 15
+      "maxDuration": 15,
+      "includeFiles": "server/lib/**"
     },
     "api/gmail-oauth-callback.ts": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "includeFiles": "server/lib/**"
     },
     "api/gmail-status.ts": {
-      "maxDuration": 15
+      "maxDuration": 15,
+      "includeFiles": "server/lib/**"
     },
     "api/gmail-draft.ts": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "includeFiles": "server/lib/**"
     },
     "api/gmail-send.ts": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "includeFiles": "server/lib/**"
     }
   },
   "rewrites": [

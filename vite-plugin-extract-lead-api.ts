@@ -1,13 +1,13 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Plugin } from "vite";
 import { loadEnv } from "vite";
-import { deleteLeadPageServer } from "./api/lib/deleteLeadPageServer";
-import { enrichLeadMetadataServer } from "./api/lib/leadMetadataServer";
+import { deleteLeadPageServer } from "./server/lib/deleteLeadPageServer";
+import { enrichLeadMetadataServer } from "./server/lib/leadMetadataServer";
 import {
   generateImplementationIdeasServer,
   type ImplementationIdeasContext,
-} from "./api/lib/implementationIdeasServer";
-import { runExtractLeadPipeline } from "./api/lib/extractLeadPipeline";
+} from "./server/lib/implementationIdeasServer";
+import { runExtractLeadPipeline } from "./server/lib/extractLeadPipeline";
 import { normalizeWebsiteUrl } from "./src/lib/leadWebsiteExtract";
 
 const readJsonBody = <T extends Record<string, unknown>>(req: IncomingMessage): Promise<T> =>
@@ -114,7 +114,7 @@ export const extractLeadApiPlugin = (): Plugin => ({
       }
 
       try {
-        const { fetchHubspotLeads } = await import("./api/lib/hubspotServer");
+        const { fetchHubspotLeads } = await import("./server/lib/hubspotServer");
         const result = await fetchHubspotLeads();
 
         if (!result.ok) {

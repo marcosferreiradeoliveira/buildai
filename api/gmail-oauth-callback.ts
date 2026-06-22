@@ -1,9 +1,9 @@
-import { exchangeOAuthCode, getGmailOAuthConfig } from "./lib/gmailServer";
+import { exchangeOAuthCode, getGmailOAuthConfig } from "../server/lib/gmailServer";
 import {
   clearOAuthStateCookie,
   parseCookieHeader,
   GMAIL_OAUTH_STATE_COOKIE,
-} from "./lib/gmailCookies";
+} from "../server/lib/gmailCookies";
 
 type ApiRequest = {
   method?: string;

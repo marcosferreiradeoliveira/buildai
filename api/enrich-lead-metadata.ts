@@ -1,5 +1,5 @@
-import { enrichLeadMetadataServer, type LeadMetadataInput } from "./lib/leadMetadataServer";
-import { handleOptions, parseBody } from "./lib/apiResponse";
+import { enrichLeadMetadataServer, type LeadMetadataInput } from "../server/lib/leadMetadataServer";
+import { handleOptions, parseBody } from "../server/lib/apiResponse";
 
 type ApiRequest = {
   method?: string;

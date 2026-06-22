@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
-import { buildGmailAuthUrl, getGmailOAuthConfig } from "./lib/gmailServer";
-import { buildOAuthStateCookie } from "./lib/gmailCookies";
+import { buildGmailAuthUrl, getGmailOAuthConfig } from "../server/lib/gmailServer";
+import { buildOAuthStateCookie } from "../server/lib/gmailCookies";
 
 type ApiRequest = {
   method?: string;

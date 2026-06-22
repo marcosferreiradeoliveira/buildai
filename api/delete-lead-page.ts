@@ -1,5 +1,5 @@
-import { deleteLeadPageServer } from "./lib/deleteLeadPageServer";
-import { handleOptions, parseBody } from "./lib/apiResponse";
+import { deleteLeadPageServer } from "../server/lib/deleteLeadPageServer";
+import { handleOptions, parseBody } from "../server/lib/apiResponse";
 
 type ApiRequest = {
   method?: string;

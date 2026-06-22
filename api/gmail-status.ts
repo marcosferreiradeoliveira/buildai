@@ -1,6 +1,6 @@
-import { getGmailOAuthConfig, resolveGmailAccessToken } from "./lib/gmailServer";
-import { clearGmailSessionCookies, readGmailCookies } from "./lib/gmailCookies";
-import { handleOptions, parseBody } from "./lib/apiResponse";
+import { getGmailOAuthConfig, resolveGmailAccessToken } from "../server/lib/gmailServer";
+import { clearGmailSessionCookies, readGmailCookies } from "../server/lib/gmailCookies";
+import { handleOptions, parseBody } from "../server/lib/apiResponse";
 
 type ApiRequest = {
   method?: string;

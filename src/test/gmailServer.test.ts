@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRawEmail } from "../../api/lib/gmailServer";
+import { buildRawEmail } from "../../server/lib/gmailServer";
 
 describe("gmailServer", () => {
   it("builds base64url raw email with utf-8 subject", () => {

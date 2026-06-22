@@ -2,8 +2,8 @@ import {
   fetchSiteHtml,
   generateImplementationIdeasServer,
   type ImplementationIdeasContext,
-} from "./lib/implementationIdeasServer";
-import { handleOptions, parseBody } from "./lib/apiResponse";
+} from "../server/lib/implementationIdeasServer";
+import { handleOptions, parseBody } from "../server/lib/apiResponse";
 
 type ApiRequest = {
   method?: string;

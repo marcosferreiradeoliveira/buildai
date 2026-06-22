@@ -1,5 +1,5 @@
-import { createGmailDraft, resolveGmailAccessToken } from "./lib/gmailServer";
-import { handleOptions, parseBody } from "./lib/apiResponse";
+import { createGmailDraft, resolveGmailAccessToken } from "../server/lib/gmailServer";
+import { handleOptions, parseBody } from "../server/lib/apiResponse";
 
 type ApiRequest = {
   method?: string;
