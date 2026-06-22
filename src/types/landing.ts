@@ -41,6 +41,24 @@ export type ContactSocial = {
   href: string;
 };
 
+export type CourseBlock = {
+  eyebrow: string;
+  title: string;
+  highlightedText: string;
+  description: string;
+  metric?: string;
+  previewImageSrc?: string;
+  backgroundImageSrc?: string;
+  instructorName?: string;
+  pricing: {
+    originalPrice?: string;
+    installments: string;
+    total: string;
+  };
+  ctaLabel: string;
+  ctaHref: string;
+};
+
 export type LandingContent = {
   /** Nome da empresa-alvo em landings personalizadas (/lp). A marca exibida continua sendo BuildAI. */
   prospectCompanyName?: string;
@@ -100,6 +118,8 @@ export type LandingContent = {
     description?: string;
     items: ProjectItem[];
   };
+  /** Módulo promocional do CursoIA — exibido na landing principal. */
+  course?: CourseBlock;
   contact: {
     eyebrow: string;
     title: string;

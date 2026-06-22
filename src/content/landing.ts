@@ -2,6 +2,7 @@ import { LandingContent } from "@/types/landing";
 import educationHeroImage from "@/assets/Gemini_Generated_Image_re9l7qre9l7qre9l Small.png";
 import educationCasesImage from "@/assets/Gemini_Generated_Image_jgkljmjgkljmjgkl Small.png";
 import previewImage from "@/assets/preview.jpeg";
+import courseOgImage from "@/assets/watermarked_img_2560458068198262558.jpg";
 import igScoutCaseImage from "@/assets/case1.jpeg";
 import culturaFluxoCaseImage from "@/assets/fluxo.jpeg";
 import appAmanhaCaseImage from "@/assets/MuseuDoAmanha-300x277-DqxW2IJM.png";
@@ -13,13 +14,14 @@ import greenSkyCaseImage from "@/assets/greensky Large.jpeg";
 import grioAiCaseImage from "@/assets/GrioAI Large.jpeg";
 import newsGenCaseImage from "@/assets/Newsgen Large.jpeg";
 import growthOsCaseImage from "@/assets/GrowOS Large.jpeg";
+import { courseLandingContent } from "@/content/course";
 
 export const baseLandingContent: LandingContent = {
   seo: {
     title: "BuildAI | MicroSaaS e IA para Negócios",
     description:
       "A BuildAI cria MicroSaaS, automações com IA e softwares sob medida para acelerar crescimento e eficiência operacional.",
-    previewImageSrc: previewImage,
+    previewImageSrc: courseOgImage,
     faviconHref: educationCasesImage,
   },
   navbar: {
@@ -29,6 +31,7 @@ export const baseLandingContent: LandingContent = {
       { label: "Processo", href: "#build-in-public" },
       { label: "Tecnologias", href: "#tech-stack" },
       { label: "Portfólio", href: "#portfolio" },
+      { label: "Curso IA", href: "#curso-ia" },
       { label: "Contato", href: "#contato" },
     ],
     ctaLabel: "Agendar Consultoria",
@@ -203,6 +206,7 @@ export const baseLandingContent: LandingContent = {
       },
     ],
   },
+  course: courseLandingContent,
   contact: {
     eyebrow: "Contato",
     title: "Pronto para",

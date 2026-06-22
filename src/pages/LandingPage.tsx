@@ -4,6 +4,7 @@ import ServicesSection from "@/components/ServicesSection";
 import BuildInPublicSection from "@/components/BuildInPublicSection";
 import TechStackSection from "@/components/TechStackSection";
 import PortfolioSection from "@/components/PortfolioSection";
+import CourseSection from "@/components/CourseSection";
 import FooterSection from "@/components/FooterSection";
 import SeoHead from "@/components/SeoHead";
 import { LandingContent } from "@/types/landing";
@@ -36,6 +37,7 @@ const LandingPage = ({ content }: LandingPageProps) => {
         <PortfolioSection sectionId="implementacoes" content={content.implementationIdeas} />
       ) : null}
       <PortfolioSection content={content.portfolio} />
+      {content.course ? <CourseSection content={content.course} /> : null}
       <ServicesSection content={content.services} />
       <BuildInPublicSection content={content.process} />
       <TechStackSection content={content.techStack} />
