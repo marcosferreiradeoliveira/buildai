@@ -12,6 +12,24 @@
     },
     "api/delete-lead-page.ts": {
       "maxDuration": 15
+    },
+    "api/hubspot-leads.ts": {
+      "maxDuration": 15
+    },
+    "api/gmail-oauth-start.ts": {
+      "maxDuration": 15
+    },
+    "api/gmail-oauth-callback.ts": {
+      "maxDuration": 30
+    },
+    "api/gmail-status.ts": {
+      "maxDuration": 15
+    },
+    "api/gmail-draft.ts": {
+      "maxDuration": 30
+    },
+    "api/gmail-send.ts": {
+      "maxDuration": 30
     }
   },
   "rewrites": [

@@ -6,6 +6,13 @@ import igScoutCaseImage from "@/assets/case1.jpeg";
 import culturaFluxoCaseImage from "@/assets/fluxo.jpeg";
 import appAmanhaCaseImage from "@/assets/MuseuDoAmanha-300x277-DqxW2IJM.png";
 import contentFactoryCaseImage from "@/assets/Carrossel.png";
+import freelasSniperCaseImage from "@/assets/99sniper Large.jpeg";
+import automacaoCaseImage from "@/assets/automacao Large.jpeg";
+import fabuladorCaseImage from "@/assets/Fabulador Large.jpeg";
+import greenSkyCaseImage from "@/assets/greensky Large.jpeg";
+import grioAiCaseImage from "@/assets/GrioAI Large.jpeg";
+import newsGenCaseImage from "@/assets/Newsgen Large.jpeg";
+import growthOsCaseImage from "@/assets/GrowOS Large.jpeg";
 
 export const baseLandingContent: LandingContent = {
   seo: {
@@ -97,6 +104,70 @@ export const baseLandingContent: LandingContent = {
     title: "Resultados que",
     highlightedText: "falam por si",
     items: [
+      {
+        title: "Gerador de Artes PSD",
+        category: "Automação com IA",
+        metric: "Produção em lote de peças visuais a partir de template + planilha, sem retrabalho manual",
+        description:
+          "Aplicação web que transforma um layout fixo no Photoshop (PSD) em gerador em lote: camadas nomeadas, planilha Excel e pasta de imagens viram artes finais em PNG/PSD — catálogos, cards, banners, menus e qualquer layout repetitivo com um clique.",
+        imageSrc: previewImage,
+      },
+      {
+        title: "NewsGen AI",
+        category: "Content Factory",
+        metric: "Produção de vídeos informativos com menos etapas manuais — roteiro, voz e montagem em um só fluxo",
+        description:
+          "Plataforma web que transforma conteúdo em vídeo com IA: a partir de texto (notícias ou roteiro), gera narração e vídeo com apresentador virtual; também traduz vídeos gravados para outros idiomas mantendo áudio e imagem sincronizados. Login seguro, histórico de projetos e configuração das ferramentas de IA no browser.",
+        imageSrc: newsGenCaseImage,
+      },
+      {
+        title: "Green Sky",
+        category: "Software Sob Medida",
+        metric: "Reservas online com Stripe e fundo de impacto social — turismo de aventura com propósito no Rio",
+        description:
+          "Site institucional e comercial para operadora de parapente e asa delta (São Conrado e Niterói): catálogo de experiências, checkout Stripe ou fluxo consultivo via WhatsApp, contador público do fundo Propósito e i18n em 6 idiomas. React 19, Firebase, Cloud Functions e EmailJS.",
+        imageSrc: greenSkyCaseImage,
+      },
+      {
+        title: "GrowthOS",
+        category: "MicroSaaS",
+        metric: "Funil completo de marketing e produto em um só lugar — com relatório estratégico gerado por IA",
+        description:
+          "Dashboard web para Chief Growth Officer: visão executiva (receita, CAC, leads, ROAS), funil de produto e comparação de canais. Conecta Google Ads, Meta, Brevo, Snov.io, Mixpanel e GA4; o CGO AI Analyst gera relatórios estratégicos com Gemini a partir dos dados sincronizados.",
+        imageSrc: growthOsCaseImage,
+      },
+      {
+        title: "Conexão Ativa — Automação de Notícias",
+        category: "Automação com IA",
+        metric: "Do Telegram ao portal publicado em minutos — texto, áudio, SEO e redes sociais sem retrabalho manual",
+        description:
+          "Monitora um canal do Telegram e transforma mensagens de texto ou áudio em artigos otimizados para SEO: transcrição com OpenAI, redação estruturada com Claude, busca de imagem no Tavily e publicação automática no WordPress (RankMath), Facebook e Instagram — com repostagem condicional em portais secundários.",
+        imageSrc: automacaoCaseImage,
+      },
+      {
+        title: "99Freelas Sniper",
+        category: "Automação com IA",
+        metric: "Prospecção e lances no 99Freelas no piloto automático — com revisão humana antes do envio",
+        description:
+          "Painel local que varre projetos Web/Mobile/Software no 99Freelas, filtra por whitelist/blacklist, gera propostas com Gemini (texto, preço e prazo) e envia lances via Playwright. Dashboard para revisar, editar cada proposta e disparar a fila manualmente — envio automático desligado por padrão.",
+        imageSrc: freelasSniperCaseImage,
+      },
+      {
+        title: "Griô AI — Horizontes da Diáspora",
+        category: "Software Sob Medida",
+        metric: "Experiência educativa imersiva — hackear o passado para reconstruir memórias da diáspora africana",
+        description:
+          "RPG narrativo cooperativo com IA sobre Mohammed Gardo Baquaqua e as rotas da diáspora: investigue fases históricas, converse com NPCs da época e use documentos reais (Slave Voyages, jornais, biografias) como evidência. Três papéis — linguista, arquivista e estrategista — narrativa afrofuturista com Gemini e suporte a PT, EN e FR.",
+        imageSrc: grioAiCaseImage,
+      },
+      {
+        title: "Espelho Literário (Fabulador)",
+        category: "Software Sob Medida",
+        metric: "Atelier de escrita assistida por IA — do relato oral ao texto final na sua biblioteca pessoal",
+        description:
+          "Facilitador literário com IA para criar e lapidar relatos pessoais: sessão por voz ou texto com perguntas instigadoras, transcrição, mosaico poético com palavras-chave e imagens sugeridas. Olhar acolhedor do facilitador, estruturação do texto com Gemini e acervo completo — processo e versão final — na Minha Biblioteca.",
+        imageSrc: fabuladorCaseImage,
+      },
       {
         title: "IG-Scout AI",
         category: "Automação com IA",

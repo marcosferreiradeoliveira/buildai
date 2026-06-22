@@ -109,14 +109,97 @@ export const normalizeWebsiteUrl = (input: string): string => {
   return `https://${trimmed}`;
 };
 
-const decodeHtml = (value: string): string =>
+const HTML_NAMED_ENTITIES: Record<string, string> = {
+  nbsp: " ",
+  amp: "&",
+  quot: '"',
+  apos: "'",
+  lt: "<",
+  gt: ">",
+  aacute: "á",
+  Aacute: "Á",
+  acirc: "â",
+  Acirc: "Â",
+  agrave: "à",
+  Agrave: "À",
+  atilde: "ã",
+  Atilde: "Ã",
+  auml: "ä",
+  Auml: "Ä",
+  aring: "å",
+  Aring: "Å",
+  eacute: "é",
+  Eacute: "É",
+  ecirc: "ê",
+  Ecirc: "Ê",
+  egrave: "è",
+  Egrave: "È",
+  iacute: "í",
+  Iacute: "Í",
+  icirc: "î",
+  Icirc: "Î",
+  iuml: "ï",
+  Iuml: "Ï",
+  oacute: "ó",
+  Oacute: "Ó",
+  ocirc: "ô",
+  Ocirc: "Ô",
+  ograve: "ò",
+  Ograve: "Ò",
+  otilde: "õ",
+  Otilde: "Õ",
+  ouml: "ö",
+  Ouml: "Ö",
+  uacute: "ú",
+  Uacute: "Ú",
+  ucirc: "û",
+  Ucirc: "Û",
+  ugrave: "ù",
+  Ugrave: "Ù",
+  uuml: "ü",
+  Uuml: "Ü",
+  ccedil: "ç",
+  Ccedil: "Ç",
+  ntilde: "ñ",
+  Ntilde: "Ñ",
+  ordm: "º",
+  ordf: "ª",
+  middot: "·",
+  bull: "•",
+  hellip: "…",
+  copy: "©",
+  reg: "®",
+  trade: "™",
+  euro: "€",
+};
+
+const decodeHtmlOnce = (value: string): string =>
   value
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .trim();
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
+      const code = Number.parseInt(hex, 16);
+      return Number.isFinite(code) ? String.fromCodePoint(code) : `&#x${hex};`;
+    })
+    .replace(/&#(\d+);/g, (_, num) => {
+      const code = Number.parseInt(num, 10);
+      return Number.isFinite(code) ? String.fromCodePoint(code) : `&#${num};`;
+    })
+    .replace(/&([a-zA-Z]+);/g, (entity, name) => HTML_NAMED_ENTITIES[name] ?? entity);
+
+/** Decodifica entidades HTML (&eacute;, &#233;, etc.), inclusive duplamente codificadas. */
+export const decodeHtmlEntities = (value: string): string => {
+  if (!value) return "";
+
+  let decoded = value;
+  for (let i = 0; i < 3; i++) {
+    const next = decodeHtmlOnce(decoded);
+    if (next === decoded) break;
+    decoded = next;
+  }
+
+  return decoded.replace(/\u00A0/g, " ").trim();
+};
+
+const decodeHtml = decodeHtmlEntities;
 
 const readMetaContent = (html: string, key: string): string | undefined => {
   const patterns = [
@@ -193,7 +276,32 @@ export const isInvalidCompanyName = (value: string | undefined): boolean => {
   if (normalized.length < 3) return true;
   if (/^https?:\/\//i.test(normalized)) return true;
   if (/\.(com|br|org|net)$/i.test(normalized) && !normalized.includes(" ")) return true;
+  if (/^\d{1,3}\s*[-.)]?\s*\w/.test(normalized)) return true;
+  if (/^(página|pagina|landing|home page|site|page)\b/.test(normalized)) return true;
+  if (/página de vendas|pagina de vendas|landing page/i.test(normalized)) return true;
   return false;
+};
+
+/** Remove numeração, títulos de página e ruído — extrai a marca (ex: "08 Página de Vendas Modus Inovandi" → "Modus Inovandi"). */
+export const sanitizeCompanyName = (value: string): string => {
+  let name = sanitizeMarkdownText(value).trim();
+  if (!name) return name;
+
+  const segments = name.split(/\s*[|\-–—:]\s*/).map((part) => part.trim()).filter(Boolean);
+  if (segments.length > 1) {
+    const meaningful = segments.find((part) => !isInvalidCompanyName(part));
+    name = meaningful ?? segments[0] ?? name;
+  }
+
+  name = name.replace(/^\d{1,3}\s*[-.)]?\s*/, "");
+
+  const pagePrefix =
+    /^(página de vendas|pagina de vendas|landing page|página inicial|pagina inicial|página|pagina|home page|site|page)\s+(de\s+)?/i;
+  while (pagePrefix.test(name)) {
+    name = name.replace(pagePrefix, "").trim();
+  }
+
+  return name.replace(/\s+(home|início|inicio|página inicial|pagina inicial)$/i, "").trim();
 };
 
 const companyNameFromHostname = (websiteUrl: string): string => {
@@ -209,12 +317,7 @@ const companyNameFromHostname = (websiteUrl: string): string => {
   }
 };
 
-const cleanCompanyName = (value: string): string => {
-  const parts = value.split(/\s*[|\-–—:]\s*/).map((part) => part.trim()).filter(Boolean);
-  const meaningful = parts.find((part) => !isInvalidCompanyName(part));
-  const chosen = meaningful ?? parts[0] ?? value.trim();
-  return chosen.replace(/\s+(home|início|inicio|página inicial)$/i, "").trim();
-};
+const cleanCompanyName = (value: string): string => sanitizeCompanyName(value);
 
 const resolveCompanyName = (
   html: string,
@@ -229,8 +332,10 @@ const resolveCompanyName = (
   ];
 
   for (const candidate of candidates) {
-    if (candidate && !isInvalidCompanyName(candidate)) {
-      return sanitizeMarkdownText(candidate);
+    if (!candidate) continue;
+    const cleaned = sanitizeCompanyName(candidate);
+    if (cleaned && !isInvalidCompanyName(cleaned)) {
+      return cleaned;
     }
   }
 
@@ -342,7 +447,7 @@ const stripHtml = (value: string): string =>
 
 /** Remove lixo de markdown (imagens blob, links, negrito) vindo do Jina Reader. */
 export const sanitizeMarkdownText = (value: string): string =>
-  value
+  decodeHtmlEntities(value)
     .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
     .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
     .replace(/\*\*([^*]+)\*\*/g, "$1")
@@ -364,6 +469,8 @@ const isValidCase = (title: string, description: string): boolean => {
   if (cleanTitle.length < 12 || cleanTitle.length > 100) return false;
   if (cleanDescription.length < 40 || cleanDescription.length > 420) return false;
   if (/^(home|contato|blog|menu|saiba mais|quem somos)$/i.test(cleanTitle)) return false;
+  if (/^\d{1,3}\s*[-.)]?\s*(página|pagina|page|landing)/i.test(cleanTitle)) return false;
+  if (/página de vendas|pagina de vendas|landing page/i.test(cleanTitle)) return false;
   if (/[!\[\]{}]|blob:|\.(png|jpe?g|webp|gif|svg)\b/i.test(cleanTitle)) return false;
   if (/^\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/i.test(cleanTitle)) return false;
   if ((cleanTitle.match(/\*\*/g) ?? []).length > 0) return false;
@@ -657,7 +764,7 @@ export const fetchWebsiteHtmlViaJina = async (url: string): Promise<string> => {
   const titleFromUrl = companyNameFromHostname(normalized);
   const title = isInvalidCompanyName(rawJinaTitle)
     ? titleFromUrl
-    : sanitizeMarkdownText(cleanCompanyName(rawJinaTitle));
+    : sanitizeCompanyName(rawJinaTitle);
   const body = text.replace(/^Title:[\s\S]*?Markdown Content:\s*/m, "").trim();
 
   const sections: Array<{ title: string; description: string }> = [];

@@ -1,5 +1,6 @@
 import { baseLandingContent, getSegmentLandingContent } from "@/content/landing";
 import { resolveImplementationIdeas } from "@/lib/leadSegmentSolutions";
+import { sanitizeCompanyName } from "@/lib/leadWebsiteExtract";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { LeadImplementationIdea, LeadPageConfig } from "@/types/lead";
 import { LandingContent, ProjectItem } from "@/types/landing";
@@ -284,7 +285,7 @@ const buildImplementationIdeas = (lead: LeadPageConfig): ProjectItem[] =>
       implementationIdeas: lead.implementationIdeas,
       solutionCases: lead.solutionCases,
       segmentSlug: lead.segmentSlug,
-      companyName: lead.companyName,
+      companyName: sanitizeCompanyName(lead.companyName),
       primaryGoal: lead.primaryGoal,
     }),
   );
@@ -293,6 +294,7 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
   const segmentTemplate = getSegmentLandingContent(lead.segmentSlug) ?? baseLandingContent;
   const content: LandingContent = JSON.parse(JSON.stringify(segmentTemplate));
   const buildai = baseLandingContent;
+  const companyName = sanitizeCompanyName(lead.companyName);
 
   const segmentName = lead.segmentSlug.charAt(0).toUpperCase() + lead.segmentSlug.slice(1);
   const cityLabel = lead.city ? ` em ${lead.city}` : "";
@@ -302,10 +304,10 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
       : "";
   const objectiveLabel = cleanGoalForLabels ? ` com foco em ${cleanGoalForLabels}` : "";
 
-  content.prospectCompanyName = lead.companyName;
+  content.prospectCompanyName = companyName;
 
-  content.seo.title = `BuildAI para ${lead.companyName} | MicroSaaS e IA`;
-  content.seo.description = `Proposta da BuildAI para ${lead.companyName}${cityLabel}: soluções de IA e automação para ${segmentName}${objectiveLabel}.`;
+  content.seo.title = `BuildAI para ${companyName} | MicroSaaS e IA`;
+  content.seo.description = `Proposta da BuildAI para ${companyName}${cityLabel}: soluções de IA e automação para ${segmentName}${objectiveLabel}.`;
   content.seo.previewImageSrc = buildai.seo.previewImageSrc;
   content.seo.faviconHref = buildai.seo.faviconHref;
 
@@ -320,25 +322,25 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
   ];
   content.navbar.ctaLabel = "Agendar consultoria";
 
-  content.hero.badge = `Proposta BuildAI para ${lead.companyName}`;
+  content.hero.badge = `Proposta BuildAI para ${companyName}`;
   content.hero.title = "Construímos o futuro da";
-  content.hero.highlightedText = lead.companyName;
+  content.hero.highlightedText = companyName;
   content.hero.titleSuffix = " com MicroSaaS e IA";
 
   const heroGoal = toHeroGoalLine(lead.primaryGoal);
   content.hero.description = heroGoal
     ? `A BuildAI preparou um plano sob medida para acelerar resultados${cityLabel} com IA e automação — ${heroGoal}`
-    : `A BuildAI preparou um plano sob medida para a ${lead.companyName}${cityLabel}, com IA e automação para acelerar resultados.`;
+    : `A BuildAI preparou um plano sob medida para a ${companyName}${cityLabel}, com IA e automação para acelerar resultados.`;
   content.hero.primaryCtaLabel = "Falar com a BuildAI →";
   content.hero.secondaryCtaLabel = "Ver implementações";
 
-  content.services.description = `A BuildAI recomenda para a ${lead.companyName}${cityLabel} soluções de IA e automação alinhadas às metas do negócio.`;
+  content.services.description = `A BuildAI recomenda para a ${companyName}${cityLabel} soluções de IA e automação alinhadas às metas do negócio.`;
 
   content.implementationIdeas = {
     eyebrow: "Ideias de implementação",
     title: "O que podemos implementar em",
-    highlightedText: lead.companyName,
-    description: `Propostas de automação, MicroSaaS e IA sob medida para a ${lead.companyName}, com base no contexto do negócio:`,
+    highlightedText: companyName,
+    description: `Propostas de automação, MicroSaaS e IA sob medida para a ${companyName}, com base no contexto do negócio:`,
     items: buildImplementationIdeas(lead),
   };
 
@@ -352,8 +354,8 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
   };
 
   content.contact.title = "Pronto para transformar a";
-  content.contact.highlightedText = lead.companyName;
-  content.contact.description = `Converse com a BuildAI e veja como aplicar IA e automação na ${lead.companyName}${objectiveLabel}.`;
+  content.contact.highlightedText = companyName;
+  content.contact.description = `Converse com a BuildAI e veja como aplicar IA e automação na ${companyName}${objectiveLabel}.`;
   content.contact.submitLabel = "Quero conversar com a BuildAI";
   content.contact.copyrightName = buildai.contact.copyrightName;
 

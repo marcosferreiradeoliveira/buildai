@@ -3,6 +3,7 @@ import {
   fetchWebsiteHtmlForBrowser,
   isInvalidCity,
   isInvalidCompanyName,
+  sanitizeCompanyName,
   summarizePrimaryGoal,
   type LeadWebsiteExtract,
 } from "@/lib/leadWebsiteExtract";
@@ -107,9 +108,11 @@ const enrichMetadataFromApi = async (
       data: {
         ...extract,
         companyName:
-          payload.companyName && !isInvalidCompanyName(payload.companyName)
-            ? payload.companyName
-            : extract.companyName,
+          payload.companyName && !isInvalidCompanyName(sanitizeCompanyName(payload.companyName))
+            ? sanitizeCompanyName(payload.companyName)
+            : extract.companyName
+              ? sanitizeCompanyName(extract.companyName)
+              : extract.companyName,
         primaryGoal: payload.primaryGoal
           ? summarizePrimaryGoal(payload.primaryGoal, 220)
           : extract.primaryGoal,

@@ -3,6 +3,7 @@ import {
   extractCasesFromWebsiteHtml,
   normalizeWebsiteUrl,
   parseLeadFromWebsiteHtml,
+  sanitizeCompanyName,
   sanitizeMarkdownText,
 } from "@/lib/leadWebsiteExtract";
 import { parseImplementationIdeas } from "@/lib/leadWebsiteExtractAi";
@@ -136,6 +137,39 @@ describe("leadWebsiteExtract", () => {
     expect(result.primaryGoal).toMatch(/\.$/);
     expect(result.primaryGoal).not.toContain("…");
     expect(result.primaryGoal).toContain("ESG");
+  });
+
+  it("decodes HTML entities in meta description for primary goal", () => {
+    const html = `
+      <html>
+        <head>
+          <title>Contsimples</title>
+          <meta name="description" content="A Contsimples &eacute; um escrit&oacute;rio de contabilidade online que disp&otilde;e de uma plataforma digital exclusiva desenvolvida para tornar mais simples a sua rela&ccedil;&atilde;o com o seu contador." />
+        </head>
+      </html>
+    `;
+
+    const result = parseLeadFromWebsiteHtml(html, "https://contsimples.com.br");
+    expect(result.primaryGoal).toContain("é um escritório");
+    expect(result.primaryGoal).toContain("relação");
+    expect(result.primaryGoal).not.toContain("&eacute;");
+    expect(result.primaryGoal).not.toContain("&ccedil;");
+  });
+
+  it("strips numbered page titles from company name", () => {
+    expect(sanitizeCompanyName("08 Página de Vendas Modus Inovandi")).toBe("Modus Inovandi");
+
+    const html = `
+      <html>
+        <head>
+          <title>08 Página de Vendas Modus Inovandi</title>
+          <meta property="og:site_name" content="08 Página de Vendas Modus Inovandi" />
+        </head>
+      </html>
+    `;
+
+    const result = parseLeadFromWebsiteHtml(html, "https://modusinovandi.com.br");
+    expect(result.companyName).toBe("Modus Inovandi");
   });
 
   it("strips markdown images and bold fragments from jina-like text", () => {

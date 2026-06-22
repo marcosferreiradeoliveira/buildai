@@ -1,4 +1,5 @@
 import type { LeadImplementationIdea, LeadSolutionCase } from "./leadWebsiteExtract";
+import { sanitizeCompanyName } from "./leadWebsiteExtract";
 
 const shortCaseLabel = (title: string): string =>
   title.length > 48 ? `${title.slice(0, 45).trim()}…` : title;
@@ -303,7 +304,8 @@ export const resolveImplementationIdeas = (input: {
   companyName: string;
   primaryGoal?: string;
 }): LeadImplementationIdea[] => {
-  const { companyName, segmentSlug, primaryGoal, solutionCases } = input;
+  const companyName = sanitizeCompanyName(input.companyName);
+  const { segmentSlug, primaryGoal, solutionCases } = input;
 
   if (input.implementationIdeas?.length) {
     return mergeImplementationIdeas(

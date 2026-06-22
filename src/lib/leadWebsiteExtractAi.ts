@@ -2,6 +2,7 @@ import {
   filterValidCases,
   isInvalidCity,
   isInvalidCompanyName,
+  sanitizeCompanyName,
   summarizePrimaryGoal,
   type LeadImplementationIdea,
   type LeadSolutionCase,
@@ -33,9 +34,13 @@ const normalizeCompanyName = (
   fallback: LeadWebsiteExtract,
 ): string | undefined => {
   const trimmed = aiName?.trim();
-  if (trimmed && !isInvalidCompanyName(trimmed)) return trimmed;
-  if (fallback.companyName && !isInvalidCompanyName(fallback.companyName)) {
-    return fallback.companyName;
+  if (trimmed) {
+    const cleaned = sanitizeCompanyName(trimmed);
+    if (!isInvalidCompanyName(cleaned)) return cleaned;
+  }
+  if (fallback.companyName) {
+    const cleaned = sanitizeCompanyName(fallback.companyName);
+    if (!isInvalidCompanyName(cleaned)) return cleaned;
   }
   return undefined;
 };

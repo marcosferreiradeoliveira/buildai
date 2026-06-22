@@ -1,5 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import HubspotLeadsSection from "@/components/HubspotLeadsSection";
+import LeadOutreachEmailModule from "@/components/LeadOutreachEmailModule";
 import { landingContentBySegment } from "@/content/landing";
 import {
   createLeadSlug,
@@ -9,8 +11,11 @@ import {
   saveLeadPage,
 } from "@/lib/leadPages";
 import { LeadImplementationIdea, LeadPageConfig, LeadSolutionCase } from "@/types/lead";
+import type { HubspotLead } from "@/types/hubspot";
 import { useToast } from "@/hooks/use-toast";
 import { fetchLeadFromWebsite } from "@/lib/fetchLeadFromWebsite";
+import { resolveHubspotWebsiteUrl } from "@/lib/hubspotWebsite";
+import type { LeadWebsiteExtract } from "@/lib/leadWebsiteExtract";
 
 const AdminLeadGeneratorPage = () => {
   const [segmentSlug, setSegmentSlug] = useState("educacao");
@@ -21,10 +26,14 @@ const AdminLeadGeneratorPage = () => {
   const [solutionCases, setSolutionCases] = useState<LeadSolutionCase[]>([]);
   const [implementationIdeas, setImplementationIdeas] = useState<LeadImplementationIdea[]>([]);
   const [extracting, setExtracting] = useState(false);
+  const [extractingHubspotId, setExtractingHubspotId] = useState<string | null>(null);
   const [leads, setLeads] = useState<LeadPageConfig[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
+  const [contactName, setContactName] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const knownSegments = useMemo(() => Object.keys(landingContentBySegment), []);
   const generatedSlug = createLeadSlug(segmentSlug, companyName);
@@ -59,8 +68,43 @@ const AdminLeadGeneratorPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleExtractFromWebsite = async () => {
-    if (!websiteUrl.trim()) {
+  useEffect(() => {
+    const gmail = searchParams.get("gmail");
+    if (!gmail) return;
+
+    if (gmail === "connected") {
+      toast({
+        title: "Gmail conectado",
+        description: "Você já pode criar rascunhos e enviar e-mails pelo admin.",
+      });
+    } else if (gmail === "error") {
+      toast({
+        title: "Falha ao conectar Gmail",
+        description: `Erro: ${searchParams.get("reason") ?? "desconhecido"}`,
+        variant: "destructive",
+      });
+    }
+
+    searchParams.delete("gmail");
+    searchParams.delete("reason");
+    setSearchParams(searchParams, { replace: true });
+  }, [searchParams, setSearchParams, toast]);
+
+  const applyExtractedData = (data: LeadWebsiteExtract) => {
+    if (data.companyName) setCompanyName(data.companyName);
+    if (data.city) setCity(data.city);
+    if (data.primaryGoal) setPrimaryGoal(data.primaryGoal);
+    if (data.segmentSlug) setSegmentSlug(data.segmentSlug);
+    setSolutionCases(data.solutionCases ?? []);
+    setImplementationIdeas(data.implementationIdeas ?? []);
+  };
+
+  const runWebsiteExtraction = async (
+    url: string,
+    options?: { hubspotLeadId?: string; sourceLabel?: string },
+  ) => {
+    const trimmed = url.trim();
+    if (!trimmed) {
       toast({
         title: "Informe o site do lead",
         description: "Cole a URL do site para buscar nome, descrição e segmento sugerido.",
@@ -69,26 +113,23 @@ const AdminLeadGeneratorPage = () => {
       return;
     }
 
+    setWebsiteUrl(trimmed);
     setExtracting(true);
+    if (options?.hubspotLeadId) setExtractingHubspotId(options.hubspotLeadId);
+
     try {
-      const { data, warnings } = await fetchLeadFromWebsite(websiteUrl);
-      if (data.companyName) setCompanyName(data.companyName);
-      if (data.city) setCity(data.city);
-      if (data.primaryGoal) setPrimaryGoal(data.primaryGoal);
-      if (data.segmentSlug) setSegmentSlug(data.segmentSlug);
-      setSolutionCases(data.solutionCases ?? []);
-      setImplementationIdeas(data.implementationIdeas ?? []);
+      const { data, warnings } = await fetchLeadFromWebsite(trimmed);
+      applyExtractedData(data);
 
       const ideasCount = data.implementationIdeas?.length ?? 0;
       const warningText = warnings.length ? ` ${warnings.join(" ")}` : "";
+      const label = options?.sourceLabel ?? data.companyName ?? "Lead";
 
       toast({
-        title: "Informações importadas",
+        title: options?.hubspotLeadId ? "HubSpot + site importados" : "Informações importadas",
         description: ideasCount
-          ? `${ideasCount} proposta(s) para "O que podemos implementar" gerada(s) com IA. Revise e salve a página.`
-          : data.companyName
-            ? `Dados de ${data.companyName} importados, mas propostas com IA não foram geradas.${warningText || " Verifique OPENAI_API_KEY na Vercel (Production) e faça redeploy."}`
-            : `Dados importados.${warningText || " Propostas com IA não geradas."}`,
+          ? `${label}: ${ideasCount} proposta(s) gerada(s) a partir de ${trimmed}.`
+          : `${label}: dados importados de ${trimmed}, mas propostas com IA não foram geradas.${warningText || " Verifique OPENAI_API_KEY na Vercel (Production) e faça redeploy."}`,
         variant: ideasCount ? "default" : warnings.length ? "destructive" : "default",
       });
     } catch (err) {
@@ -99,7 +140,39 @@ const AdminLeadGeneratorPage = () => {
       });
     } finally {
       setExtracting(false);
+      setExtractingHubspotId(null);
     }
+  };
+
+  const handleExtractFromWebsite = async () => {
+    await runWebsiteExtraction(websiteUrl);
+  };
+
+  const handleSelectHubspotLead = async (lead: HubspotLead) => {
+    if (lead.company) setCompanyName(lead.company);
+    else if (lead.name) setCompanyName(lead.name);
+    if (lead.name) setContactName(lead.name);
+    if (lead.email) setRecipientEmail(lead.email);
+    if (lead.city) setCity(lead.city);
+    if (lead.jobTitle) {
+      setPrimaryGoal((current) => current || `Contato: ${lead.jobTitle}`);
+    }
+
+    const url = resolveHubspotWebsiteUrl({ website: lead.website, email: lead.email });
+    if (!url) {
+      toast({
+        title: "Lead aplicado sem site",
+        description:
+          "Não foi possível inferir URL (sem website no HubSpot e e-mail genérico tipo Gmail). Preencha o site manualmente.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    await runWebsiteExtraction(url, {
+      hubspotLeadId: lead.id,
+      sourceLabel: lead.company ?? lead.name,
+    });
   };
 
   const handleDeleteLead = async (lead: LeadPageConfig) => {
@@ -183,6 +256,11 @@ const AdminLeadGeneratorPage = () => {
             </p>
           ) : null}
         </div>
+
+        <HubspotLeadsSection
+          onSelectLead={(lead) => void handleSelectHubspotLead(lead)}
+          extractingLeadId={extractingHubspotId}
+        />
 
         <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-card p-6 md:p-8 space-y-5">
           <div className="rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
@@ -311,6 +389,34 @@ const AdminLeadGeneratorPage = () => {
             </div>
           </div>
 
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="contactName" className="mb-2 block text-sm font-medium">
+                Nome do contato (e-mail)
+              </label>
+              <input
+                id="contactName"
+                value={contactName}
+                onChange={(event) => setContactName(event.target.value)}
+                placeholder="Ana Silva"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:border-primary/50"
+              />
+            </div>
+            <div>
+              <label htmlFor="recipientEmail" className="mb-2 block text-sm font-medium">
+                E-mail do contato
+              </label>
+              <input
+                id="recipientEmail"
+                type="email"
+                value={recipientEmail}
+                onChange={(event) => setRecipientEmail(event.target.value)}
+                placeholder="contato@empresa.com.br"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:border-primary/50"
+              />
+            </div>
+          </div>
+
           <div className="rounded-lg border border-border bg-background/60 px-4 py-3 text-sm">
             <span className="text-muted-foreground">URL gerada: </span>
             <span className="font-medium text-primary">/lp/{generatedSlug}</span>
@@ -323,6 +429,17 @@ const AdminLeadGeneratorPage = () => {
             Gerar página do lead
           </button>
         </form>
+
+        <LeadOutreachEmailModule
+          companyName={companyName}
+          contactName={contactName}
+          recipientEmail={recipientEmail}
+          segmentSlug={segmentSlug}
+          primaryGoal={primaryGoal}
+          implementationIdeas={implementationIdeas}
+          solutionCases={solutionCases}
+          landingUrl={companyName.trim() ? `${appOrigin}/lp/${generatedSlug}` : undefined}
+        />
 
         <div className="mt-10">
           <div className="flex items-center justify-between gap-3">

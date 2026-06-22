@@ -52,6 +52,91 @@ export const extractLeadApiPlugin = (): Plugin => ({
     if (env.VITE_SUPABASE_URL && !process.env.VITE_SUPABASE_URL) {
       process.env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL;
     }
+    if (env.HUBSPOT_ACCESS_TOKEN && !process.env.HUBSPOT_ACCESS_TOKEN) {
+      process.env.HUBSPOT_ACCESS_TOKEN = env.HUBSPOT_ACCESS_TOKEN;
+    }
+    if (env.GOOGLE_CLIENT_ID && !process.env.GOOGLE_CLIENT_ID) {
+      process.env.GOOGLE_CLIENT_ID = env.GOOGLE_CLIENT_ID;
+    }
+    if (env.GOOGLE_CLIENT_SECRET && !process.env.GOOGLE_CLIENT_SECRET) {
+      process.env.GOOGLE_CLIENT_SECRET = env.GOOGLE_CLIENT_SECRET;
+    }
+    if (env.GOOGLE_REDIRECT_URI && !process.env.GOOGLE_REDIRECT_URI) {
+      process.env.GOOGLE_REDIRECT_URI = env.GOOGLE_REDIRECT_URI;
+    }
+
+    const mountGmailApi = async (
+      path: string,
+      loader: () => Promise<{ default: (req: IncomingMessage, res: ServerResponse) => Promise<void> }>,
+      methods: string[],
+    ) => {
+      const handler = (await loader()).default;
+      server.middlewares.use(path, async (req, res, next) => {
+        if (!req.method || !methods.includes(req.method)) {
+          return next();
+        }
+        const host = req.headers.host ?? "localhost:8080";
+        const url = new URL(req.url ?? "/", `http://${host}`);
+        let body: string | undefined;
+        if (req.method === "POST") {
+          const parsed = await readJsonBody<Record<string, unknown>>(req);
+          body = JSON.stringify(parsed);
+        }
+        const vercelReq = {
+          method: req.method,
+          headers: req.headers as { cookie?: string; host?: string },
+          query: Object.fromEntries(url.searchParams.entries()),
+          url: req.url,
+          body,
+        };
+        await handler(vercelReq as IncomingMessage, res);
+      });
+    };
+
+    void mountGmailApi("/api/gmail-oauth-start", () => import("./api/gmail-oauth-start"), ["GET"]);
+    void mountGmailApi("/api/gmail-oauth-callback", () => import("./api/gmail-oauth-callback"), ["GET"]);
+    void mountGmailApi("/api/gmail-status", () => import("./api/gmail-status"), ["GET", "POST", "OPTIONS"]);
+    void mountGmailApi("/api/gmail-draft", () => import("./api/gmail-draft"), ["POST", "OPTIONS"]);
+    void mountGmailApi("/api/gmail-send", () => import("./api/gmail-send"), ["POST", "OPTIONS"]);
+
+    server.middlewares.use("/api/hubspot-leads", async (req, res, next) => {
+      if (req.method === "OPTIONS") {
+        res.statusCode = 204;
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        res.end();
+        return;
+      }
+
+      if (req.method !== "GET") {
+        return next();
+      }
+
+      try {
+        const { fetchHubspotLeads } = await import("./api/lib/hubspotServer");
+        const result = await fetchHubspotLeads();
+
+        if (!result.ok) {
+          if (result.reason === "no_token") {
+            sendJson(res, 503, {
+              error: "Configure HUBSPOT_ACCESS_TOKEN no .env.local para listar leads do HubSpot.",
+            });
+            return;
+          }
+
+          sendJson(res, 502, {
+            error: `Não foi possível buscar leads no HubSpot.${result.detail ? ` ${result.detail}` : ""}`,
+          });
+          return;
+        }
+
+        sendJson(res, 200, { leads: result.leads });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Falha ao buscar leads do HubSpot.";
+        sendJson(res, 500, { error: message });
+      }
+    });
 
     server.middlewares.use("/api/enrich-lead-metadata", async (req, res, next) => {
       if (req.method === "OPTIONS") {
