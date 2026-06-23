@@ -1,8 +1,9 @@
 import LandingPage from "@/pages/LandingPage";
-import { baseLandingContent } from "@/content/landing";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const Index = () => {
-  return <LandingPage content={baseLandingContent} />;
+  const { landingContent } = useLanguage();
+  return <LandingPage content={landingContent} />;
 };
 
 export default Index;

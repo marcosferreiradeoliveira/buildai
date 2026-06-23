@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { NavLink } from "@/types/landing";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import {
   createDefaultWhatsAppMessage,
   createProspectWhatsAppMessage,
@@ -48,7 +49,7 @@ const Navbar = ({ brandName, navLinks, ctaLabel, prospectCompanyName }: NavbarPr
         </a>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-4">
           {navLinks.map((link) => (
             <button
               key={link.href}
@@ -58,6 +59,7 @@ const Navbar = ({ brandName, navLinks, ctaLabel, prospectCompanyName }: NavbarPr
               {link.label}
             </button>
           ))}
+          <LanguageSwitcher />
           <button
             onClick={() => openWhatsApp(whatsappMessage)}
             className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition neon-glow"
@@ -66,19 +68,23 @@ const Navbar = ({ brandName, navLinks, ctaLabel, prospectCompanyName }: NavbarPr
           </button>
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          className="md:hidden text-foreground"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            {menuOpen ? (
-              <path d="M18 6L6 18M6 6l12 12" />
-            ) : (
-              <path d="M3 12h18M3 6h18M3 18h18" />
-            )}
-          </svg>
-        </button>
+        {/* Mobile */}
+        <div className="flex md:hidden items-center gap-2">
+          <LanguageSwitcher />
+          <button
+            className="text-foreground"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Menu"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {menuOpen ? (
+                <path d="M18 6L6 18M6 6l12 12" />
+              ) : (
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}

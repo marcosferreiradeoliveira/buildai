@@ -114,6 +114,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Aplicação web que transforma um layout fixo no Photoshop (PSD) em gerador em lote: camadas nomeadas, planilha Excel e pasta de imagens viram artes finais em PNG/PSD — catálogos, cards, banners, menus e qualquer layout repetitivo com um clique.",
         imageSrc: previewImage,
+        href: "https://psdautomator.vercel.app/",
       },
       {
         title: "NewsGen AI",
@@ -122,6 +123,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Plataforma web que transforma conteúdo em vídeo com IA: a partir de texto (notícias ou roteiro), gera narração e vídeo com apresentador virtual; também traduz vídeos gravados para outros idiomas mantendo áudio e imagem sincronizados. Login seguro, histórico de projetos e configuração das ferramentas de IA no browser.",
         imageSrc: newsGenCaseImage,
+        href: "https://ai-video-news-generator--video-generator-39001.us-central1.hosted.app/",
       },
       {
         title: "Green Sky",
@@ -130,6 +132,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Site institucional e comercial para operadora de parapente e asa delta (São Conrado e Niterói): catálogo de experiências, checkout Stripe ou fluxo consultivo via WhatsApp, contador público do fundo Propósito e i18n em 6 idiomas. React 19, Firebase, Cloud Functions e EmailJS.",
         imageSrc: greenSkyCaseImage,
+        href: "https://greensky.com.br/",
       },
       {
         title: "GrowthOS",
@@ -146,6 +149,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Monitora um canal do Telegram e transforma mensagens de texto ou áudio em artigos otimizados para SEO: transcrição com OpenAI, redação estruturada com Claude, busca de imagem no Tavily e publicação automática no WordPress (RankMath), Facebook e Instagram — com repostagem condicional em portais secundários.",
         imageSrc: automacaoCaseImage,
+        videoUrl: "https://youtu.be/W5IOzuOQIVw",
       },
       {
         title: "99Freelas Sniper",
@@ -154,6 +158,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Painel local que varre projetos Web/Mobile/Software no 99Freelas, filtra por whitelist/blacklist, gera propostas com Gemini (texto, preço e prazo) e envia lances via Playwright. Dashboard para revisar, editar cada proposta e disparar a fila manualmente — envio automático desligado por padrão.",
         imageSrc: freelasSniperCaseImage,
+        videoUrl: "https://youtu.be/0PwsGTaO3KI",
       },
       {
         title: "Griô AI — Horizontes da Diáspora",
@@ -162,6 +167,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "RPG narrativo cooperativo com IA sobre Mohammed Gardo Baquaqua e as rotas da diáspora: investigue fases históricas, converse com NPCs da época e use documentos reais (Slave Voyages, jornais, biografias) como evidência. Três papéis — linguista, arquivista e estrategista — narrativa afrofuturista com Gemini e suporte a PT, EN e FR.",
         imageSrc: grioAiCaseImage,
+        href: "https://gri-ai-horizontes-da-di-spora-108605433402.us-west1.run.app/",
       },
       {
         title: "Espelho Literário (Fabulador)",
@@ -170,6 +176,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Facilitador literário com IA para criar e lapidar relatos pessoais: sessão por voz ou texto com perguntas instigadoras, transcrição, mosaico poético com palavras-chave e imagens sugeridas. Olhar acolhedor do facilitador, estruturação do texto com Gemini e acervo completo — processo e versão final — na Minha Biblioteca.",
         imageSrc: fabuladorCaseImage,
+        href: "https://fabulador.web.app/",
       },
       {
         title: "IG-Scout AI",
@@ -178,6 +185,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Ferramenta de prospecção outbound que automatiza a busca, extração de dados e qualificação de perfis. Integração de Web Scraping com análise comercial via OpenAI para geração de mensagens personalizadas.",
         imageSrc: igScoutCaseImage,
+        href: "https://instagramscrapper-nine.vercel.app/",
       },
       {
         title: "Cultura Fluxo Finance",
@@ -186,6 +194,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Plataforma B2B para gestão financeira e compliance de projetos culturais financiados por leis de incentivo. Inclui controle de orçamento por rubricas, análise de notas fiscais via IA e gestão de assinaturas.",
         imageSrc: culturaFluxoCaseImage,
+        href: "https://execucaofinanceira.web.app/",
       },
       {
         title: "App Amanhã (IoT)",
@@ -194,6 +203,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Guia interativo para o Museu do Amanhã utilizando tecnologia de beacons para interatividade contextual em tempo real. Arquitetura robusta integrando hardware (IoT) e software mobile de alta performance.",
         imageSrc: appAmanhaCaseImage,
+        videoUrl: "https://www.youtube.com/watch?v=JFg02dn56qU",
       },
       {
         title: "Content Factory AI",
@@ -203,6 +213,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Gerador de pacotes de conteúdo omnichannel que transforma temas em ebooks, podcasts e vídeos.",
         imageSrc: contentFactoryCaseImage,
+        href: "https://gerador-de-carrossel-amber.vercel.app/",
       },
     ],
   },

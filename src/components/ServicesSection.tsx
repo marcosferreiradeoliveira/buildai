@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 import { LandingContent } from "@/types/landing";
+import { useUi } from "@/i18n/LanguageContext";
 
 const serviceIcons = [
   <svg key="micro-saas" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-neon-purple">
@@ -26,6 +27,7 @@ type ServicesSectionProps = {
 
 const ServicesSection = ({ content }: ServicesSectionProps) => {
   const ref = useRef(null);
+  const ui = useUi();
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
@@ -39,7 +41,8 @@ const ServicesSection = ({ content }: ServicesSectionProps) => {
         >
           <span className="text-sm font-medium text-primary uppercase tracking-wider">{content.eyebrow}</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mt-3">
-            {content.title} <span className="gradient-text">{content.highlightedText}</span> resultados
+            {content.title} <span className="gradient-text">{content.highlightedText}</span>{" "}
+            {ui.services.titleSuffix}
           </h2>
           <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
             {content.description}

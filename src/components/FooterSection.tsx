@@ -1,6 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { LandingContent } from "@/types/landing";
+import { useUi } from "@/i18n/LanguageContext";
 import { openWhatsApp } from "@/lib/whatsapp";
 
 type FooterSectionProps = {
@@ -9,6 +10,7 @@ type FooterSectionProps = {
 
 const FooterSection = ({ content }: FooterSectionProps) => {
   const ref = useRef(null);
+  const ui = useUi();
   const isInView = useInView(ref, { once: true, margin: "-50px" });
 
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -16,10 +18,10 @@ const FooterSection = ({ content }: FooterSectionProps) => {
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = "Nome é obrigatório";
-    if (!form.email.trim()) e.email = "Email é obrigatório";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Email inválido";
-    if (!form.message.trim()) e.message = "Mensagem é obrigatória";
+    if (!form.name.trim()) e.name = ui.footer.nameRequired;
+    if (!form.email.trim()) e.email = ui.footer.emailRequired;
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = ui.footer.emailInvalid;
+    if (!form.message.trim()) e.message = ui.footer.messageRequired;
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -27,7 +29,7 @@ const FooterSection = ({ content }: FooterSectionProps) => {
   const handleSubmit = (ev: React.FormEvent) => {
     ev.preventDefault();
     if (!validate()) return;
-    const message = `Olá! Meu nome é ${form.name}.\nEmail: ${form.email}\nMensagem: ${form.message}`;
+    const message = ui.footer.whatsappIntro(form.name, form.email, form.message);
     openWhatsApp(message);
     setForm({ name: "", email: "", message: "" });
     setErrors({});
@@ -75,7 +77,7 @@ const FooterSection = ({ content }: FooterSectionProps) => {
             <div>
               <input
                 type="text"
-                placeholder="Seu nome"
+                placeholder={ui.footer.namePlaceholder}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
@@ -86,7 +88,7 @@ const FooterSection = ({ content }: FooterSectionProps) => {
             <div>
               <input
                 type="email"
-                placeholder="Seu email"
+                placeholder={ui.footer.emailPlaceholder}
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
@@ -96,7 +98,7 @@ const FooterSection = ({ content }: FooterSectionProps) => {
             </div>
             <div>
               <textarea
-                placeholder="Conte sobre seu projeto..."
+                placeholder={ui.footer.messagePlaceholder}
                 rows={4}
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
@@ -115,7 +117,7 @@ const FooterSection = ({ content }: FooterSectionProps) => {
         </div>
 
         <div className="mt-20 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} {content.copyrightName}. Todos os direitos reservados.
+          © {new Date().getFullYear()} {content.copyrightName}. {ui.footer.rightsReserved}
         </div>
       </div>
     </footer>

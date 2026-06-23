@@ -34,6 +34,8 @@ export type ProjectItem = {
   metric: string;
   description: string;
   imageSrc?: string;
+  href?: string;
+  videoUrl?: string;
 };
 
 export type ContactSocial = {
