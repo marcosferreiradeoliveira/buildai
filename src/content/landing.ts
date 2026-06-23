@@ -141,6 +141,7 @@ export const baseLandingContent: LandingContent = {
         description:
           "Dashboard web para Chief Growth Officer: visão executiva (receita, CAC, leads, ROAS), funil de produto e comparação de canais. Conecta Google Ads, Meta, Brevo, Snov.io, Mixpanel e GA4; o CGO AI Analyst gera relatórios estratégicos com Gemini a partir dos dados sincronizados.",
         imageSrc: growthOsCaseImage,
+        videoUrl: "https://youtu.be/oJyN6APFjuA",
       },
       {
         title: "Conexão Ativa — Automação de Notícias",
