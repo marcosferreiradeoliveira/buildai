@@ -52,7 +52,7 @@ export type CourseBlock = {
   previewImageSrc?: string;
   backgroundImageSrc?: string;
   instructorName?: string;
-  pricing: {
+  pricing?: {
     originalPrice?: string;
     installments: string;
     total: string;
@@ -72,6 +72,7 @@ export type LandingContent = {
   };
   navbar: {
     brandName: string;
+    logoSrc?: string;
     navLinks: NavLink[];
     ctaLabel: string;
   };

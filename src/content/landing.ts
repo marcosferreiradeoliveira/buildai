@@ -1,4 +1,6 @@
 import { LandingContent } from "@/types/landing";
+import buildaiIcon from "@/assets/buildai-icon-only.png";
+import buildaiLogoDark from "@/assets/buildai-logo-transparent.png";
 import educationHeroImage from "@/assets/Gemini_Generated_Image_re9l7qre9l7qre9l Small.png";
 import educationCasesImage from "@/assets/Gemini_Generated_Image_jgkljmjgkljmjgkl Small.png";
 import previewImage from "@/assets/preview.jpeg";
@@ -22,10 +24,11 @@ export const baseLandingContent: LandingContent = {
     description:
       "A BuildAI cria MicroSaaS, automações com IA e softwares sob medida para acelerar crescimento e eficiência operacional.",
     previewImageSrc: courseOgImage,
-    faviconHref: educationCasesImage,
+    faviconHref: buildaiIcon,
   },
   navbar: {
     brandName: "BuildAI",
+    logoSrc: buildaiLogoDark,
     navLinks: [
       { label: "Serviços", href: "#servicos" },
       { label: "Processo", href: "#build-in-public" },
@@ -242,10 +245,11 @@ export const educationLandingContent: LandingContent = {
     description:
       "Soluções de IA para educação: captação, matrícula, retenção e eficiência acadêmica com foco em resultado.",
     previewImageSrc: educationCasesImage,
-    faviconHref: educationHeroImage,
+    faviconHref: buildaiIcon,
   },
   navbar: {
     brandName: "BuildAI Educação",
+    logoSrc: buildaiLogoDark,
     navLinks: baseLandingContent.navbar.navLinks,
     ctaLabel: "Agendar Diagnóstico Educacional",
   },

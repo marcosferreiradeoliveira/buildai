@@ -312,6 +312,7 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
   content.seo.faviconHref = buildai.seo.faviconHref;
 
   content.navbar.brandName = buildai.navbar.brandName;
+  content.navbar.logoSrc = buildai.navbar.logoSrc;
   content.navbar.navLinks = [
     { label: "Implementações", href: "#implementacoes" },
     { label: "Portfólio", href: "#portfolio" },

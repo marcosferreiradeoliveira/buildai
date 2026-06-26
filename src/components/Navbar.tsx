@@ -1,3 +1,4 @@
+import BrandLogo from "@/components/BrandLogo";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { NavLink } from "@/types/landing";
@@ -10,12 +11,13 @@ import {
 
 type NavbarProps = {
   brandName: string;
+  logoSrc?: string;
   navLinks: NavLink[];
   ctaLabel: string;
   prospectCompanyName?: string;
 };
 
-const Navbar = ({ brandName, navLinks, ctaLabel, prospectCompanyName }: NavbarProps) => {
+const Navbar = ({ brandName, logoSrc, navLinks, ctaLabel, prospectCompanyName }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const whatsappMessage = prospectCompanyName
@@ -43,9 +45,18 @@ const Navbar = ({ brandName, navLinks, ctaLabel, prospectCompanyName }: NavbarPr
       }`}
     >
       <div className="container mx-auto flex items-center justify-between py-4 px-4">
-        <a href="#" className="font-heading text-xl font-bold gradient-text">
-          {brandName}
-          <span className="text-foreground">.</span>
+        <a href="#" className="flex items-center shrink-0" aria-label={brandName}>
+          {logoSrc ? (
+            <img
+              src={logoSrc}
+              alt={brandName}
+              className="h-8 w-auto sm:h-9"
+              width={160}
+              height={36}
+            />
+          ) : (
+            <BrandLogo />
+          )}
         </a>
 
         {/* Desktop */}

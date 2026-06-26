@@ -19,7 +19,7 @@ const TechStackSection = ({ content }: TechStackSectionProps) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-10"
         >
-          <span className="text-sm text-muted-foreground uppercase tracking-wider">{content.eyebrow}</span>
+          <span className="brand-eyebrow">{content.eyebrow}</span>
         </motion.div>
         <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
           {content.items.map((tech, i) => (

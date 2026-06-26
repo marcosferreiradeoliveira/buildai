@@ -1,3 +1,4 @@
+import BrandLogo from "@/components/BrandLogo";
 import { motion } from "framer-motion";
 import { LandingContent } from "@/types/landing";
 import {
@@ -8,11 +9,12 @@ import {
 
 type HeroSectionProps = {
   content: LandingContent["hero"];
+  logoSrc?: string;
   prospectCompanyName?: string;
   secondaryCtaHref?: string;
 };
 
-const HeroSection = ({ content, prospectCompanyName, secondaryCtaHref = "#portfolio" }: HeroSectionProps) => {
+const HeroSection = ({ content, logoSrc, prospectCompanyName, secondaryCtaHref = "#portfolio" }: HeroSectionProps) => {
   const whatsappMessage = prospectCompanyName
     ? createProspectWhatsAppMessage(prospectCompanyName)
     : createDefaultWhatsAppMessage("BuildAI");
@@ -48,11 +50,30 @@ const HeroSection = ({ content, prospectCompanyName, secondaryCtaHref = "#portfo
       <div className="container mx-auto px-4 pt-24 pb-16 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="mb-8 flex justify-center"
+          >
+            {logoSrc ? (
+              <img
+                src={logoSrc}
+                alt="BuildAI"
+                className="h-12 w-auto sm:h-14 lg:h-16 drop-shadow-[0_0_28px_hsl(var(--neon-purple)/0.45)]"
+                width={240}
+                height={54}
+              />
+            ) : (
+              <BrandLogo className="h-12 sm:h-14 lg:h-16" />
+            )}
+          </motion.div>
+
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.8, delay: 0.08 }}
           >
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-medium tracking-wider uppercase bg-primary/10 text-primary border border-primary/20 mb-8">
+            <span className="brand-pill mb-8">
               {content.badge}
             </span>
           </motion.div>

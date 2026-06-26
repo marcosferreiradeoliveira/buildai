@@ -50,7 +50,7 @@ const PortfolioSection = ({ content, sectionId = "portfolio" }: PortfolioSection
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-medium text-primary uppercase tracking-wider">{content.eyebrow}</span>
+          <span className="brand-eyebrow">{content.eyebrow}</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mt-3">
             {content.title} <span className="gradient-text">{content.highlightedText}</span>
           </h2>
@@ -89,7 +89,7 @@ const PortfolioSection = ({ content, sectionId = "portfolio" }: PortfolioSection
                   />
                 ) : null}
                 <div className={`relative z-10 ${project.imageSrc ? "p-6 sm:p-8" : ""}`}>
-                  <span className="text-[10px] uppercase tracking-widest text-neon-blue font-semibold">
+                  <span className="brand-eyebrow text-[10px]">
                     {project.category}
                   </span>
                   <h3 className="text-xl font-heading font-semibold mt-3 mb-2 flex items-start justify-between gap-2">

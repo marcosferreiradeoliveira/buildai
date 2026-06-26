@@ -24,12 +24,14 @@ const LandingPage = ({ content }: LandingPageProps) => {
       />
       <Navbar
         brandName={content.navbar.brandName}
+        logoSrc={content.navbar.logoSrc}
         navLinks={content.navbar.navLinks}
         ctaLabel={content.navbar.ctaLabel}
         prospectCompanyName={content.prospectCompanyName}
       />
       <HeroSection
         content={content.hero}
+        logoSrc={content.navbar.logoSrc}
         prospectCompanyName={content.prospectCompanyName}
         secondaryCtaHref={content.implementationIdeas ? "#implementacoes" : "#portfolio"}
       />

@@ -19,7 +19,7 @@ const BuildInPublicSection = ({ content }: BuildInPublicSectionProps) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="text-sm font-medium text-primary uppercase tracking-wider">{content.eyebrow}</span>
+          <span className="brand-eyebrow">{content.eyebrow}</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mt-3">
             {content.title} <span className="gradient-text">{content.highlightedText}</span> no processo
           </h2>

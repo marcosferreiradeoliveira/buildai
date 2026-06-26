@@ -45,7 +45,7 @@ const FooterSection = ({ content }: FooterSectionProps) => {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <span className="text-sm font-medium text-primary uppercase tracking-wider">{content.eyebrow}</span>
+            <span className="brand-eyebrow">{content.eyebrow}</span>
             <h2 className="text-3xl sm:text-4xl font-heading font-bold mt-3 mb-6">
               {content.title} <span className="gradient-text">{content.highlightedText}</span>?
             </h2>

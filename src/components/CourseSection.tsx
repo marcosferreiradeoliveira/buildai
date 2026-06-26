@@ -46,7 +46,7 @@ const CourseSection = ({ content }: CourseSectionProps) => {
               ) : null}
 
               <div className="p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
-                <span className="text-[10px] uppercase tracking-widest text-neon-blue font-semibold">
+                <span className="brand-eyebrow text-[10px]">
                   {content.eyebrow}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-heading font-bold mt-3 leading-tight">
@@ -57,21 +57,12 @@ const CourseSection = ({ content }: CourseSectionProps) => {
                   {content.description}
                 </p>
 
-                <div className="mt-5 pt-5 border-t border-border flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-                  <div>
-                    {content.pricing.originalPrice ? (
-                      <p className="text-xs text-muted-foreground line-through">
-                        De {content.pricing.originalPrice}
-                      </p>
-                    ) : null}
-                    <p className="text-xl sm:text-2xl font-heading font-bold gradient-text">
-                      {content.pricing.installments}
-                    </p>
-                    <p className="text-sm text-muted-foreground">ou {content.pricing.total}</p>
-                    {content.metric ? (
-                      <p className="text-xs font-semibold text-foreground mt-2">{content.metric}</p>
-                    ) : null}
-                  </div>
+                <div className="mt-5 pt-5 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  {content.metric ? (
+                    <p className="text-xs font-semibold text-foreground">{content.metric}</p>
+                  ) : (
+                    <span />
+                  )}
 
                   <Button
                     asChild

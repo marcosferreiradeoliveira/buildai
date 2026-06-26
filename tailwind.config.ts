@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ["Space Grotesk", "sans-serif"],
+        heading: ["Inter", "sans-serif"],
         body: ["Inter", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -58,6 +59,12 @@ export default {
         neon: {
           purple: "hsl(var(--neon-purple))",
           blue: "hsl(var(--neon-blue))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+        },
+        violet: {
+          soft: "hsl(var(--violet-soft))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
