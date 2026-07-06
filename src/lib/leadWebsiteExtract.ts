@@ -54,6 +54,14 @@ const INVALID_CITY_WORDS = new Set([
   "jornada",
   "acesso",
   "oferecemos",
+  "evidências",
+  "evidencias",
+  "práticas",
+  "praticas",
+  "baseado",
+  "comprometidas",
+  "sustentável",
+  "sustentavel",
 ]);
 
 export const isInvalidCity = (city: string | undefined): boolean => {
@@ -301,7 +309,29 @@ export const sanitizeCompanyName = (value: string): string => {
     name = name.replace(pagePrefix, "").trim();
   }
 
-  return name.replace(/\s+(home|início|inicio|página inicial|pagina inicial)$/i, "").trim();
+  return stripLeadingArticleFromCompanyName(
+    name.replace(/\s+(home|início|inicio|página inicial|pagina inicial)$/i, "").trim(),
+  );
+};
+
+/** Texto colado do site (ex.: "Somos uma empresa B...") — não serve para hero nem metadados finais. */
+export const looksLikeScrapedMarketingCopy = (text: string): boolean => {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (!normalized) return true;
+  if (normalized.length > 170) return true;
+  if (/^somos\b/i.test(normalized)) return true;
+  if (/^nós\b/i.test(normalized)) return true;
+  if (/^a\s+\w+\s+é\b/i.test(normalized)) return true;
+  if (/empresa\s+b\b/i.test(normalized)) return true;
+  if (/associad[oa]\s+(?:à|a)\s+rede/i.test(normalized)) return true;
+  return false;
+};
+
+const stripLeadingArticleFromCompanyName = (name: string): string => {
+  if (/^A\s+(?=[A-ZÁÉÍÓÚÂÊÔÃÇ])/.test(name) && !/^A\s+\d/.test(name)) {
+    return name.replace(/^A\s+/, "").trim();
+  }
+  return name;
 };
 
 const companyNameFromHostname = (websiteUrl: string): string => {

@@ -181,4 +181,8 @@ describe("leadWebsiteExtract", () => {
     expect(clean).not.toContain("blob:");
     expect(clean).toContain("Relevância, impacto.");
   });
+
+  it("strips leading article from company name", () => {
+    expect(sanitizeCompanyName("A Move Social")).toBe("Move Social");
+  });
 });

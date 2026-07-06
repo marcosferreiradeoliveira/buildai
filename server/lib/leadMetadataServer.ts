@@ -37,10 +37,10 @@ const SYSTEM_PROMPT = `Você identifica dados de empresas a partir de sites para
 Responda APENAS JSON: { "companyName", "primaryGoal", "segmentSlug", "city" }
 
 Regras:
-- companyName: nome REAL da empresa/instituição (marca), NÃO título de seção ("Home", "Menu", "Contato", "Quem somos").
-- primaryGoal: 1 ou 2 frases COMPLETAS resumindo missão, oferta principal ou proposta de valor. Não copie trecho cortado; sintetize.
+- companyName: nome REAL da empresa/instituição (marca), sem artigo no início ("Move Social", não "A Move Social"). NÃO título de seção ("Home", "Menu", "Contato", "Quem somos").
+- primaryGoal: 1 ou 2 frases em TERCEIRA PESSOA resumindo missão e oferta (ex.: "Consultoria em impacto social e monitoramento de projetos com foco em ESG."). NUNCA copie "Somos uma empresa..." do site; sintetize.
 - segmentSlug: um de ${ALLOWED_SEGMENTS.join("|")}
-- city: cidade sede só se explícita (ex: São Paulo). Senão null. NUNCA "todas as", "etapas" ou trecho de frase.
+- city: cidade sede só se explícita (ex: São Paulo). Senão null. NUNCA trecho de frase ("evidências", "práticas", "todas as", "etapas").
 - Use URL, título, meta e conteúdo do site. Se o nome extraído for "Home" ou genérico, infira o nome correto do conteúdo.`;
 
 export const enrichLeadMetadataServer = async (

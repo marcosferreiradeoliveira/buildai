@@ -33,6 +33,25 @@ describe("leadSegmentSolutions", () => {
     expect(merged[0].title).toBe("Automação pontual");
   });
 
+  it("builds personalized ideas from solution cases", () => {
+    const ideas = buildIdeasFromSolutionCases(
+      [
+        {
+          title: "A Bridge3 integra a Rede Brasil do Pacto Global da ONU",
+          description: "Atuação em sustentabilidade e impacto social com empresas parceiras.",
+        },
+      ],
+      "Bridge3",
+      "Integração com a Rede Brasil do Pacto Global.",
+    );
+
+    expect(ideas).toHaveLength(4);
+    expect(ideas[0].description).toContain("Bridge3");
+    expect(ideas[0].description).toMatch(/Rede Brasil|sustentabilidade/i);
+    expect(ideas[0].description).not.toContain("…");
+    expect(ideas[0].metric).toBe("Menos retrabalho entre equipes");
+  });
+
   it("builds 4 ideas from a single solution case", () => {
     const ideas = buildIdeasFromSolutionCases(
       [{ title: "Jornada Digital ESG", description: "Suporte digital em todas as etapas da jornada ESG." }],
@@ -43,6 +62,7 @@ describe("leadSegmentSolutions", () => {
     expect(new Set(ideas.map((item) => item.category)).size).toBeGreaterThanOrEqual(3);
     expect(ideas[0].title).toBe("Automação operacional");
     expect(ideas[0].description).toContain("ESG Soluções");
+    expect(ideas[0].description).toContain("jornada ESG");
     expect(ideas[0].description).not.toContain("aplicável a");
     expect(ideas[0].metric).toBe("Menos retrabalho entre equipes");
   });

@@ -1,5 +1,10 @@
 import type { LeadImplementationIdea, LeadSolutionCase } from "./leadWebsiteExtract";
-import { sanitizeCompanyName } from "./leadWebsiteExtract";
+import {
+  buildPersonalizedIdeaCopy,
+  derivePersonalizationHint,
+  looksLikeBrokenSnippet,
+} from "./leadIdeaFormatting";
+import { sanitizeCompanyName, summarizePrimaryGoal } from "./leadWebsiteExtract";
 
 /** Ajusta segmento para fallbacks quando o slug heurístico não reflete o negócio (ex: ESG). */
 export const inferSegmentForIdeas = (
@@ -253,56 +258,42 @@ export const mergeImplementationIdeas = (
 export const buildIdeasFromSolutionCases = (
   cases: LeadSolutionCase[] | undefined,
   companyName: string,
+  primaryGoal?: string,
 ): LeadImplementationIdea[] => {
   const valid = (cases ?? []).filter(
     (item) => item.title.length >= 8 && !item.title.includes("!["),
   );
   if (!valid.length) return [];
 
+  const goalHint =
+    primaryGoal?.trim() && !looksLikeBrokenSnippet(primaryGoal)
+      ? summarizePrimaryGoal(primaryGoal, 90)
+      : null;
+
   const blueprints: Array<{
     category: string;
     title: string;
-    description: string;
-    metric: string;
+    kind: "automacao" | "painel" | "ia" | "hub";
   }> = [
-    {
-      category: "Automação com IA",
-      title: "Automação operacional",
-      description:
-        "Fluxos com IA para triar demandas, aprovar entregas e repassar tarefas entre equipes sem retrabalho.",
-      metric: "Menos retrabalho entre equipes",
-    },
-    {
-      category: "MicroSaaS",
-      title: "Painel de gestão",
-      description:
-        "Produto digital para centralizar status, prazos e indicadores da operação em um só lugar.",
-      metric: "Visão única da operação",
-    },
-    {
-      category: "IA generativa",
-      title: "Produção assistida por IA",
-      description:
-        "IA para acelerar entregas, variações e materiais com consistência e qualidade.",
-      metric: "Mais volume sem aumentar headcount",
-    },
-    {
-      category: "Software sob medida",
-      title: "Hub de entregas",
-      description:
-        "Workflow sob medida para organizar assets, versões e entregas com menos fricção.",
-      metric: "Menos fricção entre equipes e clientes",
-    },
+    { category: "Automação com IA", title: "Automação operacional", kind: "automacao" },
+    { category: "MicroSaaS", title: "Painel de gestão", kind: "painel" },
+    { category: "IA generativa", title: "Produção assistida por IA", kind: "ia" },
+    { category: "Software sob medida", title: "Hub de entregas", kind: "hub" },
   ];
 
   const ideas: LeadImplementationIdea[] = [];
   for (let i = 0; i < 4; i++) {
+    const source = valid[i % valid.length];
+    const hint =
+      derivePersonalizationHint(source, companyName) ??
+      (i === 0 ? goalHint : null);
     const blueprint = blueprints[i];
+    const copy = buildPersonalizedIdeaCopy(companyName, hint, blueprint.kind);
     ideas.push({
       category: blueprint.category,
       title: blueprint.title,
-      description: `Para a ${companyName}, ${blueprint.description.charAt(0).toLowerCase()}${blueprint.description.slice(1)}`,
-      metric: blueprint.metric,
+      description: copy.description,
+      metric: copy.metric,
     });
   }
 
@@ -329,7 +320,7 @@ export const resolveImplementationIdeas = (input: {
     );
   }
 
-  const fromCases = buildIdeasFromSolutionCases(solutionCases, companyName);
+  const fromCases = buildIdeasFromSolutionCases(solutionCases, companyName, primaryGoal);
   if (fromCases.length) {
     return mergeImplementationIdeas(fromCases, segmentSlug, companyName, 3, primaryGoal);
   }

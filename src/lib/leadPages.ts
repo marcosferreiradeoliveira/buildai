@@ -1,6 +1,11 @@
 import { baseLandingContent, getSegmentLandingContent } from "@/content/landing";
 import { resolveImplementationIdeas } from "@/lib/leadSegmentSolutions";
-import { sanitizeCompanyName } from "@/lib/leadWebsiteExtract";
+import {
+  isInvalidCity,
+  looksLikeScrapedMarketingCopy,
+  sanitizeCompanyName,
+  summarizePrimaryGoal,
+} from "@/lib/leadWebsiteExtract";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabaseClient";
 import { LeadImplementationIdea, LeadPageConfig } from "@/types/lead";
 import { LandingContent, ProjectItem } from "@/types/landing";
@@ -253,6 +258,22 @@ const toHeroGoalLine = (goal: string | undefined): string | null => {
   return null;
 };
 
+export const buildLeadHeroDescription = (
+  companyName: string,
+  city: string | undefined,
+  primaryGoal: string | undefined,
+): string => {
+  const cityLabel = city && !isInvalidCity(city) ? ` em ${city}` : "";
+  const goal = toHeroGoalLine(primaryGoal);
+
+  if (goal && !looksLikeScrapedMarketingCopy(goal)) {
+    const pitch = summarizePrimaryGoal(goal, 140).replace(/\.$/, "");
+    return `Identificamos oportunidades de IA e automação para a ${companyName}${cityLabel}, com foco em ${pitch.toLowerCase()}.`;
+  }
+
+  return `Diagnóstico gratuito com implementações de IA e automação sugeridas para a ${companyName}${cityLabel}, sem compromisso.`;
+};
+
 export const createLeadSlug = (segmentSlug: string, companyName: string): string => {
   const normalizedCompany = companyName
     .toLowerCase()
@@ -295,8 +316,9 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
   const content: LandingContent = JSON.parse(JSON.stringify(segmentTemplate));
   const buildai = baseLandingContent;
   const companyName = sanitizeCompanyName(lead.companyName);
+  const safeCity = lead.city && !isInvalidCity(lead.city) ? lead.city : undefined;
 
-  const cityLabel = lead.city ? ` em ${lead.city}` : "";
+  const cityLabel = safeCity ? ` em ${safeCity}` : "";
   const cleanGoalForLabels =
     lead.primaryGoal?.trim() && !/!\[|blob:/i.test(lead.primaryGoal)
       ? lead.primaryGoal.trim()
@@ -327,10 +349,7 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
   content.hero.highlightedText = companyName;
   content.hero.titleSuffix = undefined;
 
-  const heroGoal = toHeroGoalLine(lead.primaryGoal);
-  content.hero.description = heroGoal
-    ? `Mapeamos oportunidades de IA e automação para a ${companyName}${cityLabel} — ${heroGoal}`
-    : `Diagnóstico gratuito com implementações sugeridas para a ${companyName}${cityLabel}, sem compromisso.`;
+  content.hero.description = buildLeadHeroDescription(companyName, safeCity, lead.primaryGoal);
   content.hero.primaryCtaLabel = "Agendar diagnóstico →";
   content.hero.secondaryCtaLabel = "Ver implementações";
 

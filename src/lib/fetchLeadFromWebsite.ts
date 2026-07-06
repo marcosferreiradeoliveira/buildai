@@ -3,6 +3,7 @@ import {
   fetchWebsiteHtmlForBrowser,
   isInvalidCity,
   isInvalidCompanyName,
+  looksLikeScrapedMarketingCopy,
   sanitizeCompanyName,
   summarizePrimaryGoal,
   type LeadWebsiteExtract,
@@ -55,12 +56,15 @@ const fetchViaServerApi = async (
   }
 };
 
-const needsMetadataEnrichment = (extract: LeadWebsiteExtract): boolean =>
-  isInvalidCompanyName(extract.companyName) ||
-  isInvalidCity(extract.city) ||
-  !extract.primaryGoal?.trim() ||
-  extract.primaryGoal.endsWith("…") ||
-  !extract.primaryGoal.includes(".");
+const needsMetadataEnrichment = (extract: LeadWebsiteExtract): boolean => {
+  if (isInvalidCompanyName(extract.companyName)) return true;
+  if (isInvalidCity(extract.city)) return true;
+  if (!extract.primaryGoal?.trim()) return true;
+  if (extract.primaryGoal.endsWith("…")) return true;
+  if (looksLikeScrapedMarketingCopy(extract.primaryGoal)) return true;
+  if (/^A\s+/i.test(extract.companyName?.trim() ?? "")) return true;
+  return !extract.primaryGoal.includes(".");
+};
 
 const enrichMetadataFromApi = async (
   extract: LeadWebsiteExtract,
@@ -68,6 +72,13 @@ const enrichMetadataFromApi = async (
   if (!needsMetadataEnrichment(extract)) return { data: extract };
 
   try {
+    let pageText = "";
+    try {
+      pageText = await fetchWebsiteHtmlForBrowser(extract.websiteUrl);
+    } catch {
+      pageText = "";
+    }
+
     const response = await fetch("/api/enrich-lead-metadata", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -77,6 +88,7 @@ const enrichMetadataFromApi = async (
         scrapedPrimaryGoal: extract.primaryGoal,
         scrapedTitle: extract.rawTitle,
         scrapedDescription: extract.rawDescription,
+        pageText,
       }),
     });
 

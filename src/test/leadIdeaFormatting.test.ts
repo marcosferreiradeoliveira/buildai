@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildPersonalizedIdeaCopy,
   cleanIdeaDetailForDisplay,
   cleanIdeaTitleForDisplay,
+  derivePersonalizationHint,
   extractCaseTopic,
 } from "../lib/leadIdeaFormatting";
 
@@ -11,11 +13,41 @@ describe("leadIdeaFormatting", () => {
     expect(extractCaseTopic("A Bridge3 é a sua casa para desenvolver ideias", "Bridge3")).toBeNull();
   });
 
-  it("extracts short topics when available", () => {
-    expect(extractCaseTopic("Jornada Digital ESG")).toBe("Jornada Digital ESG");
+  it("derives hint from integra titles", () => {
     expect(
-      extractCaseTopic("A Bridge3 integra a Rede Brasil do Pacto Global da ONU", "Bridge3"),
-    ).toBeNull();
+      derivePersonalizationHint(
+        {
+          title: "A Bridge3 integra a Rede Brasil do Pacto Global da ONU",
+          description: "",
+        },
+        "Bridge3",
+      ),
+    ).toBe("Rede Brasil do Pacto Global da ONU");
+  });
+
+  it("prefers case description when useful", () => {
+    expect(
+      derivePersonalizationHint(
+        {
+          title: "Programa X",
+          description:
+            "Consultoria em sustentabilidade e relatórios ESG para empresas de médio porte.",
+        },
+        "Bridge3",
+      ),
+    ).toContain("sustentabilidade");
+  });
+
+  it("builds personalized copy with client context", () => {
+    const copy = buildPersonalizedIdeaCopy(
+      "Bridge3",
+      "Rede Brasil do Pacto Global da ONU",
+      "automacao",
+    );
+
+    expect(copy.description).toContain("Bridge3");
+    expect(copy.description).toContain("Rede Brasil do Pacto Global da ONU");
+    expect(copy.description).not.toContain("…");
   });
 
   it("strips legacy verbose idea titles", () => {
@@ -26,16 +58,18 @@ describe("leadIdeaFormatting", () => {
     ).toBe("Operação automatizada");
   });
 
-  it("uses metric in email detail instead of truncated description", () => {
+  it("shows description and metric in email detail", () => {
     const detail = cleanIdeaDetailForDisplay({
-      title: "Painel de gestão",
-      category: "MicroSaaS",
+      title: "Automação operacional",
+      category: "Automação com IA",
       description:
-        "Produto digital para a Bridge3 acompanhar status, prazos e indicadores de A Bridge3 é a sua casa…",
-      metric: "Visão única da operação",
+        "Para a Bridge3, fluxos com IA para automatizar a operação na frente de Rede Brasil do Pacto Global da ONU.",
+      metric: "Menos retrabalho entre equipes",
     });
 
-    expect(detail).toBe("Visão única da operação");
+    expect(detail).toContain("Bridge3");
+    expect(detail).toContain("Rede Brasil");
+    expect(detail).toContain("Menos retrabalho entre equipes");
     expect(detail).not.toContain("…");
   });
 });

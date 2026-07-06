@@ -27,9 +27,6 @@ const applyMetadata = async (
   pageText: string,
 ): Promise<LeadWebsiteExtract> => {
   if (!process.env.OPENAI_API_KEY?.trim()) return result;
-  if (!isInvalidCompanyName(result.companyName) && result.primaryGoal?.includes(".")) {
-    return result;
-  }
 
   const meta = await enrichLeadMetadataServer({
     websiteUrl: result.websiteUrl,
@@ -88,6 +85,8 @@ export const runExtractLeadPipeline = async (url: string): Promise<LeadWebsiteEx
       result = { ...result, city: undefined };
     }
 
+    result = await applyMetadata(result, pageText);
+
     if (!result.implementationIdeas?.length || result.implementationIdeas.length < 3) {
       const ideas = await generateImplementationIdeasServer({
         companyName: result.companyName ?? "Cliente",
@@ -102,7 +101,6 @@ export const runExtractLeadPipeline = async (url: string): Promise<LeadWebsiteEx
       }
     }
 
-    result = await applyMetadata(result, pageText);
     result = ensureImplementationIdeas(result);
   } catch (error) {
     console.error("extractLeadPipeline AI step failed:", error);

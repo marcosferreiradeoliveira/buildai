@@ -189,7 +189,7 @@ const SYSTEM_PROMPT = `Você extrai dados de sites de empresas/instituições pa
 Responda APENAS JSON válido com:
 - companyName: nome REAL da marca/empresa (NUNCA "Home", "Menu", "Contato" ou título de seção do site)
 - city (cidade sede se explícita, senão null)
-- primaryGoal: 1 ou 2 frases COMPLETAS com missão/oferta de valor (sintetize, não copie trecho cortado)
+- primaryGoal: 1 ou 2 frases em TERCEIRA PESSOA com missão/oferta de valor (sintetize; nunca copie "Somos uma empresa..." do site)
 - segmentSlug (${ALLOWED_SEGMENTS.join("|")})
 - solutionCases (0 a 4): produtos/serviços/cases REAIS listados no site (title + description). Não inclua FAQ, artigos jurídicos genéricos, busca do site.
 - implementationIdeas (exatamente 3 ou 4): propostas que a BuildAI pode IMPLEMENTAR para ESTE negócio (foco em solução digital, não em descrever cases que eles já têm).
