@@ -4,7 +4,7 @@ import { handleOptions, parseBody } from "../server/lib/apiResponse";
 type ApiRequest = {
   method?: string;
   headers?: { cookie?: string };
-  body?: string | { to?: string; subject?: string; body?: string };
+  body?: string | { to?: string; subject?: string; body?: string; bodyHtml?: string };
 };
 
 type ApiResponse = {
@@ -25,10 +25,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   try {
-    const body = parseBody<{ to?: string; subject?: string; body?: string }>(req);
+    const body = parseBody<{ to?: string; subject?: string; body?: string; bodyHtml?: string }>(req);
     const to = body.to?.trim();
     const subject = body.subject?.trim();
     const text = body.body?.trim();
+    const bodyHtml = body.bodyHtml?.trim();
 
     if (!to || !subject || !text) {
       return res.status(400).json({ error: "Informe to, subject e body." });
@@ -43,7 +44,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       res.setHeader?.("Set-Cookie", session.cookies);
     }
 
-    const draft = await createGmailDraft(session.accessToken, { to, subject, body: text });
+    const draft = await createGmailDraft(session.accessToken, {
+      to,
+      subject,
+      body: text,
+      bodyHtml: bodyHtml || undefined,
+    });
 
     return res.status(200).json({
       draftId: draft.draftId,

@@ -1,8 +1,6 @@
 import type { LeadImplementationIdea, LeadSolutionCase } from "./leadWebsiteExtract";
+import { caseContextLabel } from "./leadIdeaFormatting";
 import { sanitizeCompanyName } from "./leadWebsiteExtract";
-
-const shortCaseLabel = (title: string): string =>
-  title.length > 48 ? `${title.slice(0, 45).trim()}…` : title;
 
 /** Ajusta segmento para fallbacks quando o slug heurístico não reflete o negócio (ex: ESG). */
 export const inferSegmentForIdeas = (
@@ -262,36 +260,53 @@ export const buildIdeasFromSolutionCases = (
   );
   if (!valid.length) return [];
 
-  const templates = [
-    (item: LeadSolutionCase): LeadImplementationIdea => ({
+  const blueprints: Array<{
+    category: string;
+    title: string;
+    buildDescription: (company: string, context: string) => string;
+    metric: string;
+  }> = [
+    {
       category: "Automação com IA",
-      title: `Operação automatizada: ${shortCaseLabel(item.title)}`,
-      description: `Para a ${companyName}, fluxos com IA para acelerar a frente "${item.title}" — triagem de demandas, aprovações e handoff entre equipes sem retrabalho.`,
-      metric: "Menos tempo operacional por entrega",
-    }),
-    (item: LeadSolutionCase): LeadImplementationIdea => ({
+      title: "Automação operacional",
+      buildDescription: (company, context) =>
+        `Fluxos com IA para a ${company} triar demandas, aprovar entregas e repassar tarefas — aplicável a ${context}.`,
+      metric: "Menos retrabalho entre equipes",
+    },
+    {
       category: "MicroSaaS",
-      title: `Painel de gestão: ${shortCaseLabel(item.title)}`,
-      description: `Produto digital para a ${companyName} acompanhar status, prazos e indicadores da linha "${item.title}" com visão única para o time e clientes.`,
-      metric: "Controle e previsibilidade da operação",
-    }),
-    (item: LeadSolutionCase): LeadImplementationIdea => ({
+      title: "Painel de gestão",
+      buildDescription: (company, context) =>
+        `Produto digital para a ${company} acompanhar status, prazos e indicadores de ${context} em um só lugar.`,
+      metric: "Visão única da operação",
+    },
+    {
       category: "IA generativa",
-      title: `Produção assistida: ${shortCaseLabel(item.title)}`,
-      description: `IA para a ${companyName} acelerar entregas e variações ligadas a "${item.title}", mantendo consistência e qualidade.`,
+      title: "Produção assistida por IA",
+      buildDescription: (company, context) =>
+        `IA para a ${company} acelerar entregas e variações em ${context}, com consistência e qualidade.`,
       metric: "Mais volume sem aumentar headcount",
-    }),
-    (item: LeadSolutionCase): LeadImplementationIdea => ({
+    },
+    {
       category: "Software sob medida",
-      title: `Hub dedicado: ${shortCaseLabel(item.title)}`,
-      description: `Repositório e workflow sob medida para a ${companyName} organizar assets, versões e entregas ligadas a "${item.title}".`,
+      title: "Hub de entregas",
+      buildDescription: (company, context) =>
+        `Workflow sob medida para a ${company} organizar assets, versões e entregas de ${context}.`,
       metric: "Menos fricção entre equipes e clientes",
-    }),
+    },
   ];
 
   const ideas: LeadImplementationIdea[] = [];
   for (let i = 0; i < 4; i++) {
-    ideas.push(templates[i](valid[i % valid.length]));
+    const source = valid[i % valid.length];
+    const context = caseContextLabel(source.title);
+    const blueprint = blueprints[i];
+    ideas.push({
+      category: blueprint.category,
+      title: blueprint.title,
+      description: blueprint.buildDescription(companyName, context),
+      metric: blueprint.metric,
+    });
   }
 
   return ideas;

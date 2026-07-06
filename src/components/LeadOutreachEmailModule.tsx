@@ -37,6 +37,7 @@ const LeadOutreachEmailModule = ({
   const [newsHighlight, setNewsHighlight] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [bodyHtml, setBodyHtml] = useState("");
   const [gmailStatus, setGmailStatus] = useState<GmailStatus | null>(null);
   const [gmailLoading, setGmailLoading] = useState(true);
   const [draftId, setDraftId] = useState<string | null>(null);
@@ -87,10 +88,11 @@ const LeadOutreachEmailModule = ({
   useEffect(() => {
     setSubject(draft.subject);
     setBody(draft.body);
+    setBodyHtml(draft.bodyHtml);
     setDraftId(null);
     setDraftUrl(null);
     setPendingApproval(false);
-  }, [draft.subject, draft.body]);
+  }, [draft.subject, draft.body, draft.bodyHtml]);
 
   if (!companyName.trim()) return null;
 
@@ -119,6 +121,7 @@ const LeadOutreachEmailModule = ({
         to: recipientEmail.trim(),
         subject,
         body,
+        bodyHtml,
       });
       setDraftId(result.draftId);
       setDraftUrl(result.gmailDraftsUrl);
@@ -273,7 +276,7 @@ const LeadOutreachEmailModule = ({
 
       <div>
         <label htmlFor="outreachBody" className="mb-2 block text-sm font-medium">
-          Corpo do e-mail
+          Corpo do e-mail (texto simples)
         </label>
         <Textarea
           id="outreachBody"
@@ -283,8 +286,20 @@ const LeadOutreachEmailModule = ({
             setPendingApproval(false);
             setDraftId(null);
           }}
-          rows={18}
-          className="text-sm font-mono resize-y min-h-[320px]"
+          rows={12}
+          className="text-sm font-mono resize-y min-h-[240px]"
+        />
+      </div>
+
+      <div>
+        <p className="mb-2 block text-sm font-medium">Pré-visualização formatada</p>
+        <p className="mb-3 text-xs text-muted-foreground">
+          O Gmail envia esta versão com negrito e links. O cliente de e-mail padrão usa apenas o texto
+          simples acima.
+        </p>
+        <div
+          className="rounded-xl border border-border bg-white text-slate-800 p-5 sm:p-6 text-[15px] leading-relaxed overflow-auto"
+          dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
       </div>
 
@@ -301,6 +316,7 @@ const LeadOutreachEmailModule = ({
           onClick={() => {
             setSubject(draft.subject);
             setBody(draft.body);
+            setBodyHtml(draft.bodyHtml);
             toast({ title: "Texto regenerado" });
           }}
           className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted/50 transition"

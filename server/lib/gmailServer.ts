@@ -13,6 +13,7 @@ export type GmailSendInput = {
   to: string;
   subject: string;
   body: string;
+  bodyHtml?: string;
 };
 
 const GMAIL_SCOPES = [
@@ -143,16 +144,42 @@ export const resolveGmailAccessToken = async (
 export const buildRawEmail = (input: GmailSendInput): string => {
   const to = input.to.trim();
   const subjectEncoded = `=?UTF-8?B?${Buffer.from(input.subject, "utf8").toString("base64")}?=`;
+  const bodyHtml = input.bodyHtml?.trim();
 
-  const raw = [
-    `To: ${to}`,
-    `Subject: ${subjectEncoded}`,
-    "MIME-Version: 1.0",
-    "Content-Type: text/plain; charset=UTF-8",
-    "Content-Transfer-Encoding: 8bit",
-    "",
-    input.body,
-  ].join("\r\n");
+  const raw =
+    bodyHtml ?
+      (() => {
+        const boundary = `buildai_${Date.now().toString(36)}`;
+        return [
+          `To: ${to}`,
+          `Subject: ${subjectEncoded}`,
+          "MIME-Version: 1.0",
+          `Content-Type: multipart/alternative; boundary="${boundary}"`,
+          "",
+          `--${boundary}`,
+          "Content-Type: text/plain; charset=UTF-8",
+          "Content-Transfer-Encoding: 8bit",
+          "",
+          input.body,
+          "",
+          `--${boundary}`,
+          "Content-Type: text/html; charset=UTF-8",
+          "Content-Transfer-Encoding: 8bit",
+          "",
+          bodyHtml,
+          "",
+          `--${boundary}--`,
+        ].join("\r\n");
+      })()
+    : [
+        `To: ${to}`,
+        `Subject: ${subjectEncoded}`,
+        "MIME-Version: 1.0",
+        "Content-Type: text/plain; charset=UTF-8",
+        "Content-Transfer-Encoding: 8bit",
+        "",
+        input.body,
+      ].join("\r\n");
 
   return Buffer.from(raw, "utf8")
     .toString("base64")

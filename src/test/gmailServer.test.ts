@@ -14,4 +14,19 @@ describe("gmailServer", () => {
     expect(decoded).toContain("To: cliente@empresa.com");
     expect(decoded).toContain("implementações de IA");
   });
+
+  it("builds multipart html email when bodyHtml is provided", () => {
+    const raw = buildRawEmail({
+      to: "cliente@empresa.com",
+      subject: "Diagnóstico gratuito de IA",
+      body: "Olá,\n\nTexto simples.",
+      bodyHtml: "<p>Olá, <strong>Cliente</strong></p>",
+    });
+
+    const decoded = Buffer.from(raw.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+    expect(decoded).toContain("multipart/alternative");
+    expect(decoded).toContain("text/html; charset=UTF-8");
+    expect(decoded).toContain("<strong>Cliente</strong>");
+    expect(decoded).toContain("Texto simples.");
+  });
 });

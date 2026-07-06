@@ -46,6 +46,7 @@ export const createGmailDraft = async (input: {
   to: string;
   subject: string;
   body: string;
+  bodyHtml?: string;
 }): Promise<GmailDraftResult> => {
   const response = await fetch("/api/gmail-draft", {
     method: "POST",
