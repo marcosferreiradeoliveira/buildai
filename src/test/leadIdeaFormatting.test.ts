@@ -2,15 +2,20 @@ import { describe, expect, it } from "vitest";
 import {
   cleanIdeaDetailForDisplay,
   cleanIdeaTitleForDisplay,
-  caseContextLabel,
+  extractCaseTopic,
 } from "../lib/leadIdeaFormatting";
 
 describe("leadIdeaFormatting", () => {
-  it("shortens long case titles for context", () => {
-    const long =
-      "A Bridge3 integra a Rede Brasil do Pacto Global da ONU";
-    expect(caseContextLabel(long).length).toBeLessThanOrEqual(41);
-    expect(caseContextLabel(long)).not.toBe(long);
+  it("rejects broken or marketing sentence titles", () => {
+    expect(extractCaseTopic("Nossos números, são mais de ...", "Bridge3")).toBeNull();
+    expect(extractCaseTopic("A Bridge3 é a sua casa para desenvolver ideias", "Bridge3")).toBeNull();
+  });
+
+  it("extracts short topics when available", () => {
+    expect(extractCaseTopic("Jornada Digital ESG")).toBe("Jornada Digital ESG");
+    expect(
+      extractCaseTopic("A Bridge3 integra a Rede Brasil do Pacto Global da ONU", "Bridge3"),
+    ).toBeNull();
   });
 
   it("strips legacy verbose idea titles", () => {
@@ -21,16 +26,16 @@ describe("leadIdeaFormatting", () => {
     ).toBe("Operação automatizada");
   });
 
-  it("compacts awkward descriptions for email", () => {
+  it("uses metric in email detail instead of truncated description", () => {
     const detail = cleanIdeaDetailForDisplay({
       title: "Painel de gestão",
       category: "MicroSaaS",
       description:
-        'Produto digital para a Bridge3 acompanhar status, prazos e indicadores da linha "A Bridge3 é a sua casa para desenvolver ideias e construir conhecimento." com visão única.',
+        "Produto digital para a Bridge3 acompanhar status, prazos e indicadores de A Bridge3 é a sua casa…",
       metric: "Visão única da operação",
     });
 
-    expect(detail.length).toBeLessThanOrEqual(101);
-    expect(detail).not.toContain('"A Bridge3 é a sua casa');
+    expect(detail).toBe("Visão única da operação");
+    expect(detail).not.toContain("…");
   });
 });

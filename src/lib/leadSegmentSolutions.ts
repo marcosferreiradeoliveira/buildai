@@ -1,5 +1,4 @@
 import type { LeadImplementationIdea, LeadSolutionCase } from "./leadWebsiteExtract";
-import { caseContextLabel } from "./leadIdeaFormatting";
 import { sanitizeCompanyName } from "./leadWebsiteExtract";
 
 /** Ajusta segmento para fallbacks quando o slug heurístico não reflete o negócio (ex: ESG). */
@@ -263,48 +262,46 @@ export const buildIdeasFromSolutionCases = (
   const blueprints: Array<{
     category: string;
     title: string;
-    buildDescription: (company: string, context: string) => string;
+    description: string;
     metric: string;
   }> = [
     {
       category: "Automação com IA",
       title: "Automação operacional",
-      buildDescription: (company, context) =>
-        `Fluxos com IA para a ${company} triar demandas, aprovar entregas e repassar tarefas — aplicável a ${context}.`,
+      description:
+        "Fluxos com IA para triar demandas, aprovar entregas e repassar tarefas entre equipes sem retrabalho.",
       metric: "Menos retrabalho entre equipes",
     },
     {
       category: "MicroSaaS",
       title: "Painel de gestão",
-      buildDescription: (company, context) =>
-        `Produto digital para a ${company} acompanhar status, prazos e indicadores de ${context} em um só lugar.`,
+      description:
+        "Produto digital para centralizar status, prazos e indicadores da operação em um só lugar.",
       metric: "Visão única da operação",
     },
     {
       category: "IA generativa",
       title: "Produção assistida por IA",
-      buildDescription: (company, context) =>
-        `IA para a ${company} acelerar entregas e variações em ${context}, com consistência e qualidade.`,
+      description:
+        "IA para acelerar entregas, variações e materiais com consistência e qualidade.",
       metric: "Mais volume sem aumentar headcount",
     },
     {
       category: "Software sob medida",
       title: "Hub de entregas",
-      buildDescription: (company, context) =>
-        `Workflow sob medida para a ${company} organizar assets, versões e entregas de ${context}.`,
+      description:
+        "Workflow sob medida para organizar assets, versões e entregas com menos fricção.",
       metric: "Menos fricção entre equipes e clientes",
     },
   ];
 
   const ideas: LeadImplementationIdea[] = [];
   for (let i = 0; i < 4; i++) {
-    const source = valid[i % valid.length];
-    const context = caseContextLabel(source.title);
     const blueprint = blueprints[i];
     ideas.push({
       category: blueprint.category,
       title: blueprint.title,
-      description: blueprint.buildDescription(companyName, context),
+      description: `Para a ${companyName}, ${blueprint.description.charAt(0).toLowerCase()}${blueprint.description.slice(1)}`,
       metric: blueprint.metric,
     });
   }
