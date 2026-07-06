@@ -9,6 +9,7 @@ import {
   isUsablePersonalizationHint,
   looksLikeBrokenPersonalizedDescription,
   sanitizeImplementationIdea,
+  stripRedundantCompanyOpener,
 } from "../lib/leadIdeaFormatting";
 import { isInvalidCity } from "../lib/leadWebsiteExtract";
 
@@ -64,8 +65,8 @@ describe("leadIdeaFormatting", () => {
   it("builds personalized copy with client context", () => {
     const copy = buildPersonalizedIdeaCopy("LogBrasil", "Gestão de Frotas", "automacao");
 
-    expect(copy.description).toContain("LogBrasil");
     expect(copy.description).toContain("Gestão de Frotas");
+    expect(copy.description).not.toMatch(/^Para a /i);
     expect(copy.description).not.toContain("em Atuamos");
   });
 
@@ -90,7 +91,7 @@ describe("leadIdeaFormatting", () => {
     );
 
     expect(fixed.description).not.toContain("Atuamos");
-    expect(fixed.description).toContain("Move Social");
+    expect(fixed.description).not.toMatch(/^Para a /i);
   });
 
   it("strips legacy verbose idea titles", () => {
@@ -102,16 +103,29 @@ describe("leadIdeaFormatting", () => {
   });
 
   it("shows description and metric in email detail", () => {
-    const detail = cleanIdeaDetailForDisplay({
-      title: "Automação operacional",
-      category: "Automação com IA",
-      description:
-        "Para a LogBrasil, fluxos com IA para automatizar operações relacionados a Gestão de Frotas, com triagem, aprovações e handoff entre equipes.",
-      metric: "Menos retrabalho entre equipes",
-    });
+    const detail = cleanIdeaDetailForDisplay(
+      {
+        title: "Automação operacional",
+        category: "Automação com IA",
+        description:
+          "Para a LogBrasil, fluxos com IA para automatizar operações relacionados a Gestão de Frotas, com triagem, aprovações e handoff entre equipes.",
+        metric: "Menos retrabalho entre equipes",
+      },
+      "LogBrasil",
+    );
 
     expect(detail).toContain("Gestão de Frotas");
+    expect(detail).not.toMatch(/^Para a LogBrasil/i);
     expect(detail).toContain("Menos retrabalho entre equipes");
+  });
+
+  it("strips redundant company opener from descriptions", () => {
+    expect(
+      stripRedundantCompanyOpener(
+        "Para a Move Social, fluxos com IA para triar demandas e aprovar entregas.",
+        "Move Social",
+      ),
+    ).toBe("Fluxos com IA para triar demandas e aprovar entregas.");
   });
 
   it("validates usable hints", () => {

@@ -62,7 +62,7 @@ Regras:
 - NÃO apenas descreva o case do cliente — proponha produto/automação que a BuildAI entregaria.
 - Varie categorias quando fizer sentido: "Automação com IA", "MicroSaaS", "IA generativa", "Software sob medida".
 - title: nome curto e específico (8-80 chars)
-- description: 2 frases (40-320 chars)
+- description: 2 frases (40-320 chars) focadas no que a BuildAI entrega; NÃO comece com "Para a [empresa]" (o nome já aparece no título da seção)
 - metric: benefício mensurável (8-120 chars)
 
 Responda APENAS JSON: { "implementationIdeas": [ { "category", "title", "description", "metric" }, ... ] }`;
@@ -78,7 +78,7 @@ Regras:
 - Proponha produto/automação que a BuildAI entregaria — não apenas descreva o que a empresa já faz.
 - Varie categorias: "Automação com IA", "MicroSaaS", "IA generativa", "Software sob medida".
 - title: nome claro e aplicável ao segmento (8-80 chars)
-- description: 2 frases (40-320 chars) mencionando a empresa quando possível
+- description: 2 frases (40-320 chars) focadas na solução; NÃO comece com "Para a [empresa]"
 - metric: benefício mensurável (8-120 chars)
 
 Responda APENAS JSON: { "implementationIdeas": [ { "category", "title", "description", "metric" }, ... ] }`;

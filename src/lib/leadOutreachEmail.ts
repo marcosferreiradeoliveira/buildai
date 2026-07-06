@@ -38,22 +38,22 @@ const escapeHtml = (value: string): string =>
 const emailLink = (href: string, label: string): string =>
   `<a href="${escapeHtml(href)}" style="color:#7B5CF0;font-weight:600;text-decoration:none;">${escapeHtml(label)}</a>`;
 
-const formatIdeasList = (ideas: LeadImplementationIdea[]): string =>
+const formatIdeasList = (ideas: LeadImplementationIdea[], company: string): string =>
   ideas
     .slice(0, 3)
     .map((item) => {
       const title = cleanIdeaTitleForDisplay(item.title);
-      const detail = cleanIdeaDetailForDisplay(item);
+      const detail = cleanIdeaDetailForDisplay(item, company);
       return `• ${title} · ${item.category}\n  ${detail}`;
     })
     .join("\n\n");
 
-const formatIdeasListHtml = (ideas: LeadImplementationIdea[]): string =>
+const formatIdeasListHtml = (ideas: LeadImplementationIdea[], company: string): string =>
   ideas
     .slice(0, 3)
     .map((item) => {
       const title = cleanIdeaTitleForDisplay(item.title);
-      const detail = cleanIdeaDetailForDisplay(item);
+      const detail = cleanIdeaDetailForDisplay(item, company);
       return `<li style="margin:0 0 14px;"><strong>${escapeHtml(title)}</strong> <span style="color:#64748b;font-size:13px;">· ${escapeHtml(item.category)}</span><br><span style="color:#475569;font-size:14px;">${escapeHtml(detail)}</span></li>`;
     })
     .join("");
@@ -107,8 +107,8 @@ export const buildOutreachEmail = (input: OutreachEmailInput): OutreachEmail => 
     ? `<p style="margin:0 0 20px;color:#475569;">${escapeHtml(input.newsHighlight.trim())}</p>`
     : "";
 
-  const ideasBlock = ideas.length ? formatIdeasList(ideas) : genericIdeasBlock(company);
-  const ideasBlockHtml = ideas.length ? formatIdeasListHtml(ideas) : genericIdeasBlockHtml(company);
+  const ideasBlock = ideas.length ? formatIdeasList(ideas, company) : genericIdeasBlock(company);
+  const ideasBlockHtml = ideas.length ? formatIdeasListHtml(ideas, company) : genericIdeasBlockHtml(company);
 
   const body = `${greeting}
 

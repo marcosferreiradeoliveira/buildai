@@ -193,7 +193,7 @@ Responda APENAS JSON válido com:
 - segmentSlug (${ALLOWED_SEGMENTS.join("|")})
 - solutionCases (0 a 4): produtos/serviços/cases REAIS listados no site (title + description). Não inclua FAQ, artigos jurídicos genéricos, busca do site.
 - implementationIdeas (exatamente 3 ou 4): propostas que a BuildAI pode IMPLEMENTAR para ESTE negócio (foco em solução digital, não em descrever cases que eles já têm).
-  Cada item: category (uma de: ${ALLOWED_CATEGORIES.map((c) => `"${c}"`).join(", ")}), title (nome curto da solução), description (2 frases: o que a BuildAI entrega para este cliente), metric (benefício em poucas palavras).
+  Cada item: category (uma de: ${ALLOWED_CATEGORIES.map((c) => `"${c}"`).join(", ")}), title (nome curto da solução), description (2 frases: o que a BuildAI entrega; NÃO comece com "Para a [empresa]"), metric (benefício em poucas palavras).
   Adapte ao contexto: instituto/ONG de defesa do consumidor → triagem de demandas, base de conhecimento, chatbot orientação, automação de atendimento (NÃO "painel de campanhas" nem "content factory" genérico de agência).
   Escola → matrículas, retenção; clínica → agendamento; agência → conteúdo e operação; varejo → conversão e estoque.
 NÃO repita o mesmo tipo de solução com títulos parecidos. Varie as categorias quando fizer sentido.`;

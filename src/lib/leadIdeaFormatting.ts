@@ -133,7 +133,7 @@ export const sanitizeImplementationIdea = (
 };
 
 export const buildPersonalizedIdeaCopy = (
-  companyName: string,
+  _companyName: string,
   hint: string | null,
   kind: "automacao" | "painel" | "ia" | "hub",
 ): { description: string; metric: string } => {
@@ -143,29 +143,29 @@ export const buildPersonalizedIdeaCopy = (
     case "automacao":
       return {
         description: focus
-          ? `Para a ${companyName}, fluxos com IA para automatizar operações${focus}, com triagem, aprovações e handoff entre equipes.`
-          : `Para a ${companyName}, fluxos com IA para triar demandas, aprovar entregas e repassar tarefas entre equipes sem retrabalho.`,
+          ? `Fluxos com IA para automatizar operações${focus}, com triagem, aprovações e handoff entre equipes.`
+          : `Fluxos com IA para triar demandas, aprovar entregas e repassar tarefas entre equipes sem retrabalho.`,
         metric: "Menos retrabalho entre equipes",
       };
     case "painel":
       return {
         description: focus
-          ? `Para a ${companyName}, painel digital para acompanhar status, prazos e indicadores${focus} em tempo real.`
-          : `Para a ${companyName}, produto digital para centralizar status, prazos e indicadores da operação em um só lugar.`,
+          ? `Painel digital para acompanhar status, prazos e indicadores${focus} em tempo real.`
+          : `Produto digital para centralizar status, prazos e indicadores da operação em um só lugar.`,
         metric: "Visão única da operação",
       };
     case "ia":
       return {
         description: focus
-          ? `Para a ${companyName}, IA generativa para acelerar entregas, variações e materiais${focus}, mantendo consistência.`
-          : `Para a ${companyName}, IA para acelerar entregas, variações e materiais com consistência e qualidade.`,
+          ? `IA generativa para acelerar entregas, variações e materiais${focus}, mantendo consistência.`
+          : `IA para acelerar entregas, variações e materiais com consistência e qualidade.`,
         metric: "Mais volume sem aumentar headcount",
       };
     case "hub":
       return {
         description: focus
-          ? `Para a ${companyName}, hub sob medida para organizar assets, versões e entregas${focus} com menos fricção.`
-          : `Para a ${companyName}, workflow sob medida para organizar assets, versões e entregas com menos fricção.`,
+          ? `Hub sob medida para organizar assets, versões e entregas${focus} com menos fricção.`
+          : `Workflow sob medida para organizar assets, versões e entregas com menos fricção.`,
         metric: "Menos fricção entre equipes e clientes",
       };
   }
@@ -181,6 +181,46 @@ export const cleanIdeaTitleForDisplay = (title: string): string => {
   return shortenText(normalized, 52);
 };
 
+const companyNameVariants = (companyName: string): string[] => {
+  const trimmed = companyName.replace(/\s+/g, " ").trim();
+  if (!trimmed) return [];
+
+  const variants = new Set<string>([trimmed]);
+  const withoutArticle = trimmed.replace(/^A\s+/i, "").trim();
+  if (withoutArticle) variants.add(withoutArticle);
+  if (!/^A\s+/i.test(trimmed)) variants.add(`A ${trimmed}`);
+  return [...variants];
+};
+
+/** Remove abertura repetitiva "Para a [empresa]," — o nome já está no título da seção. */
+export const stripRedundantCompanyOpener = (
+  description: string,
+  companyName?: string,
+): string => {
+  let result = description.replace(/\s+/g, " ").trim();
+  if (!result || !companyName?.trim()) return result;
+
+  for (const name of companyNameVariants(companyName)) {
+    const escaped = escapeRegExp(name);
+    result = result.replace(
+      new RegExp(`^Para\\s+(?:a\\s+)?${escaped}[,:\\s–—-]+\\s*`, "i"),
+      "",
+    );
+  }
+
+  if (result.length > 0) {
+    result = result.charAt(0).toUpperCase() + result.slice(1);
+  }
+
+  return result.trim();
+};
+
+export const formatIdeaDescriptionForDisplay = (
+  description: string,
+  companyName?: string,
+): string =>
+  stripRedundantCompanyOpener(cleanDescriptionText(description), companyName);
+
 const cleanDescriptionText = (description: string): string =>
   description
     .replace(/\s+/g, " ")
@@ -190,8 +230,11 @@ const cleanDescriptionText = (description: string): string =>
     .trim();
 
 /** Texto exibido no e-mail: descrição personalizada + benefício, sem cortes abruptos. */
-export const cleanIdeaDetailForDisplay = (idea: LeadImplementationIdea): string => {
-  const desc = cleanDescriptionText(idea.description);
+export const cleanIdeaDetailForDisplay = (
+  idea: LeadImplementationIdea,
+  companyName?: string,
+): string => {
+  const desc = formatIdeaDescriptionForDisplay(idea.description, companyName);
   const metric = idea.metric?.replace(/\s+/g, " ").trim();
 
   if (

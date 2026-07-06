@@ -3,6 +3,7 @@ import {
   buildPersonalizedIdeaCopy,
   derivePersonalizationHint,
   extractShortGoalHint,
+  formatIdeaDescriptionForDisplay,
   isUsablePersonalizationHint,
   sanitizeImplementationIdea,
 } from "./leadIdeaFormatting";
@@ -311,7 +312,13 @@ export const resolveImplementationIdeas = (input: {
   const { segmentSlug, primaryGoal, solutionCases } = input;
 
   const polish = (ideas: LeadImplementationIdea[]) =>
-    ideas.map((idea) => sanitizeImplementationIdea(idea, companyName));
+    ideas.map((idea) => {
+      const sanitized = sanitizeImplementationIdea(idea, companyName);
+      return {
+        ...sanitized,
+        description: formatIdeaDescriptionForDisplay(sanitized.description, companyName),
+      };
+    });
 
   if (input.implementationIdeas?.length) {
     return polish(
