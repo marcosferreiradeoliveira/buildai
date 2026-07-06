@@ -296,7 +296,6 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
   const buildai = baseLandingContent;
   const companyName = sanitizeCompanyName(lead.companyName);
 
-  const segmentName = lead.segmentSlug.charAt(0).toUpperCase() + lead.segmentSlug.slice(1);
   const cityLabel = lead.city ? ` em ${lead.city}` : "";
   const cleanGoalForLabels =
     lead.primaryGoal?.trim() && !/!\[|blob:/i.test(lead.primaryGoal)
@@ -306,8 +305,8 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
 
   content.prospectCompanyName = companyName;
 
-  content.seo.title = `BuildAI para ${companyName} | MicroSaaS e IA`;
-  content.seo.description = `Proposta da BuildAI para ${companyName}${cityLabel}: soluções de IA e automação para ${segmentName}${objectiveLabel}.`;
+  content.seo.title = `Diagnóstico gratuito de IA — ${companyName} | BuildAI`;
+  content.seo.description = `Diagnóstico gratuito de uso de IA da BuildAI para ${companyName}${cityLabel}: oportunidades de automação e software sob medida para o caso de vocês.`;
   content.seo.previewImageSrc = buildai.seo.previewImageSrc;
   content.seo.faviconHref = buildai.seo.faviconHref;
 
@@ -321,27 +320,27 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
     { label: "Tecnologias", href: "#tech-stack" },
     { label: "Contato", href: "#contato" },
   ];
-  content.navbar.ctaLabel = "Agendar consultoria";
+  content.navbar.ctaLabel = "Agendar diagnóstico";
 
-  content.hero.badge = `Proposta BuildAI para ${companyName}`;
-  content.hero.title = "Construímos o futuro da";
+  content.hero.badge = "Diagnóstico gratuito de IA";
+  content.hero.title = "Diagnóstico de uso de IA para";
   content.hero.highlightedText = companyName;
-  content.hero.titleSuffix = " com MicroSaaS e IA";
+  content.hero.titleSuffix = undefined;
 
   const heroGoal = toHeroGoalLine(lead.primaryGoal);
   content.hero.description = heroGoal
-    ? `A BuildAI preparou um plano sob medida para acelerar resultados${cityLabel} com IA e automação — ${heroGoal}`
-    : `A BuildAI preparou um plano sob medida para a ${companyName}${cityLabel}, com IA e automação para acelerar resultados.`;
-  content.hero.primaryCtaLabel = "Falar com a BuildAI →";
+    ? `Mapeamos oportunidades de IA e automação para a ${companyName}${cityLabel} — ${heroGoal}`
+    : `Diagnóstico gratuito com implementações sugeridas para a ${companyName}${cityLabel}, sem compromisso.`;
+  content.hero.primaryCtaLabel = "Agendar diagnóstico →";
   content.hero.secondaryCtaLabel = "Ver implementações";
 
   content.services.description = `A BuildAI recomenda para a ${companyName}${cityLabel} soluções de IA e automação alinhadas às metas do negócio.`;
 
   content.implementationIdeas = {
-    eyebrow: "Ideias de implementação",
-    title: "O que podemos implementar em",
+    eyebrow: "Diagnóstico gratuito",
+    title: "Oportunidades de IA para",
     highlightedText: companyName,
-    description: `Propostas de automação, MicroSaaS e IA sob medida para a ${companyName}, com base no contexto do negócio:`,
+    description: `Implementações sugeridas pela BuildAI com base no contexto da ${companyName}:`,
     items: buildImplementationIdeas(lead),
   };
 

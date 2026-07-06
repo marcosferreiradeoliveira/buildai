@@ -17,10 +17,13 @@ describe("leadOutreachEmail", () => {
       landingUrl: "https://buildai.dev.br/lp/modus-inovandi-tecnologia",
     });
 
+    expect(email.subject).toContain("Diagnóstico gratuito de IA");
     expect(email.subject).toContain("Modus Inovandi");
     expect(email.body).toContain("Olá, Ana");
+    expect(email.body).toContain("diagnóstico gratuito de uso de IA");
     expect(email.body).toContain("Painel de gestão");
-    expect(email.body).toContain("diagnóstico gratuito");
+    expect(email.body).toContain("Ideias principais:");
+    expect(email.body).toContain("https://calendly.com/buildaidev/30min");
     expect(email.body).toContain("https://buildai.dev.br/lp/modus-inovandi-tecnologia");
   });
 

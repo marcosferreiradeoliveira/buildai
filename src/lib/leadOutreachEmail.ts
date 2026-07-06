@@ -18,23 +18,22 @@ export type OutreachEmail = {
   body: string;
 };
 
-const DEFAULT_NEWS = `Na BuildAI, seguimos ampliando entregas em MicroSaaS, automação com IA e software sob medida — ajudando empresas a reduzir retrabalho operacional e abrir novas linhas de receita com produtos digitais.`;
+export const OUTREACH_CALENDLY_URL = "https://calendly.com/buildaidev/30min";
+
+const DIVIDER = "──────────────";
 
 const formatIdeasList = (ideas: LeadImplementationIdea[]): string =>
   ideas
-    .slice(0, 4)
-    .map(
-      (item, index) =>
-        `${index + 1}. ${item.title} (${item.category})\n   ${item.description}\n   → ${item.metric}`,
-    )
-    .join("\n\n");
+    .slice(0, 3)
+    .map((item) => `• ${item.title} (${item.category}) — ${item.description}`)
+    .join("\n");
 
 const genericIdeasBlock = (company: string): string =>
   [
-    `1. Automação de processos com IA\n   Fluxos inteligentes para a ${company} ganhar escala sem aumentar headcount.`,
-    `2. MicroSaaS sob medida\n   Produto digital exclusivo para centralizar operação e indicadores.`,
-    `3. Copiloto de conteúdo e análise\n   IA aplicada aos dados e comunicação para acelerar decisões.`,
-  ].join("\n\n");
+    `• Automação com IA — escala operacional para a ${company}`,
+    `• MicroSaaS sob medida — produto digital exclusivo`,
+    `• Copiloto de análise — decisões mais rápidas com IA`,
+  ].join("\n");
 
 export const buildOutreachEmail = (input: OutreachEmailInput): OutreachEmail => {
   const company = sanitizeCompanyName(input.companyName) || "sua empresa";
@@ -51,39 +50,31 @@ export const buildOutreachEmail = (input: OutreachEmailInput): OutreachEmail => 
       });
 
   const greeting = contact ? `Olá, ${contact},` : `Olá, equipe ${company},`;
-  const news = input.newsHighlight?.trim() || DEFAULT_NEWS;
 
-  const contextLine =
-    input.primaryGoal?.trim() ?
-      `Considerando o contexto de vocês — ${input.primaryGoal.trim()} — mapeamos oportunidades práticas de IA para o negócio.\n`
-    : `Com base no perfil da ${company}, mapeamos oportunidades práticas de IA para o negócio.\n`;
+  const landingLead = input.landingUrl
+    ? `Preparamos um diagnóstico gratuito de uso de IA para a ${company} — com implementações sugeridas para o caso de vocês:\n\n${input.landingUrl}`
+    : `Mapeamos um diagnóstico gratuito de uso de IA para a ${company}.`;
+
+  const newsBlock = input.newsHighlight?.trim() ? `\n\n${input.newsHighlight.trim()}` : "";
 
   const ideasBlock = ideas.length ? formatIdeasList(ideas) : genericIdeasBlock(company);
 
-  const landingBlock =
-    input.landingUrl ?
-      `\nTambém preparei uma visão dedicada para a ${company} (implementações, portfólio e próximos passos):\n${input.landingUrl}\n`
-    : "";
-
   const body = `${greeting}
 
-${news}
+${landingLead}${newsBlock}
 
-${contextLine}
-Com base no que entendemos sobre a ${company}, estas são implementações que podemos construir juntos:
-
+Ideias principais:
 ${ideasBlock}
-${landingBlock}
-Gostaria de oferecer um diagnóstico gratuito (30–45 min) para priorizar essas frentes com o time de vocês — sem compromisso.
 
-Podemos agendar? Responda este e-mail ou sugira um horário que funcione.
+${DIVIDER}
+Próximo passo: conversa de 30 min para priorizar (sem compromisso)
+Agendar: ${OUTREACH_CALENDLY_URL}
 
 Abraço,
-Equipe BuildAI
-MicroSaaS · Automação · IA sob medida`;
+Equipe BuildAI`;
 
   return {
-    subject: `BuildAI × ${company} — implementações de IA + diagnóstico gratuito`,
+    subject: `Diagnóstico gratuito de IA — ${company}`,
     body: body.replace(/\n{3,}/g, "\n\n").trim(),
   };
 };
