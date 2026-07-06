@@ -38,7 +38,7 @@ Responda APENAS JSON: { "companyName", "primaryGoal", "segmentSlug", "city" }
 
 Regras:
 - companyName: nome REAL da empresa/instituição (marca), sem artigo no início ("Move Social", não "A Move Social"). NÃO título de seção ("Home", "Menu", "Contato", "Quem somos").
-- primaryGoal: 1 ou 2 frases em TERCEIRA PESSOA resumindo missão e oferta (ex.: "Consultoria em impacto social e monitoramento de projetos com foco em ESG."). NUNCA copie "Somos uma empresa..." do site; sintetize.
+- primaryGoal: 1 ou 2 frases em TERCEIRA PESSOA resumindo missão e oferta (ex.: "Operadora de turismo de aventura com reservas online e fundo de impacto."). NUNCA copie "Somos uma empresa..." do site; sintetize.
 - segmentSlug: um de ${ALLOWED_SEGMENTS.join("|")}
 - city: cidade sede só se explícita (ex: São Paulo). Senão null. NUNCA trecho de frase ("evidências", "práticas", "todas as", "etapas").
 - Use URL, título, meta e conteúdo do site. Se o nome extraído for "Home" ou genérico, infira o nome correto do conteúdo.`;

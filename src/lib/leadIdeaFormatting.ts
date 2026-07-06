@@ -1,5 +1,6 @@
 import type { LeadImplementationIdea } from "./leadWebsiteExtract";
 import type { LeadSolutionCase } from "./leadWebsiteExtract";
+import { looksLikeScrapedMarketingCopy, summarizePrimaryGoal } from "./leadWebsiteExtract";
 
 export const shortenText = (text: string, max: number): string => {
   const normalized = text.replace(/\s+/g, " ").trim();
@@ -16,10 +17,34 @@ const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\
 export const looksLikeBrokenSnippet = (text: string): boolean =>
   text.includes("...") || text.includes("…") || /,\s*são\s+mais\s+de/i.test(text);
 
-/** Extrai um rótulo curto utilizável; retorna null se o título for frase de marketing incompleta. */
+/** Hint curto e utilizável para personalizar copy — vale para qualquer segmento. */
+export const isUsablePersonalizationHint = (hint: string | null | undefined): hint is string => {
+  if (!hint?.trim()) return false;
+  const t = hint.replace(/\s+/g, " ").trim();
+  if (looksLikeBrokenSnippet(t) || looksLikeScrapedMarketingCopy(t)) return false;
+  if (t.length < 4 || t.length > 50) return false;
+  if (/^(atuamos|somos|nós|busca|facilitar|planejar|apoiar|como|que|para|com)\b/i.test(t)) {
+    return false;
+  }
+
+  const words = t.split(/\s+/);
+  if (words.length > 6) return false;
+  if (/^(de|da|do|das|dos|a|o|as|os|suas|seus|tomada)$/i.test(words[words.length - 1] ?? "")) {
+    return false;
+  }
+
+  if (/[A-ZÁÉÍÓÚÂÊÔÃÇ]/.test(t)) return true;
+  return words.length <= 4;
+};
+
+const GENERIC_CASE_TITLES =
+  /^(serviços|servicos|o que fazemos|quem somos|sobre|cases|projetos|home|soluções|solucoes|contato|blog)$/i;
+
+/** Nome curto de produto/serviço/case do site — sem frases de marketing. */
 export const extractCaseTopic = (title: string, companyName?: string): string | null => {
   let text = title.replace(/\s+/g, " ").trim();
   if (!text || text.length < 4 || looksLikeBrokenSnippet(text)) return null;
+  if (GENERIC_CASE_TITLES.test(text)) return null;
 
   if (companyName) {
     text = text
@@ -31,12 +56,12 @@ export const extractCaseTopic = (title: string, companyName?: string): string | 
   const integraMatch = text.match(/^integra\s+(?:a\s+)?(.+)$/i);
   if (integraMatch) text = integraMatch[1].trim();
 
-  if (/^(é|somos|nossos?)(\s|,|$)/i.test(text)) return null;
+  if (/^(é|somos|nossos?|atuamos)(\s|,|$)/i.test(text)) return null;
 
   const words = text.split(/\s+/);
-  if (words.length > 7 || text.length > 72) return null;
+  if (words.length > 7 || text.length > 55) return null;
 
-  return text;
+  return isUsablePersonalizationHint(text) ? text : null;
 };
 
 const firstSentence = (text: string): string => {
@@ -44,28 +69,24 @@ const firstSentence = (text: string): string => {
   return (match?.[0] ?? text).trim();
 };
 
-const stripCompanyPrefix = (text: string, companyName?: string): string => {
-  if (!companyName) return text;
-  return text
-    .replace(new RegExp(`^a\\s+${escapeRegExp(companyName)}[,\\s]+`, "i"), "")
-    .replace(new RegExp(`^${escapeRegExp(companyName)}[,\\s]+`, "i"), "")
-    .trim();
+/** Trecho curto do objetivo/missão (ex.: após síntese por IA) — qualquer segmento. */
+export const extractShortGoalHint = (primaryGoal: string | undefined): string | null => {
+  if (!primaryGoal?.trim() || looksLikeScrapedMarketingCopy(primaryGoal)) return null;
+
+  const summary = summarizePrimaryGoal(primaryGoal, 90).replace(/\.$/, "");
+  const clause = summary.split(/[,;]/)[0]?.trim() ?? summary;
+  const shortClause = clause.split(/\s+/).slice(0, 5).join(" ");
+  if (isUsablePersonalizationHint(shortClause)) return shortClause;
+  return isUsablePersonalizationHint(clause) ? clause : null;
 };
 
-/** Contexto utilizável para personalizar ideias (prioriza descrição do case, depois título). */
+/** Contexto de personalização: título do case ou missão resumida — nunca trecho cru do site. */
 export const derivePersonalizationHint = (
   item: Pick<LeadSolutionCase, "title" | "description">,
   companyName?: string,
 ): string | null => {
-  const description = item.description.replace(/\s+/g, " ").trim();
-  if (description.length >= 24 && !looksLikeBrokenSnippet(description)) {
-    const sentence = stripCompanyPrefix(firstSentence(description), companyName);
-    if (sentence.length >= 20 && sentence.length <= 110) return sentence;
-    if (sentence.length > 110) {
-      const words = sentence.split(/\s+/).slice(0, 14).join(" ");
-      if (words.length >= 20) return words;
-    }
-  }
+  const fromTitle = extractCaseTopic(item.title, companyName);
+  if (fromTitle) return fromTitle;
 
   let title = item.title.replace(/\s+/g, " ").trim();
   if (companyName) {
@@ -78,20 +99,37 @@ export const derivePersonalizationHint = (
   const integraMatch = title.match(/^integra\s+(?:a\s+)?(.+)$/i);
   if (integraMatch) {
     const topic = integraMatch[1].trim();
-    if (topic.length >= 8 && topic.length <= 72 && !looksLikeBrokenSnippet(topic)) {
-      return topic;
-    }
+    if (isUsablePersonalizationHint(topic)) return topic;
   }
 
-  return extractCaseTopic(item.title, companyName);
+  return null;
 };
 
-const focusPhrase = (hint: string): string => {
-  if (/^(nossos?|somos|é)\b/i.test(hint)) return "na operação de vocês";
-  if (/rede|programa|jornada|plataforma|frente|iniciativa/i.test(hint)) {
-    return `na frente de ${hint}`;
-  }
-  return `em ${hint}`;
+export const looksLikeBrokenPersonalizedDescription = (description: string): boolean => {
+  const normalized = description.replace(/\s+/g, " ").toLowerCase();
+  if (/operação em (atuamos|planejar|apoiar|busca|facilitar|suas)\b/.test(normalized)) return true;
+  if (/indicadores em (atuamos|planejar|apoiar|busca|facilitar)\b/.test(normalized)) return true;
+  if (/materiais em (atuamos|planejar|apoiar|busca|facilitar)\b/.test(normalized)) return true;
+  if (/entregas em (atuamos|planejar|apoiar|busca|facilitar)\b/.test(normalized)) return true;
+  if (/relacionados a (atuamos|planejar|apoiar|busca|facilitar|suas)\b/.test(normalized)) return true;
+  if (/tomada de[,]?\s*(com triagem|$)/.test(normalized)) return true;
+  return false;
+};
+
+const categoryToKind = (category: string): "automacao" | "painel" | "ia" | "hub" => {
+  if (/microsaas|painel/i.test(category)) return "painel";
+  if (/generativa/i.test(category)) return "ia";
+  if (/software|hub/i.test(category)) return "hub";
+  return "automacao";
+};
+
+export const sanitizeImplementationIdea = (
+  idea: LeadImplementationIdea,
+  companyName: string,
+): LeadImplementationIdea => {
+  if (!looksLikeBrokenPersonalizedDescription(idea.description)) return idea;
+  const copy = buildPersonalizedIdeaCopy(companyName, null, categoryToKind(idea.category));
+  return { ...idea, description: copy.description };
 };
 
 export const buildPersonalizedIdeaCopy = (
@@ -99,34 +137,34 @@ export const buildPersonalizedIdeaCopy = (
   hint: string | null,
   kind: "automacao" | "painel" | "ia" | "hub",
 ): { description: string; metric: string } => {
-  const focus = hint ? focusPhrase(hint) : null;
+  const focus = isUsablePersonalizationHint(hint) ? ` relacionados a ${hint}` : "";
 
   switch (kind) {
     case "automacao":
       return {
         description: focus
-          ? `Para a ${companyName}, fluxos com IA para automatizar e escalar a operação ${focus}, com triagem, aprovações e handoff entre equipes.`
+          ? `Para a ${companyName}, fluxos com IA para automatizar operações${focus}, com triagem, aprovações e handoff entre equipes.`
           : `Para a ${companyName}, fluxos com IA para triar demandas, aprovar entregas e repassar tarefas entre equipes sem retrabalho.`,
         metric: "Menos retrabalho entre equipes",
       };
     case "painel":
       return {
         description: focus
-          ? `Para a ${companyName}, painel digital para acompanhar status, prazos e indicadores ${focus} em tempo real.`
+          ? `Para a ${companyName}, painel digital para acompanhar status, prazos e indicadores${focus} em tempo real.`
           : `Para a ${companyName}, produto digital para centralizar status, prazos e indicadores da operação em um só lugar.`,
         metric: "Visão única da operação",
       };
     case "ia":
       return {
         description: focus
-          ? `Para a ${companyName}, IA generativa para acelerar entregas, variações e materiais ${focus}, mantendo consistência.`
+          ? `Para a ${companyName}, IA generativa para acelerar entregas, variações e materiais${focus}, mantendo consistência.`
           : `Para a ${companyName}, IA para acelerar entregas, variações e materiais com consistência e qualidade.`,
         metric: "Mais volume sem aumentar headcount",
       };
     case "hub":
       return {
         description: focus
-          ? `Para a ${companyName}, hub sob medida para organizar assets, versões e entregas ${focus} com menos fricção.`
+          ? `Para a ${companyName}, hub sob medida para organizar assets, versões e entregas${focus} com menos fricção.`
           : `Para a ${companyName}, workflow sob medida para organizar assets, versões e entregas com menos fricção.`,
         metric: "Menos fricção entre equipes e clientes",
       };
@@ -156,7 +194,11 @@ export const cleanIdeaDetailForDisplay = (idea: LeadImplementationIdea): string 
   const desc = cleanDescriptionText(idea.description);
   const metric = idea.metric?.replace(/\s+/g, " ").trim();
 
-  if (desc.length >= 36 && !looksLikeBrokenSnippet(desc)) {
+  if (
+    desc.length >= 36 &&
+    !looksLikeBrokenSnippet(desc) &&
+    !looksLikeBrokenPersonalizedDescription(desc)
+  ) {
     if (metric && !desc.toLowerCase().includes(metric.toLowerCase())) {
       const combined = `${desc} → ${metric}`;
       return combined.length <= 200 ? combined : desc;

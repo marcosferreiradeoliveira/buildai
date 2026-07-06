@@ -62,7 +62,7 @@ describe("leadSegmentSolutions", () => {
     expect(new Set(ideas.map((item) => item.category)).size).toBeGreaterThanOrEqual(3);
     expect(ideas[0].title).toBe("Automação operacional");
     expect(ideas[0].description).toContain("ESG Soluções");
-    expect(ideas[0].description).toContain("jornada ESG");
+    expect(ideas[0].description).toContain("Jornada Digital ESG");
     expect(ideas[0].description).not.toContain("aplicável a");
     expect(ideas[0].metric).toBe("Menos retrabalho entre equipes");
   });

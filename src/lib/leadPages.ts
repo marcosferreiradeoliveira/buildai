@@ -271,7 +271,7 @@ export const buildLeadHeroDescription = (
     return `Identificamos oportunidades de IA e automação para a ${companyName}${cityLabel}, com foco em ${pitch.toLowerCase()}.`;
   }
 
-  return `Diagnóstico gratuito com implementações de IA e automação sugeridas para a ${companyName}${cityLabel}, sem compromisso.`;
+  return `Diagnóstico gratuito com implementações de IA e automação sugeridas para a ${companyName}, sem compromisso.`;
 };
 
 export const createLeadSlug = (segmentSlug: string, companyName: string): string => {

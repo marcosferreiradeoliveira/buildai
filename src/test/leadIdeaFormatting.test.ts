@@ -5,49 +5,92 @@ import {
   cleanIdeaTitleForDisplay,
   derivePersonalizationHint,
   extractCaseTopic,
+  extractShortGoalHint,
+  isUsablePersonalizationHint,
+  looksLikeBrokenPersonalizedDescription,
+  sanitizeImplementationIdea,
 } from "../lib/leadIdeaFormatting";
+import { isInvalidCity } from "../lib/leadWebsiteExtract";
 
 describe("leadIdeaFormatting", () => {
   it("rejects broken or marketing sentence titles", () => {
-    expect(extractCaseTopic("Nossos números, são mais de ...", "Bridge3")).toBeNull();
-    expect(extractCaseTopic("A Bridge3 é a sua casa para desenvolver ideias", "Bridge3")).toBeNull();
+    expect(extractCaseTopic("Nossos números, são mais de ...", "Acme")).toBeNull();
+    expect(extractCaseTopic("A Acme é a sua casa para desenvolver ideias", "Acme")).toBeNull();
   });
 
-  it("derives hint from integra titles", () => {
+  it("rejects invalid city fragments", () => {
+    expect(isInvalidCity("planejar suas")).toBe(true);
+    expect(isInvalidCity("evidências")).toBe(true);
+    expect(isInvalidCity("São Paulo")).toBe(false);
+  });
+
+  it("does not use truncated case descriptions as hints", () => {
     expect(
       derivePersonalizationHint(
         {
-          title: "A Bridge3 integra a Rede Brasil do Pacto Global da ONU",
-          description: "",
-        },
-        "Bridge3",
-      ),
-    ).toBe("Rede Brasil do Pacto Global da ONU");
-  });
-
-  it("prefers case description when useful", () => {
-    expect(
-      derivePersonalizationHint(
-        {
-          title: "Programa X",
+          title: "Serviços",
           description:
-            "Consultoria em sustentabilidade e relatórios ESG para empresas de médio porte.",
+            "Atuamos como elo que busca facilitar processos institucionais capazes de apoiar a tomada de decisão baseada em evidências.",
         },
-        "Bridge3",
+        "Move Social",
       ),
-    ).toContain("sustentabilidade");
+    ).toBeNull();
+  });
+
+  it("uses short case titles from any industry", () => {
+    expect(
+      derivePersonalizationHint(
+        { title: "Gestão de Frotas", description: "Controle de veículos e manutenção preventiva." },
+        "LogBrasil",
+      ),
+    ).toBe("Gestão de Frotas");
+
+    expect(
+      derivePersonalizationHint(
+        { title: "E-commerce B2B", description: "Portal de pedidos para distribuidores." },
+        "VarejoMax",
+      ),
+    ).toBe("E-commerce B2B");
+  });
+
+  it("extracts short goal hints from synthesized mission", () => {
+    expect(
+      extractShortGoalHint(
+        "Operadora de turismo de aventura com reservas online e experiências guiadas no Rio de Janeiro.",
+      ),
+    ).toMatch(/turismo de aventura/i);
   });
 
   it("builds personalized copy with client context", () => {
-    const copy = buildPersonalizedIdeaCopy(
-      "Bridge3",
-      "Rede Brasil do Pacto Global da ONU",
-      "automacao",
+    const copy = buildPersonalizedIdeaCopy("LogBrasil", "Gestão de Frotas", "automacao");
+
+    expect(copy.description).toContain("LogBrasil");
+    expect(copy.description).toContain("Gestão de Frotas");
+    expect(copy.description).not.toContain("em Atuamos");
+  });
+
+  it("detects broken personalized descriptions", () => {
+    expect(
+      looksLikeBrokenPersonalizedDescription(
+        "Para a Move Social, fluxos com IA para automatizar operações relacionados a Atuamos como elo que busca facilitar processos, com triagem, aprovações e handoff entre equipes.",
+      ),
+    ).toBe(true);
+  });
+
+  it("sanitizes broken stored ideas", () => {
+    const fixed = sanitizeImplementationIdea(
+      {
+        title: "Automação operacional",
+        category: "Automação com IA",
+        description:
+          "Para a Move Social, fluxos com IA para automatizar operações relacionados a Atuamos como elo que busca facilitar processos institucionais capazes de apoiar a tomada de, com triagem, aprovações e handoff entre equipes.",
+        metric: "Menos retrabalho entre equipes",
+      },
+      "Move Social",
     );
 
-    expect(copy.description).toContain("Bridge3");
-    expect(copy.description).toContain("Rede Brasil do Pacto Global da ONU");
-    expect(copy.description).not.toContain("…");
+    expect(fixed.description).not.toContain("Atuamos");
+    expect(fixed.description).toContain("Move Social");
   });
 
   it("strips legacy verbose idea titles", () => {
@@ -63,13 +106,17 @@ describe("leadIdeaFormatting", () => {
       title: "Automação operacional",
       category: "Automação com IA",
       description:
-        "Para a Bridge3, fluxos com IA para automatizar a operação na frente de Rede Brasil do Pacto Global da ONU.",
+        "Para a LogBrasil, fluxos com IA para automatizar operações relacionados a Gestão de Frotas, com triagem, aprovações e handoff entre equipes.",
       metric: "Menos retrabalho entre equipes",
     });
 
-    expect(detail).toContain("Bridge3");
-    expect(detail).toContain("Rede Brasil");
+    expect(detail).toContain("Gestão de Frotas");
     expect(detail).toContain("Menos retrabalho entre equipes");
-    expect(detail).not.toContain("…");
+  });
+
+  it("validates usable hints", () => {
+    expect(isUsablePersonalizationHint("Gestão de Frotas")).toBe(true);
+    expect(isUsablePersonalizationHint("planejar suas")).toBe(false);
+    expect(isUsablePersonalizationHint("Atuamos como elo")).toBe(false);
   });
 });

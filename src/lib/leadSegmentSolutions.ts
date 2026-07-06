@@ -2,7 +2,9 @@ import type { LeadImplementationIdea, LeadSolutionCase } from "./leadWebsiteExtr
 import {
   buildPersonalizedIdeaCopy,
   derivePersonalizationHint,
-  looksLikeBrokenSnippet,
+  extractShortGoalHint,
+  isUsablePersonalizationHint,
+  sanitizeImplementationIdea,
 } from "./leadIdeaFormatting";
 import { sanitizeCompanyName, summarizePrimaryGoal } from "./leadWebsiteExtract";
 
@@ -265,10 +267,7 @@ export const buildIdeasFromSolutionCases = (
   );
   if (!valid.length) return [];
 
-  const goalHint =
-    primaryGoal?.trim() && !looksLikeBrokenSnippet(primaryGoal)
-      ? summarizePrimaryGoal(primaryGoal, 90)
-      : null;
+  const goalHint = extractShortGoalHint(primaryGoal);
 
   const blueprints: Array<{
     category: string;
@@ -284,9 +283,10 @@ export const buildIdeasFromSolutionCases = (
   const ideas: LeadImplementationIdea[] = [];
   for (let i = 0; i < 4; i++) {
     const source = valid[i % valid.length];
-    const hint =
+    const rawHint =
       derivePersonalizationHint(source, companyName) ??
       (i === 0 ? goalHint : null);
+    const hint = isUsablePersonalizationHint(rawHint) ? rawHint : null;
     const blueprint = blueprints[i];
     const copy = buildPersonalizedIdeaCopy(companyName, hint, blueprint.kind);
     ideas.push({
@@ -310,23 +310,30 @@ export const resolveImplementationIdeas = (input: {
   const companyName = sanitizeCompanyName(input.companyName);
   const { segmentSlug, primaryGoal, solutionCases } = input;
 
+  const polish = (ideas: LeadImplementationIdea[]) =>
+    ideas.map((idea) => sanitizeImplementationIdea(idea, companyName));
+
   if (input.implementationIdeas?.length) {
-    return mergeImplementationIdeas(
-      input.implementationIdeas,
-      segmentSlug,
-      companyName,
-      3,
-      primaryGoal,
+    return polish(
+      mergeImplementationIdeas(
+        input.implementationIdeas,
+        segmentSlug,
+        companyName,
+        3,
+        primaryGoal,
+      ),
     );
   }
 
   const fromCases = buildIdeasFromSolutionCases(solutionCases, companyName, primaryGoal);
   if (fromCases.length) {
-    return mergeImplementationIdeas(fromCases, segmentSlug, companyName, 3, primaryGoal);
+    return polish(mergeImplementationIdeas(fromCases, segmentSlug, companyName, 3, primaryGoal));
   }
 
-  return getSegmentImplementationIdeas(
-    inferSegmentForIdeas(segmentSlug, companyName, primaryGoal),
-    companyName,
+  return polish(
+    getSegmentImplementationIdeas(
+      inferSegmentForIdeas(segmentSlug, companyName, primaryGoal),
+      companyName,
+    ),
   );
 };

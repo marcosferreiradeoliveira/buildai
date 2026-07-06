@@ -62,7 +62,22 @@ const INVALID_CITY_WORDS = new Set([
   "comprometidas",
   "sustentável",
   "sustentavel",
+  "planejar",
+  "planejamento",
+  "atuamos",
+  "facilitar",
+  "institucionais",
+  "processos",
+  "suas",
+  "seus",
+  "tomada",
 ]);
+
+const looksLikePlaceName = (city: string): boolean =>
+  city
+    .trim()
+    .split(/\s+/)
+    .some((word) => /^[A-ZÁÉÍÓÚÂÊÔÃÇ]/.test(word));
 
 export const isInvalidCity = (city: string | undefined): boolean => {
   if (!city?.trim()) return true;
@@ -70,7 +85,10 @@ export const isInvalidCity = (city: string | undefined): boolean => {
   if (normalized.length < 4 || normalized.length > 40) return true;
   const first = normalized.split(/\s+/)[0];
   if (first && INVALID_CITY_WORDS.has(first)) return true;
-  if (/todas|etapas|jornada|oferecemos/i.test(normalized)) return true;
+  if (/todas|etapas|jornada|oferecemos|planejar|atuamos|facilitar|suas|seus|tomada/i.test(normalized)) {
+    return true;
+  }
+  if (!looksLikePlaceName(city)) return true;
   return false;
 };
 

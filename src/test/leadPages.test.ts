@@ -12,6 +12,7 @@ describe("leadPages hero", () => {
     expect(description).toContain("Move Social");
     expect(description).not.toContain("Somos uma empresa");
     expect(description).not.toContain("evidências");
+    expect(description).not.toContain("planejar suas");
     expect(description).not.toContain("RBMA");
   });
 
@@ -19,11 +20,11 @@ describe("leadPages hero", () => {
     const description = buildLeadHeroDescription(
       "Move Social",
       "São Paulo",
-      "Consultoria em impacto social e monitoramento de projetos com foco em práticas ESG.",
+      "Consultoria em logística e gestão de frotas para empresas de médio porte.",
     );
 
     expect(description).toContain("Move Social");
-    expect(description).toContain("impacto social");
+    expect(description).toContain("logística");
     expect(description).toContain("São Paulo");
   });
 });
