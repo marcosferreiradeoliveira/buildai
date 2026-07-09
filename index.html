@@ -8,9 +8,9 @@
       function gtag() {
         dataLayer.push(arguments);
       }
+      window.gtag = gtag;
       gtag("js", new Date());
-      /* SPA: pageviews via React Router (src/components/AnalyticsPageView.tsx) */
-      gtag("config", "G-1MHT8QP7FC", { send_page_view: false });
+      gtag("config", "G-1MHT8QP7FC");
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

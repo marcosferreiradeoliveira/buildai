@@ -15,11 +15,18 @@ export const isGa4Enabled = (): boolean => Boolean(GA4_MEASUREMENT_ID);
 
 const shouldTrackPath = (path: string): boolean => !path.startsWith("/admin");
 
-/** Envia page_view — gtag já carregado no <head> (index.html). */
-export const trackPageView = (path: string): void => {
-  if (!window.gtag || !shouldTrackPath(path)) return;
+const getGtag = (): ((...args: unknown[]) => void) | undefined => {
+  if (typeof window === "undefined") return undefined;
+  return typeof window.gtag === "function" ? window.gtag : undefined;
+};
 
-  window.gtag("config", GA4_MEASUREMENT_ID, {
+/** Pageview em navegações SPA (a carga inicial é enviada pelo snippet no index.html). */
+export const trackPageView = (path: string): void => {
+  const gtag = getGtag();
+  if (!gtag || !shouldTrackPath(path)) return;
+
+  gtag("event", "page_view", {
+    send_to: GA4_MEASUREMENT_ID,
     page_path: path,
     page_location: `${window.location.origin}${path}`,
     page_title: document.title,
@@ -30,6 +37,7 @@ export const trackEvent = (
   eventName: string,
   params?: Record<string, string | number | boolean>,
 ): void => {
-  if (!window.gtag) return;
-  window.gtag("event", eventName, params);
+  const gtag = getGtag();
+  if (!gtag) return;
+  gtag("event", eventName, params);
 };
