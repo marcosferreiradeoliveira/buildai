@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import Index from "./pages/Index.tsx";
 import AdminLeadGeneratorPage from "./pages/AdminLeadGeneratorPage.tsx";
+import DiagnosticoPage from "./pages/DiagnosticoPage.tsx";
 import LeadLandingPage from "./pages/LeadLandingPage.tsx";
 import SegmentPage from "./pages/SegmentPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -28,6 +29,7 @@ const App = () => (
         <AnalyticsPageView />
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/diagnostico" element={<DiagnosticoPage />} />
           <Route path="/admin" element={<AdminLeadGeneratorPage />} />
           <Route path="/admin/gerar" element={<AdminLeadGeneratorPage />} />
           <Route path="/lp/:leadSlug" element={<LeadLandingPage />} />
