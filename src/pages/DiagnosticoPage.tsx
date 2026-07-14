@@ -27,6 +27,13 @@ import {
 } from "@/components/ui/accordion";
 import { trackEvent } from "@/lib/analytics";
 import buildaiLogo from "@/assets/buildai-logo-transparent.png";
+import automacaoCaseImage from "@/assets/automacao Large.jpeg";
+import contentFactoryCaseImage from "@/assets/Newsgen Large.jpeg";
+import culturaFluxoCaseImage from "@/assets/fluxo.jpeg";
+import freelasSniperCaseImage from "@/assets/99sniper Large.jpeg";
+import greenSkyCaseImage from "@/assets/greensky Large.jpeg";
+import growthOsCaseImage from "@/assets/GrowOS Large.jpeg";
+import psdAutomatorCaseImage from "@/assets/preview.jpeg";
 
 const calendlyUrl = "https://calendly.com/buildaidev/30min";
 
@@ -72,6 +79,7 @@ const portfolio = [
       "Aplicação web que transforma um layout fixo no Photoshop (PSD) em gerador em lote: camadas nomeadas, planilha Excel e pasta de imagens viram artes finais em PNG/PSD — catálogos, cards, banners, menus e qualquer layout repetitivo com um clique.",
     highlight:
       "Produção em lote de peças visuais a partir de template + planilha, sem retrabalho manual",
+    imageSrc: psdAutomatorCaseImage,
     href: "https://psdautomator.vercel.app/",
     cta: "Ver projeto ao vivo",
   },
@@ -82,6 +90,7 @@ const portfolio = [
       "Plataforma web que transforma conteúdo em vídeo com IA: a partir de texto (notícias ou roteiro), gera narração e vídeo com apresentador virtual; também traduz vídeos gravados para outros idiomas mantendo áudio e imagem sincronizados.",
     highlight:
       "Produção de vídeos informativos com menos etapas manuais — roteiro, voz e montagem em um só fluxo",
+    imageSrc: contentFactoryCaseImage,
     href: "https://ai-video-news-generator--video-generator-39001.us-central1.hosted.app/",
     cta: "Ver projeto ao vivo",
   },
@@ -91,6 +100,7 @@ const portfolio = [
     description:
       "Site institucional e comercial para operadora de parapente e asa delta (São Conrado e Niterói): catálogo de experiências, checkout Stripe ou fluxo consultivo via WhatsApp.",
     highlight: "Reservas online com Stripe e fundo de impacto social",
+    imageSrc: greenSkyCaseImage,
     href: "https://greensky.com.br/",
     cta: "Ver projeto ao vivo",
   },
@@ -100,6 +110,7 @@ const portfolio = [
     description:
       "Dashboard web para Chief Growth Officer (receita, CAC, leads, ROAS, funil de produto e comparação de canais). Conecta Google Ads, Meta, Brevo, Snov.io, Mixpanel e GA4; o CGO AI Analyst gera relatórios estratégicos com Gemini.",
     highlight: "Funil completo de marketing e produto em um só lugar — com relatório estratégico gerado por IA",
+    imageSrc: growthOsCaseImage,
     href: "https://youtu.be/oJyN6APFjuA",
     cta: "Assistir vídeo",
     video: true,
@@ -110,6 +121,7 @@ const portfolio = [
     description:
       "Monitora canal do Telegram e transforma mensagens de texto ou áudio em artigos otimizados para SEO: transcrição com OpenAI, redação estruturada com Claude, busca de imagem no Tavily e publicação automática no WordPress, Facebook e Instagram.",
     highlight: "Do Telegram ao portal publicado em minutos",
+    imageSrc: automacaoCaseImage,
     href: "https://youtu.be/W5IOzuOQIVw",
     cta: "Assistir vídeo",
     video: true,
@@ -120,6 +132,7 @@ const portfolio = [
     description:
       "Painel local que varre projetos no 99Freelas, filtra por whitelist/blacklist, gera propostas com Gemini e envia lances via Playwright.",
     highlight: "Prospecção e lances no 99Freelas no piloto automático — com revisão humana antes do envio",
+    imageSrc: freelasSniperCaseImage,
     href: "https://youtu.be/0PwsGTaO3KI",
     cta: "Assistir vídeo",
     video: true,
@@ -130,6 +143,7 @@ const portfolio = [
     description:
       "Plataforma B2B para gestão financeira e compliance de projetos culturais. Controle de orçamento por rubricas, análise de notas fiscais via IA e gestão de assinaturas.",
     highlight: "Automação de processos complexos de prestação de contas com análise de conformidade de documentos",
+    imageSrc: culturaFluxoCaseImage,
     href: "https://execucaofinanceira.web.app/",
     cta: "Ver projeto ao vivo",
   },
@@ -456,44 +470,57 @@ const DiagnosticoPage = () => {
             {portfolio.map((project) => (
               <article
                 key={project.title}
-                className="group flex min-h-[360px] flex-col rounded-3xl border border-white/10 bg-white/[0.04] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/50 hover:bg-white/[0.06]"
+                className="group flex min-h-[480px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/50 hover:bg-white/[0.06]"
               >
-                <div className="mb-5 flex items-start justify-between gap-4">
-                  <span
-                    className={`rounded-full border px-3 py-1 text-xs font-semibold ${
-                      categoryStyles[project.category]
-                    }`}
+                <div className="relative h-44 overflow-hidden border-b border-white/10 bg-slate-900">
+                  <img
+                    src={project.imageSrc}
+                    alt={`Preview do case ${project.title}`}
+                    loading="lazy"
+                    className="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/20 to-transparent" />
+                  <div className="absolute left-4 top-4 flex items-center gap-2">
+                    <span
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur ${
+                        categoryStyles[project.category]
+                      }`}
+                    >
+                      {project.category}
+                    </span>
+                  </div>
+                  <div className="absolute bottom-4 right-4 rounded-full border border-white/15 bg-black/35 p-2 text-white backdrop-blur">
+                    {project.video ? (
+                      <PlayCircle className="h-5 w-5" />
+                    ) : (
+                      <ExternalLink className="h-5 w-5" />
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-1 flex-col p-6">
+                  <h3 className="text-2xl font-bold text-white">{project.title}</h3>
+                  <p className="mt-4 text-sm leading-6 text-slate-400">{project.description}</p>
+                  <div className="mt-5 rounded-2xl border border-cyan-300/15 bg-cyan-300/10 p-4 text-sm font-medium leading-6 text-cyan-100">
+                    {project.highlight}
+                  </div>
+                  <a
+                    href={project.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() =>
+                      trackEvent("diagnostico_portfolio_click", {
+                        page: "diagnostico",
+                        project_title: project.title,
+                        project_category: project.category,
+                        destination_type: project.video ? "video" : "project",
+                      })
+                    }
+                    className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-bold text-blue-200 transition hover:text-white"
                   >
-                    {project.category}
-                  </span>
-                  {project.video ? (
-                    <PlayCircle className="h-5 w-5 text-slate-500 transition group-hover:text-cyan-200" />
-                  ) : (
-                    <ExternalLink className="h-5 w-5 text-slate-500 transition group-hover:text-cyan-200" />
-                  )}
+                    {project.cta}
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
                 </div>
-                <h3 className="text-2xl font-bold text-white">{project.title}</h3>
-                <p className="mt-4 text-sm leading-6 text-slate-400">{project.description}</p>
-                <div className="mt-5 rounded-2xl border border-cyan-300/15 bg-cyan-300/10 p-4 text-sm font-medium leading-6 text-cyan-100">
-                  {project.highlight}
-                </div>
-                <a
-                  href={project.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() =>
-                    trackEvent("diagnostico_portfolio_click", {
-                      page: "diagnostico",
-                      project_title: project.title,
-                      project_category: project.category,
-                      destination_type: project.video ? "video" : "project",
-                    })
-                  }
-                  className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-bold text-blue-200 transition hover:text-white"
-                >
-                  {project.cta}
-                  <ArrowRight className="h-4 w-4" />
-                </a>
               </article>
             ))}
           </div>
