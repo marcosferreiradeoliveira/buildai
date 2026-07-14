@@ -1,11 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
-  BarChart3,
   Bot,
   Brain,
   CalendarDays,
-  CheckCircle2,
+  Calculator,
   Clock3,
   Code2,
   Database,
@@ -16,6 +15,7 @@ import {
   PlayCircle,
   ShieldCheck,
   Sparkles,
+  Users,
   Workflow,
   Zap,
 } from "lucide-react";
@@ -36,6 +36,10 @@ import growthOsCaseImage from "@/assets/GrowOS Large.jpeg";
 import psdAutomatorCaseImage from "@/assets/preview.jpeg";
 
 const calendlyUrl = "https://calendly.com/buildaidev/30min";
+const urgentCtaClass =
+  "group inline-flex items-center justify-center gap-3 rounded-2xl border border-yellow-200/70 bg-gradient-to-r from-yellow-300 via-cyan-300 to-blue-400 px-6 py-4 text-base font-extrabold text-slate-950 shadow-[0_0_44px_rgba(250,204,21,0.55)] ring-2 ring-yellow-200/25 transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_0_70px_rgba(34,211,238,0.65)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200/60";
+const urgentCtaSmallClass =
+  "group inline-flex items-center justify-center gap-2 rounded-full border border-yellow-200/70 bg-gradient-to-r from-yellow-300 via-cyan-300 to-blue-400 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-[0_0_34px_rgba(250,204,21,0.48)] ring-2 ring-yellow-200/20 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_54px_rgba(34,211,238,0.58)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200/60 sm:px-5";
 
 const metrics = [
   { value: "50+", label: "Projetos entregues" },
@@ -206,6 +210,189 @@ const trackDiagnosticCta = (ctaPosition: string) => {
   });
 };
 
+const scrollToCalendly = () => {
+  document.getElementById("calendly")?.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+const formatCurrency = (value: number): string =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(value);
+
+const getPaybackEstimate = (monthlyLoss: number): string => {
+  if (monthlyLoss < 3000) return "45 dias";
+  if (monthlyLoss <= 10000) return "30 dias";
+  return "15 dias";
+};
+
+type RangeControlProps = {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  unit?: string;
+  prefix?: string;
+  onChange: (value: number) => void;
+};
+
+const RangeControl = ({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  unit,
+  prefix,
+  onChange,
+}: RangeControlProps) => {
+  const progress = ((value - min) / (max - min)) * 100;
+
+  return (
+    <label className="block rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <span className="text-sm font-medium text-slate-300">{label}</span>
+        <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1 font-mono text-sm font-bold text-cyan-100">
+          {prefix}
+          {value}
+          {unit}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="h-3 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-cyan-300 outline-none [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-cyan-300 [&::-moz-range-thumb]:shadow-[0_0_24px_rgba(34,211,238,0.8)] [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-cyan-300 [&::-webkit-slider-thumb]:shadow-[0_0_24px_rgba(34,211,238,0.8)]"
+        style={{
+          background: `linear-gradient(90deg, #22d3ee 0%, #60a5fa ${progress}%, rgba(30,41,59,0.95) ${progress}%, rgba(30,41,59,0.95) 100%)`,
+        }}
+      />
+      <div className="mt-2 flex justify-between text-xs text-slate-500">
+        <span>
+          {prefix}
+          {min}
+          {unit}
+        </span>
+        <span>
+          {prefix}
+          {max}
+          {unit}
+        </span>
+      </div>
+    </label>
+  );
+};
+
+const RoiCalculator = () => {
+  const [teamSize, setTeamSize] = useState(5);
+  const [weeklyHours, setWeeklyHours] = useState(8);
+  const [hourlyCost, setHourlyCost] = useState(40);
+
+  const wastedHours = Math.round(teamSize * weeklyHours * 4.33);
+  const monthlyLoss = wastedHours * hourlyCost;
+  const payback = getPaybackEstimate(monthlyLoss);
+
+  const handleAutomateClick = () => {
+    trackDiagnosticCta("roi_calculator");
+    trackEvent("roi_calculator_cta_click", {
+      page: "diagnostico",
+      team_size: teamSize,
+      weekly_hours: weeklyHours,
+      hourly_cost: hourlyCost,
+      wasted_hours: wastedHours,
+      monthly_loss: monthlyLoss,
+      payback_estimate: payback,
+    });
+    scrollToCalendly();
+  };
+
+  return (
+    <div className="relative">
+      <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-r from-cyan-400/25 via-blue-500/20 to-indigo-600/25 blur-2xl" />
+      <div className="relative overflow-hidden rounded-[2rem] border border-cyan-300/25 bg-[#0F172A]/85 p-5 shadow-[0_0_80px_rgba(34,211,238,0.16)] backdrop-blur-xl sm:p-6">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-cyan-200">Calculadora de ROI</p>
+            <h2 className="mt-1 text-2xl font-extrabold text-white">Quanto custa não automatizar?</h2>
+          </div>
+          <div className="rounded-2xl border border-cyan-300/25 bg-cyan-300/10 p-3 text-cyan-100 shadow-[0_0_28px_rgba(34,211,238,0.22)]">
+            <Calculator className="h-7 w-7" />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <RangeControl
+            label="Tamanho do Time"
+            value={teamSize}
+            min={1}
+            max={30}
+            unit=" pessoas"
+            onChange={setTeamSize}
+          />
+          <RangeControl
+            label="Horas Perdidas"
+            value={weeklyHours}
+            min={2}
+            max={40}
+            unit="h/sem"
+            onChange={setWeeklyHours}
+          />
+          <RangeControl
+            label="Custo da Hora do Time"
+            value={hourlyCost}
+            min={20}
+            max={150}
+            prefix="R$ "
+            onChange={setHourlyCost}
+          />
+        </div>
+
+        <div className="mt-6 rounded-3xl border border-orange-300/20 bg-gradient-to-br from-orange-500/15 via-red-500/10 to-cyan-400/10 p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-100/80">
+            Custo Mensal Exposto
+          </p>
+          <div className="mt-2 bg-gradient-to-r from-orange-300 via-yellow-200 to-cyan-200 bg-clip-text text-4xl font-black tracking-tight text-transparent sm:text-5xl">
+            {formatCurrency(monthlyLoss)}
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+            <div className="flex items-center gap-2 text-slate-400">
+              <Clock3 className="h-4 w-4 text-cyan-200" />
+              <span className="text-sm">Horas Desperdiçadas/Mês</span>
+            </div>
+            <p className="mt-2 font-mono text-3xl font-extrabold text-white">{wastedHours}h</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+            <div className="flex items-center gap-2 text-slate-400">
+              <Users className="h-4 w-4 text-yellow-200" />
+              <span className="text-sm">Payback Estimado</span>
+            </div>
+            <p className="mt-2 font-mono text-3xl font-extrabold text-cyan-100">{payback}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-yellow-200/20 bg-yellow-200/10 p-4">
+          <p className="text-sm font-semibold leading-6 text-yellow-50">
+            Seu time está perdendo {wastedHours} horas que poderiam ser automatizadas. Vamos zerar esse custo?
+          </p>
+          <button type="button" onClick={handleAutomateClick} className={`${urgentCtaSmallClass} mt-4`}>
+            Automatizar este processo
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const DiagnosticoPage = () => {
   useEffect(() => {
     document.title = "Diagnóstico de Automação & ROI | BuildAI";
@@ -285,7 +472,7 @@ const DiagnosticoPage = () => {
           <a
             href="#calendly"
             onClick={() => trackDiagnosticCta("header")}
-            className="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_0_32px_rgba(59,130,246,0.35)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_44px_rgba(99,102,241,0.45)] sm:px-5"
+            className={urgentCtaSmallClass}
           >
             Garantir Diagnóstico Gratuito
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -319,7 +506,7 @@ const DiagnosticoPage = () => {
               <a
                 href="#calendly"
                 onClick={() => trackDiagnosticCta("hero_primary")}
-                className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 text-base font-bold text-white shadow-[0_0_40px_rgba(59,130,246,0.42)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_56px_rgba(99,102,241,0.55)]"
+                className={urgentCtaClass}
               >
                 <CalendarDays className="h-5 w-5" />
                 Agendar Meu Diagnóstico de 15 min
@@ -341,43 +528,7 @@ const DiagnosticoPage = () => {
             </div>
           </div>
 
-          <div className="relative">
-            <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-r from-blue-500/20 to-indigo-600/20 blur-2xl" />
-            <div className="relative rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 shadow-2xl backdrop-blur-xl">
-              <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-400">Diagnóstico estimado</p>
-                  <p className="text-2xl font-bold text-white">ROI em 15 min</p>
-                </div>
-                <div className="rounded-2xl bg-blue-500/10 p-3 text-blue-200">
-                  <BarChart3 className="h-7 w-7" />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {[
-                  ["Horas manuais por mês", "120h"],
-                  ["Custo operacional exposto", "R$ 18k"],
-                  ["Payback estimado", "45 dias"],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-sm text-slate-400">{label}</span>
-                      <span className="font-mono text-lg font-bold text-cyan-200">{value}</span>
-                    </div>
-                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
-                      <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-blue-400 to-cyan-300" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-100">
-                <CheckCircle2 className="mb-2 h-5 w-5" />
-                Se a conta não fechar, a recomendação é não desenvolver. Simples assim.
-              </div>
-            </div>
-          </div>
+          <RoiCalculator />
         </div>
       </section>
 
@@ -432,6 +583,22 @@ const DiagnosticoPage = () => {
             </div>
 
             <div className="mx-auto mt-10 max-w-5xl">
+              <div className="mb-6 flex flex-col items-center justify-center gap-3 text-center">
+                <a
+                  href={calendlyUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => trackDiagnosticCta("calendly_top")}
+                  className={urgentCtaClass}
+                >
+                  <CalendarDays className="h-5 w-5" />
+                  Escolher horário agora
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </a>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-yellow-100/80">
+                  Poucos horários disponíveis esta semana
+                </p>
+              </div>
               <div className="overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl">
                 <div
                   className="calendly-inline-widget min-w-[320px]"
@@ -459,7 +626,7 @@ const DiagnosticoPage = () => {
             <a
               href="#calendly"
               onClick={() => trackDiagnosticCta("portfolio_section")}
-              className="inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-400/10 px-5 py-3 text-sm font-bold text-blue-100 transition hover:border-blue-300/60 hover:bg-blue-400/20"
+              className={urgentCtaSmallClass}
             >
               Quero mapear meu ROI
               <ArrowRight className="h-4 w-4" />
@@ -569,7 +736,7 @@ const DiagnosticoPage = () => {
             <a
               href="#calendly"
               onClick={() => trackDiagnosticCta("faq_section")}
-              className="mt-8 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 px-5 py-3 text-sm font-bold text-white transition hover:scale-[1.02]"
+              className={`${urgentCtaSmallClass} mt-8`}
             >
               Garantir Diagnóstico Gratuito
               <ArrowRight className="h-4 w-4" />
@@ -606,7 +773,7 @@ const DiagnosticoPage = () => {
             <a
               href="#calendly"
               onClick={() => trackDiagnosticCta("final_cta")}
-              className="mt-8 inline-flex items-center justify-center gap-3 rounded-2xl bg-white px-6 py-4 text-base font-extrabold text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-100"
+              className={`${urgentCtaClass} mt-8`}
             >
               Agendar Meu Diagnóstico de 15 min
               <CalendarDays className="h-5 w-5" />
