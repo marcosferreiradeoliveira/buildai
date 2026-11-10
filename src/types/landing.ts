@@ -34,6 +34,9 @@ export type ProjectItem = {
   metric: string;
   description: string;
   imageSrc?: string;
+  imageSrcSet?: string;
+  webpSrcSet?: string;
+  imageSizes?: string;
   href?: string;
   videoUrl?: string;
 };

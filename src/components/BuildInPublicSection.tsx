@@ -21,7 +21,7 @@ const BuildInPublicSection = ({ content }: BuildInPublicSectionProps) => {
         >
           <span className="brand-eyebrow">{content.eyebrow}</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mt-3">
-            {content.title} <span className="gradient-text">{content.highlightedText}</span> no processo
+            {content.title} <span className="gradient-text">{content.highlightedText}</span>
           </h2>
           <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
             {content.description}

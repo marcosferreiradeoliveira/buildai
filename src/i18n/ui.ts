@@ -8,6 +8,7 @@ export type UiTranslations = {
   portfolio: {
     watchVideo: string;
     viewLive: string;
+    viewAll: string;
   };
   services: {
     titleSuffix: string;
@@ -15,12 +16,17 @@ export type UiTranslations = {
   footer: {
     namePlaceholder: string;
     emailPlaceholder: string;
+    phonePlaceholder: string;
+    companyPlaceholder: string;
     messagePlaceholder: string;
     nameRequired: string;
     emailRequired: string;
     emailInvalid: string;
+    phoneRequired: string;
+    phoneInvalid: string;
+    companyRequired: string;
     messageRequired: string;
-    whatsappIntro: (name: string, email: string, message: string) => string;
+    whatsappIntro: (name: string, email: string, phone: string, company: string, message: string) => string;
     preferWhatsApp: string;
     rightsReserved: string;
   };
@@ -36,6 +42,7 @@ const uiByLocale: Record<Locale, UiTranslations> = {
     portfolio: {
       watchVideo: "Assistir vídeo",
       viewLive: "Ver projeto ao vivo",
+      viewAll: "Ver todos os cases",
     },
     services: {
       titleSuffix: "resultados",
@@ -43,13 +50,18 @@ const uiByLocale: Record<Locale, UiTranslations> = {
     footer: {
       namePlaceholder: "Seu nome",
       emailPlaceholder: "Seu email",
+      phonePlaceholder: "Seu telefone",
+      companyPlaceholder: "Sua empresa",
       messagePlaceholder: "Conte sobre seu projeto...",
       nameRequired: "Nome é obrigatório",
       emailRequired: "Email é obrigatório",
       emailInvalid: "Email inválido",
+      phoneRequired: "Telefone é obrigatório",
+      phoneInvalid: "Telefone inválido",
+      companyRequired: "Empresa é obrigatória",
       messageRequired: "Mensagem é obrigatória",
-      whatsappIntro: (name, email, message) =>
-        `Olá! Meu nome é ${name}.\nEmail: ${email}\nMensagem: ${message}`,
+      whatsappIntro: (name, email, phone, company, message) =>
+        `Olá! Meu nome é ${name}.\nEmpresa: ${company}\nTelefone: ${phone}\nEmail: ${email}\nMensagem: ${message}`,
       preferWhatsApp: "Prefere WhatsApp?",
       rightsReserved: "Todos os direitos reservados.",
     },
@@ -62,6 +74,7 @@ const uiByLocale: Record<Locale, UiTranslations> = {
     portfolio: {
       watchVideo: "Watch video",
       viewLive: "View live project",
+      viewAll: "See all cases",
     },
     services: {
       titleSuffix: "results",
@@ -69,13 +82,18 @@ const uiByLocale: Record<Locale, UiTranslations> = {
     footer: {
       namePlaceholder: "Your name",
       emailPlaceholder: "Your email",
+      phonePlaceholder: "Your phone",
+      companyPlaceholder: "Your company",
       messagePlaceholder: "Tell us about your project...",
       nameRequired: "Name is required",
       emailRequired: "Email is required",
       emailInvalid: "Invalid email",
+      phoneRequired: "Phone is required",
+      phoneInvalid: "Invalid phone",
+      companyRequired: "Company is required",
       messageRequired: "Message is required",
-      whatsappIntro: (name, email, message) =>
-        `Hi! My name is ${name}.\nEmail: ${email}\nMessage: ${message}`,
+      whatsappIntro: (name, email, phone, company, message) =>
+        `Hi! My name is ${name}.\nCompany: ${company}\nPhone: ${phone}\nEmail: ${email}\nMessage: ${message}`,
       preferWhatsApp: "Prefer WhatsApp?",
       rightsReserved: "All rights reserved.",
     },
@@ -89,6 +107,7 @@ const uiByLocale: Record<Locale, UiTranslations> = {
     portfolio: {
       watchVideo: "Ver video",
       viewLive: "Ver proyecto en vivo",
+      viewAll: "Ver todos los casos",
     },
     services: {
       titleSuffix: "resultados",
@@ -96,13 +115,18 @@ const uiByLocale: Record<Locale, UiTranslations> = {
     footer: {
       namePlaceholder: "Tu nombre",
       emailPlaceholder: "Tu email",
+      phonePlaceholder: "Tu teléfono",
+      companyPlaceholder: "Tu empresa",
       messagePlaceholder: "Cuéntanos sobre tu proyecto...",
       nameRequired: "El nombre es obligatorio",
       emailRequired: "El email es obligatorio",
       emailInvalid: "Email inválido",
+      phoneRequired: "El teléfono es obligatorio",
+      phoneInvalid: "Teléfono inválido",
+      companyRequired: "La empresa es obligatoria",
       messageRequired: "El mensaje es obligatorio",
-      whatsappIntro: (name, email, message) =>
-        `¡Hola! Mi nombre es ${name}.\nEmail: ${email}\nMensaje: ${message}`,
+      whatsappIntro: (name, email, phone, company, message) =>
+        `¡Hola! Mi nombre es ${name}.\nEmpresa: ${company}\nTeléfono: ${phone}\nEmail: ${email}\nMensaje: ${message}`,
       preferWhatsApp: "¿Prefieres WhatsApp?",
       rightsReserved: "Todos los derechos reservados.",
     },

@@ -15,15 +15,27 @@ const FooterSection = ({ content }: FooterSectionProps) => {
   const ui = useUi();
   const isInView = useInView(ref, { once: true, margin: "-50px" });
 
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", company: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
 
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  };
+
   const validate = () => {
     const e: Record<string, string> = {};
+    const phoneDigits = form.phone.replace(/\D/g, "");
     if (!form.name.trim()) e.name = ui.footer.nameRequired;
     if (!form.email.trim()) e.email = ui.footer.emailRequired;
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = ui.footer.emailInvalid;
+    if (!phoneDigits) e.phone = ui.footer.phoneRequired;
+    else if (phoneDigits.length < 10) e.phone = ui.footer.phoneInvalid;
+    if (!form.company.trim()) e.company = ui.footer.companyRequired;
     if (!form.message.trim()) e.message = ui.footer.messageRequired;
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -32,9 +44,9 @@ const FooterSection = ({ content }: FooterSectionProps) => {
   const handleSubmit = (ev: React.FormEvent) => {
     ev.preventDefault();
     if (!validate()) return;
-    const message = ui.footer.whatsappIntro(form.name, form.email, form.message);
+    const message = ui.footer.whatsappIntro(form.name, form.email, form.phone, form.company, form.message);
     openWhatsApp(message, "contact_form");
-    setForm({ name: "", email: "", message: "" });
+    setForm({ name: "", email: "", phone: "", company: "", message: "" });
     setErrors({});
     setSubmitted(true);
   };
@@ -106,6 +118,33 @@ const FooterSection = ({ content }: FooterSectionProps) => {
                 maxLength={255}
               />
               {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  placeholder={ui.footer.phonePlaceholder}
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: formatPhone(e.target.value) })}
+                  className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
+                  maxLength={16}
+                />
+                {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone}</p>}
+              </div>
+              <div>
+                <input
+                  type="text"
+                  autoComplete="organization"
+                  placeholder={ui.footer.companyPlaceholder}
+                  value={form.company}
+                  onChange={(e) => setForm({ ...form, company: e.target.value })}
+                  className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
+                  maxLength={120}
+                />
+                {errors.company && <p className="text-destructive text-xs mt-1">{errors.company}</p>}
+              </div>
             </div>
             <div>
               <textarea

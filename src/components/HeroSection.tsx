@@ -11,7 +11,7 @@ type HeroSectionProps = {
 
 const HeroSection = ({ content, logoSrc, secondaryCtaHref = "#portfolio" }: HeroSectionProps) => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center hero-gradient overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center hero-gradient overflow-hidden pb-28 sm:pb-16">
       {content.backgroundImageSrc ? (
         <img
           src={content.backgroundImageSrc}
@@ -125,14 +125,20 @@ const HeroSection = ({ content, logoSrc, secondaryCtaHref = "#portfolio" }: Hero
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.7 }}
-            className="mt-20 grid grid-cols-3 gap-8 max-w-lg mx-auto"
+            className="mt-12 flex flex-wrap items-center justify-center gap-3 max-w-2xl mx-auto"
           >
-            {content.stats.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl sm:text-3xl font-heading font-bold gradient-text">{stat.value}</div>
-                <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
-              </div>
-            ))}
+            {content.stats.map((stat) =>
+              stat.label ? (
+                <div key={stat.label} className="min-w-[5.5rem] text-center">
+                  <div className="text-2xl sm:text-3xl font-heading font-bold gradient-text">{stat.value}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
+                </div>
+              ) : (
+                <span key={stat.value} className="brand-pill">
+                  {stat.value}
+                </span>
+              ),
+            )}
           </motion.div>
         </div>
       </div>

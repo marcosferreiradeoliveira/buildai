@@ -80,22 +80,9 @@ The calculator CTA scrolls smoothly to the Calendly section and emits GA4 events
 
 ## Portfolio Cases
 
-The public site and diagnostic landing use BuildAI portfolio proof, including:
+The home shows six cases. `/portfolio` lists the full public set: Gerador de Encartes, Green Sky, formulário de IR e pesquisa NPS (escritório de contabilidade de saúde, sem nome de cliente), AlphaCoach, LeadGen AI, Conexão Ativa, NewsGen AI, GrowthOS, Content Factory AI and CNU Simulado.
 
-- PSD Art Generator
-- NewsGen AI
-- Green Sky
-- GrowthOS
-- Conexao Ativa
-- 99Freelas Sniper
-- Cultura Fluxo Finance
-- Grio AI
-- Espelho Literario / Fabulador
-- IG-Scout AI
-- App Amanha (IoT)
-- Content Factory AI
-
-Case imagery is stored under `src/assets/` and imported directly into React components.
+Case imagery for the public cards lives in `src/assets/cases/`.
 
 ## Lead Extraction & Personalized Landing Pages
 

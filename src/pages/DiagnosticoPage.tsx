@@ -29,25 +29,27 @@ import SeoHead from "@/components/SeoHead";
 import WhatsAppCtaBand from "@/components/WhatsAppCtaBand";
 import { trackEvent } from "@/lib/analytics";
 import buildaiLogo from "@/assets/buildai-logo-transparent.png";
-import automacaoCaseImage from "@/assets/automacao Large.jpeg";
-import contentFactoryCaseImage from "@/assets/Newsgen Large.jpeg";
-import culturaFluxoCaseImage from "@/assets/fluxo.jpeg";
-import freelasSniperCaseImage from "@/assets/99sniper Large.jpeg";
-import greenSkyCaseImage from "@/assets/greensky Large.jpeg";
-import growthOsCaseImage from "@/assets/GrowOS Large.jpeg";
-import psdAutomatorCaseImage from "@/assets/preview.jpeg";
+import encartes640 from "@/assets/cases/encartes-640.webp";
+import encartes960 from "@/assets/cases/encartes-960.webp";
+import encartesJpeg from "@/assets/cases/encartes-960.jpg";
+import greensky640 from "@/assets/cases/greensky-640.webp";
+import greensky960 from "@/assets/cases/greensky-960.webp";
+import greenskyJpeg from "@/assets/cases/greensky-960.jpg";
+import conexao640 from "@/assets/cases/conexao-640.webp";
+import conexao960 from "@/assets/cases/conexao-960.webp";
+import conexaoJpeg from "@/assets/cases/conexao-960.jpg";
+import newsgen640 from "@/assets/cases/newsgen-640.webp";
+import newsgen960 from "@/assets/cases/newsgen-960.webp";
+import newsgenJpeg from "@/assets/cases/newsgen-960.jpg";
+import growth640 from "@/assets/cases/growth-640.webp";
+import growth960 from "@/assets/cases/growth-960.webp";
+import growthJpeg from "@/assets/cases/growth-960.jpg";
 
 const calendlyUrl = "https://calendly.com/buildaidev/30min";
 const urgentCtaClass =
   "group inline-flex items-center justify-center gap-3 rounded-2xl border border-yellow-200/70 bg-gradient-to-r from-yellow-300 via-cyan-300 to-blue-400 px-6 py-4 text-base font-extrabold text-slate-950 shadow-[0_0_44px_rgba(250,204,21,0.55)] ring-2 ring-yellow-200/25 transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-[0_0_70px_rgba(34,211,238,0.65)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200/60";
 const urgentCtaSmallClass =
   "group inline-flex items-center justify-center gap-2 rounded-full border border-yellow-200/70 bg-gradient-to-r from-yellow-300 via-cyan-300 to-blue-400 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-[0_0_34px_rgba(250,204,21,0.48)] ring-2 ring-yellow-200/20 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_54px_rgba(34,211,238,0.58)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-200/60 sm:px-5";
-
-const metrics = [
-  { value: "50+", label: "Projetos entregues" },
-  { value: "98%", label: "Satisfação" },
-  { value: "10x", label: "ROI médio" },
-];
 
 const steps = [
   {
@@ -77,81 +79,71 @@ const categoryStyles: Record<string, string> = {
   MicroSaaS: "border-indigo-400/30 bg-indigo-400/10 text-indigo-200",
 };
 
+const caseSizes = "(min-width: 1280px) 28rem, (min-width: 768px) 46vw, 100vw";
+
 const portfolio = [
   {
     category: "Automação com IA",
-    title: "Gerador de Artes PSD",
+    title: "Gerador de Encartes para Varejo/Supermercado",
     description:
-      "Aplicação web que transforma um layout fixo no Photoshop (PSD) em gerador em lote: camadas nomeadas, planilha Excel e pasta de imagens viram artes finais em PNG/PSD — catálogos, cards, banners, menus e qualquer layout repetitivo com um clique.",
+      "Pega um layout do Photoshop, uma planilha e uma pasta de imagens, e gera encartes, catálogos, cards e banners em lote, sem montar peça por peça na mão.",
     highlight:
-      "Produção em lote de peças visuais a partir de template + planilha, sem retrabalho manual",
-    imageSrc: psdAutomatorCaseImage,
+      "Produção em lote de encartes e peças de varejo a partir de um layout e de uma planilha, sem retrabalho manual.",
+    imageSrc: encartesJpeg,
+    imageSrcSet: `${encartesJpeg} 960w`,
+    webpSrcSet: `${encartes640} 640w, ${encartes960} 960w`,
     href: "https://psdautomator.vercel.app/",
-    cta: "Ver projeto ao vivo",
-  },
-  {
-    category: "Content Factory",
-    title: "NewsGen AI",
-    description:
-      "Plataforma web que transforma conteúdo em vídeo com IA: a partir de texto (notícias ou roteiro), gera narração e vídeo com apresentador virtual; também traduz vídeos gravados para outros idiomas mantendo áudio e imagem sincronizados.",
-    highlight:
-      "Produção de vídeos informativos com menos etapas manuais — roteiro, voz e montagem em um só fluxo",
-    imageSrc: contentFactoryCaseImage,
-    href: "https://ai-video-news-generator--video-generator-39001.us-central1.hosted.app/",
     cta: "Ver projeto ao vivo",
   },
   {
     category: "Software Sob Medida",
     title: "Green Sky",
     description:
-      "Site institucional e comercial para operadora de parapente e asa delta (São Conrado e Niterói): catálogo de experiências, checkout Stripe ou fluxo consultivo via WhatsApp.",
-    highlight: "Reservas online com Stripe e fundo de impacto social",
-    imageSrc: greenSkyCaseImage,
+      "Site da operadora de parapente e asa delta (São Conrado e Niterói), com catálogo de experiências, pagamento no site ou conversa no WhatsApp, seis idiomas e contador público do fundo de impacto.",
+    highlight: "Reservas online com pagamento no site ou conversa no WhatsApp — turismo de aventura no Rio.",
+    imageSrc: greenskyJpeg,
+    imageSrcSet: `${greenskyJpeg} 960w`,
+    webpSrcSet: `${greensky640} 640w, ${greensky960} 960w`,
     href: "https://greensky.com.br/",
+    cta: "Ver projeto ao vivo",
+  },
+  {
+    category: "Automação com IA",
+    title: "Conexão Ativa — Automação de Notícias",
+    description:
+      "Monitora um canal do Telegram, estrutura o artigo, busca imagem e publica no portal, no Facebook e no Instagram, com repostagem em portais secundários quando cabe.",
+    highlight: "Do Telegram ao portal, ao Facebook e ao Instagram, sem o time copiar e colar o mesmo conteúdo em três lugares.",
+    imageSrc: conexaoJpeg,
+    imageSrcSet: `${conexaoJpeg} 960w`,
+    webpSrcSet: `${conexao640} 640w, ${conexao960} 960w`,
+    href: "https://youtu.be/W5IOzuOQIVw",
+    cta: "Assistir vídeo",
+    video: true,
+  },
+  {
+    category: "Content Factory",
+    title: "NewsGen AI",
+    description:
+      "A partir de um texto, gera narração e vídeo com apresentador virtual. Também traduz um vídeo já gravado, mantendo áudio e imagem alinhados.",
+    highlight: "Roteiro, voz e montagem de vídeo informativo num só fluxo.",
+    imageSrc: newsgenJpeg,
+    imageSrcSet: `${newsgenJpeg} 960w`,
+    webpSrcSet: `${newsgen640} 640w, ${newsgen960} 960w`,
+    href: "https://ai-video-news-generator--video-generator-39001.us-central1.hosted.app/",
     cta: "Ver projeto ao vivo",
   },
   {
     category: "MicroSaaS",
     title: "GrowthOS",
     description:
-      "Dashboard web para Chief Growth Officer (receita, CAC, leads, ROAS, funil de produto e comparação de canais). Conecta Google Ads, Meta, Brevo, Snov.io, Mixpanel e GA4; o CGO AI Analyst gera relatórios estratégicos com Gemini.",
-    highlight: "Funil completo de marketing e produto em um só lugar — com relatório estratégico gerado por IA",
-    imageSrc: growthOsCaseImage,
+      "Painel de growth com visão de receita, funil e canais. Conecta as fontes de anúncio e de e-mail, e um analista de IA monta o relatório a partir dos dados sincronizados.",
+    highlight: "Funil de marketing e produto no mesmo lugar, com relatório estratégico gerado por IA.",
+    imageSrc: growthJpeg,
+    imageSrcSet: `${growthJpeg} 960w`,
+    webpSrcSet: `${growth640} 640w, ${growth960} 960w`,
     href: "https://youtu.be/oJyN6APFjuA",
     cta: "Assistir vídeo",
     video: true,
-  },
-  {
-    category: "Automação com IA",
-    title: "Conexão Ativa",
-    description:
-      "Monitora canal do Telegram e transforma mensagens de texto ou áudio em artigos otimizados para SEO: transcrição com OpenAI, redação estruturada com Claude, busca de imagem no Tavily e publicação automática no WordPress, Facebook e Instagram.",
-    highlight: "Do Telegram ao portal publicado em minutos",
-    imageSrc: automacaoCaseImage,
-    href: "https://youtu.be/W5IOzuOQIVw",
-    cta: "Assistir vídeo",
-    video: true,
-  },
-  {
-    category: "Automação com IA",
-    title: "99Freelas Sniper",
-    description:
-      "Painel local que varre projetos no 99Freelas, filtra por whitelist/blacklist, gera propostas com Gemini e envia lances via Playwright.",
-    highlight: "Prospecção e lances no 99Freelas no piloto automático — com revisão humana antes do envio",
-    imageSrc: freelasSniperCaseImage,
-    href: "https://youtu.be/0PwsGTaO3KI",
-    cta: "Assistir vídeo",
-    video: true,
-  },
-  {
-    category: "MicroSaaS",
-    title: "Cultura Fluxo Finance",
-    description:
-      "Plataforma B2B para gestão financeira e compliance de projetos culturais. Controle de orçamento por rubricas, análise de notas fiscais via IA e gestão de assinaturas.",
-    highlight: "Automação de processos complexos de prestação de contas com análise de conformidade de documentos",
-    imageSrc: culturaFluxoCaseImage,
-    href: "https://execucaofinanceira.web.app/",
-    cta: "Ver projeto ao vivo",
   },
 ];
 
@@ -521,17 +513,6 @@ const DiagnosticoPage = () => {
               <p className="text-sm font-medium text-cyan-100">👉 Avaliação técnica 100% gratuita.</p>
             </div>
 
-            <div className="mt-10 grid max-w-3xl grid-cols-3 gap-3">
-              {metrics.map((metric) => (
-                <div
-                  key={metric.label}
-                  className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-center backdrop-blur"
-                >
-                  <div className="text-2xl font-extrabold text-white sm:text-3xl">{metric.value}</div>
-                  <div className="mt-1 text-xs text-slate-400 sm:text-sm">{metric.label}</div>
-                </div>
-              ))}
-            </div>
           </div>
 
           <RoiCalculator />
@@ -646,12 +627,18 @@ const DiagnosticoPage = () => {
                 className="group flex min-h-[480px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/50 hover:bg-white/[0.06]"
               >
                 <div className="relative h-44 overflow-hidden border-b border-white/10 bg-slate-900">
-                  <img
-                    src={project.imageSrc}
-                    alt={`Preview do case ${project.title}`}
-                    loading="lazy"
-                    className="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100"
-                  />
+                  <picture>
+                    <source type="image/webp" srcSet={project.webpSrcSet} sizes={caseSizes} />
+                    <img
+                      src={project.imageSrc}
+                      srcSet={project.imageSrcSet}
+                      sizes={caseSizes}
+                      alt={`Preview do case ${project.title}`}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100"
+                    />
+                  </picture>
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/20 to-transparent" />
                   <div className="absolute left-4 top-4 flex items-center gap-2">
                     <span

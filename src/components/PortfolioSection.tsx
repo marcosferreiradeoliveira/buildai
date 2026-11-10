@@ -8,7 +8,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import WhatsAppCtaBand from "@/components/WhatsAppCtaBand";
+import { Link } from "react-router-dom";
 import { LandingContent } from "@/types/landing";
+import { ProjectItem } from "@/types/landing";
 import { useUi } from "@/i18n/LanguageContext";
 
 type PortfolioBlock = LandingContent["portfolio"];
@@ -16,6 +18,27 @@ type PortfolioBlock = LandingContent["portfolio"];
 type PortfolioSectionProps = {
   content: PortfolioBlock;
   sectionId?: string;
+  allCasesHref?: string;
+};
+
+const CasePicture = ({ project }: { project: ProjectItem }) => {
+  if (!project.imageSrc) return null;
+  const sizes = project.imageSizes ?? "(min-width: 1024px) 22rem, (min-width: 640px) 46vw, 100vw";
+
+  return (
+    <picture>
+      {project.webpSrcSet ? <source type="image/webp" srcSet={project.webpSrcSet} sizes={sizes} /> : null}
+      <img
+        src={project.imageSrc}
+        srcSet={project.imageSrcSet}
+        sizes={project.imageSrcSet ? sizes : undefined}
+        alt={project.title}
+        loading="lazy"
+        decoding="async"
+        className="relative z-10 h-40 w-full object-cover sm:h-44"
+      />
+    </picture>
+  );
 };
 
 const getYoutubeEmbedUrl = (url: string) => {
@@ -23,13 +46,12 @@ const getYoutubeEmbedUrl = (url: string) => {
   return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1` : url;
 };
 
-const PortfolioSection = ({ content, sectionId = "portfolio" }: PortfolioSectionProps) => {
+const PortfolioSection = ({ content, sectionId = "portfolio", allCasesHref }: PortfolioSectionProps) => {
   const ref = useRef(null);
   const ui = useUi();
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [videoModal, setVideoModal] = useState<{ title: string; embedUrl: string } | null>(null);
-  const gridClass =
-    content.items.length >= 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-3";
+  const gridClass = content.items.length >= 3 ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2";
 
   return (
     <section id={sectionId} className="relative py-24 sm:py-32 overflow-hidden" ref={ref}>
@@ -39,6 +61,8 @@ const PortfolioSection = ({ content, sectionId = "portfolio" }: PortfolioSection
             src={content.backgroundImageSrc}
             alt=""
             aria-hidden="true"
+            loading="lazy"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover opacity-30"
           />
           <div className="absolute inset-0 bg-background/55" />
@@ -77,18 +101,14 @@ const PortfolioSection = ({ content, sectionId = "portfolio" }: PortfolioSection
                       src={content.backgroundImageSrc}
                       alt=""
                       aria-hidden="true"
+                      loading="lazy"
+                      decoding="async"
                       className="absolute inset-0 h-full w-full object-cover opacity-20"
                     />
                     <div className="absolute inset-0 bg-card/85" />
                   </>
                 ) : null}
-                {project.imageSrc ? (
-                  <img
-                    src={project.imageSrc}
-                    alt={project.title}
-                    className="relative z-10 w-full h-40 sm:h-44 object-cover"
-                  />
-                ) : null}
+                <CasePicture project={project} />
                 <div className={`relative z-10 ${project.imageSrc ? "p-6 sm:p-8" : ""}`}>
                   <span className="brand-eyebrow text-[10px]">
                     {project.category}
@@ -156,6 +176,14 @@ const PortfolioSection = ({ content, sectionId = "portfolio" }: PortfolioSection
             );
           })}
         </div>
+
+        {allCasesHref ? (
+          <div className="mt-10 text-center">
+            <Link to={allCasesHref} className="text-sm font-semibold text-primary hover:underline">
+              {ui.portfolio.viewAll}
+            </Link>
+          </div>
+        ) : null}
 
         {sectionId === "portfolio" ? <WhatsAppCtaBand source="cases" className="mt-12" /> : null}
       </div>

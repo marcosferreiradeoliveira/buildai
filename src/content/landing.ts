@@ -3,27 +3,14 @@ import buildaiIcon from "@/assets/buildai-icon-only.png";
 import buildaiLogoDark from "@/assets/buildai-logo-transparent.png";
 import educationHeroImage from "@/assets/Gemini_Generated_Image_re9l7qre9l7qre9l Small.png";
 import educationCasesImage from "@/assets/Gemini_Generated_Image_jgkljmjgkljmjgkl Small.png";
-import previewImage from "@/assets/preview.jpeg";
-import courseOgImage from "@/assets/watermarked_img_2560458068198262558.jpg";
-import igScoutCaseImage from "@/assets/case1.jpeg";
-import culturaFluxoCaseImage from "@/assets/fluxo.jpeg";
-import appAmanhaCaseImage from "@/assets/MuseuDoAmanha-300x277-DqxW2IJM.png";
-import contentFactoryCaseImage from "@/assets/Carrossel.png";
-import freelasSniperCaseImage from "@/assets/99sniper Large.jpeg";
-import automacaoCaseImage from "@/assets/automacao Large.jpeg";
-import fabuladorCaseImage from "@/assets/Fabulador Large.jpeg";
-import greenSkyCaseImage from "@/assets/greensky Large.jpeg";
-import grioAiCaseImage from "@/assets/GrioAI Large.jpeg";
-import newsGenCaseImage from "@/assets/Newsgen Large.jpeg";
-import growthOsCaseImage from "@/assets/GrowOS Large.jpeg";
-import { courseLandingContent } from "@/content/course";
+import { getHomeCases } from "@/content/cases";
 
 export const baseLandingContent: LandingContent = {
   seo: {
-    title: "BuildAI | MicroSaaS e IA para Negócios",
+    title: "BuildAI | Microssistemas e automações para PMEs",
     description:
-      "A BuildAI desenvolve apps, sistemas sob medida e automação com IA, além de MicroSaaS, para acelerar crescimento e eficiência operacional.",
-    previewImageSrc: courseOgImage,
+      "A BuildAI cria microssistemas, automações com IA e software sob medida para tirar o retrabalho da operação de pequenas e médias empresas.",
+    previewImageSrc: "/preview.jpeg",
     faviconHref: buildaiIcon,
   },
   navbar: {
@@ -34,23 +21,22 @@ export const baseLandingContent: LandingContent = {
       { label: "Processo", href: "#build-in-public" },
       { label: "Tecnologias", href: "#tech-stack" },
       { label: "Portfólio", href: "#portfolio" },
-      { label: "Curso IA", href: "#curso-ia" },
       { label: "Contato", href: "#contato" },
     ],
     ctaLabel: "Agendar Consultoria",
   },
   hero: {
-    badge: "Build-in-Public Agency",
-    title: "Construímos o futuro do seu negócio com",
-    highlightedText: "MicroSaaS e IA",
+    badge: "Agência que constrói em público",
+    title: "Pare o retrabalho com",
+    highlightedText: "microssistemas e automações",
     description:
-      "Transformamos suas ideias em softwares escaláveis e automações inteligentes que economizam centenas de horas e maximizam seu ROI.",
+      "Atendimento repetitivo no WhatsApp, planilhas copiadas à mão e o mesmo trabalho feito de novo entre equipes. A BuildAI cria o sistema pequeno que resolve o gargalo da sua operação — e você acompanha cada etapa.",
     primaryCtaLabel: "Pedir orçamento no WhatsApp",
     secondaryCtaLabel: "Ver cases",
     stats: [
-      { value: "50+", label: "Projetos entregues" },
-      { value: "98%", label: "Satisfação" },
-      { value: "10x", label: "ROI médio" },
+      { value: "Sistemas sob medida", label: "" },
+      { value: "Automações com IA", label: "" },
+      { value: "MicroSaaS para PME", label: "" },
     ],
   },
   services: {
@@ -77,7 +63,7 @@ export const baseLandingContent: LandingContent = {
     ],
   },
   process: {
-    eyebrow: "Build-in-Public",
+    eyebrow: "Construção em público",
     title: "Transparência",
     highlightedText: "total",
     description: "Você acompanha cada etapa do desenvolvimento. Sem surpresas, sem caixas-pretas.",
@@ -109,119 +95,8 @@ export const baseLandingContent: LandingContent = {
     eyebrow: "Portfólio",
     title: "Resultados que",
     highlightedText: "falam por si",
-    items: [
-      {
-        title: "Gerador de Artes PSD",
-        category: "Automação com IA",
-        metric: "Produção em lote de peças visuais a partir de template + planilha, sem retrabalho manual",
-        description:
-          "Aplicação web que transforma um layout fixo no Photoshop (PSD) em gerador em lote: camadas nomeadas, planilha Excel e pasta de imagens viram artes finais em PNG/PSD — catálogos, cards, banners, menus e qualquer layout repetitivo com um clique.",
-        imageSrc: previewImage,
-        href: "https://psdautomator.vercel.app/",
-      },
-      {
-        title: "NewsGen AI",
-        category: "Content Factory",
-        metric: "Produção de vídeos informativos com menos etapas manuais — roteiro, voz e montagem em um só fluxo",
-        description:
-          "Plataforma web que transforma conteúdo em vídeo com IA: a partir de texto (notícias ou roteiro), gera narração e vídeo com apresentador virtual; também traduz vídeos gravados para outros idiomas mantendo áudio e imagem sincronizados. Login seguro, histórico de projetos e configuração das ferramentas de IA no browser.",
-        imageSrc: newsGenCaseImage,
-        href: "https://ai-video-news-generator--video-generator-39001.us-central1.hosted.app/",
-      },
-      {
-        title: "Green Sky",
-        category: "Software Sob Medida",
-        metric: "Reservas online com Stripe e fundo de impacto social — turismo de aventura com propósito no Rio",
-        description:
-          "Site institucional e comercial para operadora de parapente e asa delta (São Conrado e Niterói): catálogo de experiências, checkout Stripe ou fluxo consultivo via WhatsApp, contador público do fundo Propósito e i18n em 6 idiomas. React 19, Firebase, Cloud Functions e EmailJS.",
-        imageSrc: greenSkyCaseImage,
-        href: "https://greensky.com.br/",
-      },
-      {
-        title: "GrowthOS",
-        category: "MicroSaaS",
-        metric: "Funil completo de marketing e produto em um só lugar — com relatório estratégico gerado por IA",
-        description:
-          "Dashboard web para Chief Growth Officer: visão executiva (receita, CAC, leads, ROAS), funil de produto e comparação de canais. Conecta Google Ads, Meta, Brevo, Snov.io, Mixpanel e GA4; o CGO AI Analyst gera relatórios estratégicos com Gemini a partir dos dados sincronizados.",
-        imageSrc: growthOsCaseImage,
-        videoUrl: "https://youtu.be/oJyN6APFjuA",
-      },
-      {
-        title: "Conexão Ativa — Automação de Notícias",
-        category: "Automação com IA",
-        metric: "Do Telegram ao portal publicado em minutos — texto, áudio, SEO e redes sociais sem retrabalho manual",
-        description:
-          "Monitora um canal do Telegram e transforma mensagens de texto ou áudio em artigos otimizados para SEO: transcrição com OpenAI, redação estruturada com Claude, busca de imagem no Tavily e publicação automática no WordPress (RankMath), Facebook e Instagram — com repostagem condicional em portais secundários.",
-        imageSrc: automacaoCaseImage,
-        videoUrl: "https://youtu.be/W5IOzuOQIVw",
-      },
-      {
-        title: "99Freelas Sniper",
-        category: "Automação com IA",
-        metric: "Prospecção e lances no 99Freelas no piloto automático — com revisão humana antes do envio",
-        description:
-          "Painel local que varre projetos Web/Mobile/Software no 99Freelas, filtra por whitelist/blacklist, gera propostas com Gemini (texto, preço e prazo) e envia lances via Playwright. Dashboard para revisar, editar cada proposta e disparar a fila manualmente — envio automático desligado por padrão.",
-        imageSrc: freelasSniperCaseImage,
-        videoUrl: "https://youtu.be/0PwsGTaO3KI",
-      },
-      {
-        title: "Griô AI — Horizontes da Diáspora",
-        category: "Software Sob Medida",
-        metric: "Experiência educativa imersiva — hackear o passado para reconstruir memórias da diáspora africana",
-        description:
-          "RPG narrativo cooperativo com IA sobre Mohammed Gardo Baquaqua e as rotas da diáspora: investigue fases históricas, converse com NPCs da época e use documentos reais (Slave Voyages, jornais, biografias) como evidência. Três papéis — linguista, arquivista e estrategista — narrativa afrofuturista com Gemini e suporte a PT, EN e FR.",
-        imageSrc: grioAiCaseImage,
-        href: "https://gri-ai-horizontes-da-di-spora-108605433402.us-west1.run.app/",
-      },
-      {
-        title: "Espelho Literário (Fabulador)",
-        category: "Software Sob Medida",
-        metric: "Atelier de escrita assistida por IA — do relato oral ao texto final na sua biblioteca pessoal",
-        description:
-          "Facilitador literário com IA para criar e lapidar relatos pessoais: sessão por voz ou texto com perguntas instigadoras, transcrição, mosaico poético com palavras-chave e imagens sugeridas. Olhar acolhedor do facilitador, estruturação do texto com Gemini e acervo completo — processo e versão final — na Minha Biblioteca.",
-        imageSrc: fabuladorCaseImage,
-        href: "https://fabulador.web.app/",
-      },
-      {
-        title: "IG-Scout AI",
-        category: "Automação com IA",
-        metric: "Escala em vendas através de prospecção automatizada e qualificada",
-        description:
-          "Ferramenta de prospecção outbound que automatiza a busca, extração de dados e qualificação de perfis. Integração de Web Scraping com análise comercial via OpenAI para geração de mensagens personalizadas.",
-        imageSrc: igScoutCaseImage,
-        href: "https://instagramscrapper-nine.vercel.app/",
-      },
-      {
-        title: "Cultura Fluxo Finance",
-        category: "MicroSaaS",
-        metric: "Automação de processos complexos de prestação de contas com análise de conformidade de documentos",
-        description:
-          "Plataforma B2B para gestão financeira e compliance de projetos culturais financiados por leis de incentivo. Inclui controle de orçamento por rubricas, análise de notas fiscais via IA e gestão de assinaturas.",
-        imageSrc: culturaFluxoCaseImage,
-        href: "https://execucaofinanceira.web.app/",
-      },
-      {
-        title: "App Amanhã (IoT)",
-        category: "Software Sob Medida",
-        metric: "Premiado como o melhor aplicativo de Internet das Coisas (IoT) do Brasil",
-        description:
-          "Guia interativo para o Museu do Amanhã utilizando tecnologia de beacons para interatividade contextual em tempo real. Arquitetura robusta integrando hardware (IoT) e software mobile de alta performance.",
-        imageSrc: appAmanhaCaseImage,
-        videoUrl: "https://www.youtube.com/watch?v=JFg02dn56qU",
-      },
-      {
-        title: "Content Factory AI",
-        category: "Content Factory",
-        metric:
-          "Redução drástica de custos eliminando a necessidade de estúdios tradicionais através de avatares digitais",
-        description:
-          "Gerador de pacotes de conteúdo omnichannel que transforma temas em ebooks, podcasts e vídeos.",
-        imageSrc: contentFactoryCaseImage,
-        href: "https://gerador-de-carrossel-amber.vercel.app/",
-      },
-    ],
+    items: getHomeCases("pt"),
   },
-  course: courseLandingContent,
   contact: {
     eyebrow: "Contato",
     title: "Pronto para",

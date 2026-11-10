@@ -10,6 +10,7 @@ import Index from "./pages/Index.tsx";
 import AdminLeadGeneratorPage from "./pages/AdminLeadGeneratorPage.tsx";
 import DiagnosticoPage from "./pages/DiagnosticoPage.tsx";
 import LeadLandingPage from "./pages/LeadLandingPage.tsx";
+import PortfolioPage from "./pages/PortfolioPage.tsx";
 import SegmentPage from "./pages/SegmentPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/admin" element={<AdminLeadGeneratorPage />} />
           <Route path="/admin/gerar" element={<AdminLeadGeneratorPage />} />
           <Route path="/lp/:leadSlug" element={<LeadLandingPage />} />
+          <Route path="/portfolio" element={<PortfolioPage />} />
           <Route path="/:segmentSlug" element={<SegmentPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

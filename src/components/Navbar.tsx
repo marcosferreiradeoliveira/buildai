@@ -1,6 +1,8 @@
 import BrandLogo from "@/components/BrandLogo";
 import SocialLinks from "@/components/SocialLinks";
+import { CALENDLY_URL, isConsultoriaCta } from "@/lib/calendly";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { NavLink } from "@/types/landing";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -19,8 +21,10 @@ type NavbarProps = {
 };
 
 const Navbar = ({ brandName, logoSrc, navLinks, ctaLabel, prospectCompanyName }: NavbarProps) => {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const openCalendly = isConsultoriaCta(ctaLabel);
   const whatsappMessage = prospectCompanyName
     ? createProspectWhatsAppMessage(prospectCompanyName)
     : createDefaultWhatsAppMessage(brandName);
@@ -33,8 +37,17 @@ const Navbar = ({ brandName, logoSrc, navLinks, ctaLabel, prospectCompanyName }:
 
   const handleClick = (href: string) => {
     setMenuOpen(false);
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+    if (!href.startsWith("#")) return;
+    const target = document.querySelector(href);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    navigate({ pathname: "/", hash: href.slice(1) });
   };
+
+  const ctaClassName =
+    "bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition neon-glow text-center";
 
   return (
     <motion.nav
@@ -83,12 +96,15 @@ const Navbar = ({ brandName, logoSrc, navLinks, ctaLabel, prospectCompanyName }:
           ))}
           <SocialLinks className="flex gap-2" />
           <LanguageSwitcher />
-          <button
-            onClick={() => openWhatsApp(whatsappMessage, "navbar")}
-            className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition neon-glow"
-          >
-            {ctaLabel}
-          </button>
+          {openCalendly ? (
+            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className={ctaClassName}>
+              {ctaLabel}
+            </a>
+          ) : (
+            <button type="button" onClick={() => openWhatsApp(whatsappMessage, "navbar")} className={ctaClassName}>
+              {ctaLabel}
+            </button>
+          )}
         </div>
 
         {/* Mobile */}
@@ -127,12 +143,24 @@ const Navbar = ({ brandName, logoSrc, navLinks, ctaLabel, prospectCompanyName }:
             </button>
           ))}
           <SocialLinks className="flex gap-2 py-2" />
-          <button
-            onClick={() => openWhatsApp(whatsappMessage, "navbar")}
-            className="mt-2 w-full bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium"
-          >
-            {ctaLabel}
-          </button>
+          {openCalendly ? (
+            <a
+              href={CALENDLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 block w-full bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium text-center"
+            >
+              {ctaLabel}
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={() => openWhatsApp(whatsappMessage, "navbar")}
+              className="mt-2 w-full bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium"
+            >
+              {ctaLabel}
+            </button>
+          )}
         </motion.div>
       )}
     </motion.nav>
