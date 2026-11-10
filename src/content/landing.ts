@@ -22,7 +22,7 @@ export const baseLandingContent: LandingContent = {
   seo: {
     title: "BuildAI | MicroSaaS e IA para Negócios",
     description:
-      "A BuildAI cria MicroSaaS, automações com IA e softwares sob medida para acelerar crescimento e eficiência operacional.",
+      "A BuildAI desenvolve apps, sistemas sob medida e automação com IA, além de MicroSaaS, para acelerar crescimento e eficiência operacional.",
     previewImageSrc: courseOgImage,
     faviconHref: buildaiIcon,
   },
@@ -45,8 +45,8 @@ export const baseLandingContent: LandingContent = {
     highlightedText: "MicroSaaS e IA",
     description:
       "Transformamos suas ideias em softwares escaláveis e automações inteligentes que economizam centenas de horas e maximizam seu ROI.",
-    primaryCtaLabel: "Agendar Consultoria →",
-    secondaryCtaLabel: "Ver Portfólio",
+    primaryCtaLabel: "Pedir orçamento no WhatsApp",
+    secondaryCtaLabel: "Ver cases",
     stats: [
       { value: "50+", label: "Projetos entregues" },
       { value: "98%", label: "Satisfação" },
@@ -230,11 +230,8 @@ export const baseLandingContent: LandingContent = {
     submitLabel: "Enviar Mensagem",
     successTitle: "Mensagem enviada!",
     successDescription: "Entraremos em contato em até 24h.",
-    socials: [
-      { label: "twitter", href: "#" },
-      { label: "linkedin", href: "#" },
-      { label: "github", href: "#" },
-    ],
+    // Redes exibidas só se a URL existir em src/config/social.ts.
+    socials: [],
     copyrightName: "BuildAI",
   },
 };
@@ -259,8 +256,8 @@ export const educationLandingContent: LandingContent = {
     highlightedText: "IA e automação",
     description:
       "Criamos plataformas e automações para escolas, cursos e edtechs melhorarem aprendizagem, retenção e eficiência operacional.",
-    primaryCtaLabel: "Agendar Diagnóstico →",
-    secondaryCtaLabel: "Ver Cases de Educação",
+    primaryCtaLabel: "Pedir orçamento no WhatsApp",
+    secondaryCtaLabel: "Ver cases",
     stats: [
       { value: "35+", label: "Projetos em educação" },
       { value: "-42%", label: "Tempo em tarefas administrativas" },

@@ -350,8 +350,8 @@ export const buildLandingContentFromLead = (lead: LeadPageConfig): LandingConten
   content.hero.titleSuffix = undefined;
 
   content.hero.description = buildLeadHeroDescription(companyName, safeCity, lead.primaryGoal);
-  content.hero.primaryCtaLabel = "Agendar diagnóstico →";
-  content.hero.secondaryCtaLabel = "Ver implementações";
+  content.hero.primaryCtaLabel = "Pedir orçamento no WhatsApp";
+  content.hero.secondaryCtaLabel = "Ver cases";
 
   content.services.description = `A BuildAI recomenda para a ${companyName}${cityLabel} soluções de IA e automação alinhadas às metas do negócio.`;
 

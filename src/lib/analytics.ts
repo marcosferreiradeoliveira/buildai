@@ -41,3 +41,8 @@ export const trackEvent = (
   if (!gtag) return;
   gtag("event", eventName, params);
 };
+
+/** Clique em qualquer link ou ação que abre o WhatsApp. */
+export const trackWhatsAppClick = (source: string): void => {
+  trackEvent("whatsapp_click", { source });
+};

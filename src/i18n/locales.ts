@@ -24,7 +24,13 @@ export const detectBrowserLocale = (): Locale => {
   return "pt";
 };
 
+const HTML_LANG: Record<Locale, string> = {
+  pt: "pt-BR",
+  en: "en",
+  es: "es",
+};
+
 export const persistLocale = (locale: Locale) => {
   localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-  document.documentElement.lang = locale;
+  document.documentElement.lang = HTML_LANG[locale];
 };

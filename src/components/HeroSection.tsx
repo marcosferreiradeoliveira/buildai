@@ -1,24 +1,15 @@
 import BrandLogo from "@/components/BrandLogo";
+import WhatsAppLink from "@/components/WhatsAppLink";
 import { motion } from "framer-motion";
 import { LandingContent } from "@/types/landing";
-import {
-  createDefaultWhatsAppMessage,
-  createProspectWhatsAppMessage,
-  openWhatsApp,
-} from "@/lib/whatsapp";
 
 type HeroSectionProps = {
   content: LandingContent["hero"];
   logoSrc?: string;
-  prospectCompanyName?: string;
   secondaryCtaHref?: string;
 };
 
-const HeroSection = ({ content, logoSrc, prospectCompanyName, secondaryCtaHref = "#portfolio" }: HeroSectionProps) => {
-  const whatsappMessage = prospectCompanyName
-    ? createProspectWhatsAppMessage(prospectCompanyName)
-    : createDefaultWhatsAppMessage("BuildAI");
-
+const HeroSection = ({ content, logoSrc, secondaryCtaHref = "#portfolio" }: HeroSectionProps) => {
   return (
     <section className="relative min-h-screen flex items-center justify-center hero-gradient overflow-hidden">
       {content.backgroundImageSrc ? (
@@ -112,13 +103,12 @@ const HeroSection = ({ content, logoSrc, prospectCompanyName, secondaryCtaHref =
             transition={{ duration: 0.8, delay: 0.45 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <button
-              type="button"
-              onClick={() => openWhatsApp(whatsappMessage)}
-              className="bg-primary text-primary-foreground px-8 py-3.5 rounded-lg font-semibold text-base hover:opacity-90 transition neon-glow"
+            <WhatsAppLink
+              source="hero"
+              className="inline-flex max-w-full items-center justify-center bg-primary text-primary-foreground px-8 py-3.5 rounded-lg font-semibold text-base hover:opacity-90 transition neon-glow text-center"
             >
               {content.primaryCtaLabel}
-            </button>
+            </WhatsAppLink>
             <button
               type="button"
               onClick={() =>

@@ -7,6 +7,7 @@ import PortfolioSection from "@/components/PortfolioSection";
 import CourseSection from "@/components/CourseSection";
 import FooterSection from "@/components/FooterSection";
 import SeoHead from "@/components/SeoHead";
+import WhatsAppCtaBand from "@/components/WhatsAppCtaBand";
 import { LandingContent } from "@/types/landing";
 
 type LandingPageProps = {
@@ -32,8 +33,7 @@ const LandingPage = ({ content }: LandingPageProps) => {
       <HeroSection
         content={content.hero}
         logoSrc={content.navbar.logoSrc}
-        prospectCompanyName={content.prospectCompanyName}
-        secondaryCtaHref={content.implementationIdeas ? "#implementacoes" : "#portfolio"}
+        secondaryCtaHref="#portfolio"
       />
       {content.implementationIdeas ? (
         <PortfolioSection sectionId="implementacoes" content={content.implementationIdeas} />
@@ -44,6 +44,7 @@ const LandingPage = ({ content }: LandingPageProps) => {
       <BuildInPublicSection content={content.process} />
       <TechStackSection content={content.techStack} />
       <FooterSection content={content.contact} />
+      <WhatsAppCtaBand source="page_end" className="container mx-auto px-4 pb-4" />
     </div>
   );
 };

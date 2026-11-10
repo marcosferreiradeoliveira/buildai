@@ -60,7 +60,7 @@ const enCopy: LandingCopy = {
   seo: {
     title: "BuildAI | MicroSaaS and AI for Business",
     description:
-      "BuildAI builds MicroSaaS, AI automations and custom software to accelerate growth and operational efficiency.",
+      "BuildAI develops apps, custom systems and AI automation, including MicroSaaS, to accelerate growth and operational efficiency.",
   },
   navbar: {
     navLinks: ["Services", "Process", "Technologies", "Portfolio", "AI Course", "Contact"],
@@ -72,8 +72,8 @@ const enCopy: LandingCopy = {
     highlightedText: "MicroSaaS and AI",
     description:
       "We turn your ideas into scalable software and intelligent automations that save hundreds of hours and maximize ROI.",
-    primaryCtaLabel: "Book a Consultation →",
-    secondaryCtaLabel: "View Portfolio",
+    primaryCtaLabel: "Request a quote on WhatsApp",
+    secondaryCtaLabel: "See cases",
     stats: ["Projects delivered", "Satisfaction", "Average ROI"],
   },
   services: {
@@ -225,7 +225,7 @@ const esCopy: LandingCopy = {
   seo: {
     title: "BuildAI | MicroSaaS e IA para Negocios",
     description:
-      "BuildAI crea MicroSaaS, automatizaciones con IA y software a medida para acelerar el crecimiento y la eficiencia operacional.",
+      "BuildAI desarrolla apps, sistemas a medida y automatización con IA, además de MicroSaaS, para acelerar el crecimiento y la eficiencia operacional.",
   },
   navbar: {
     navLinks: ["Servicios", "Proceso", "Tecnologías", "Portafolio", "Curso IA", "Contacto"],
@@ -237,8 +237,8 @@ const esCopy: LandingCopy = {
     highlightedText: "MicroSaaS e IA",
     description:
       "Transformamos tus ideas en software escalable y automatizaciones inteligentes que ahorran cientos de horas y maximizan el ROI.",
-    primaryCtaLabel: "Agendar Consultoría →",
-    secondaryCtaLabel: "Ver Portafolio",
+    primaryCtaLabel: "Pedir presupuesto por WhatsApp",
+    secondaryCtaLabel: "Ver casos",
     stats: ["Proyectos entregados", "Satisfacción", "ROI promedio"],
   },
   services: {

@@ -519,7 +519,7 @@ const isValidCase = (title: string, description: string): boolean => {
   if (/^(home|contato|blog|menu|saiba mais|quem somos)$/i.test(cleanTitle)) return false;
   if (/^\d{1,3}\s*[-.)]?\s*(página|pagina|page|landing)/i.test(cleanTitle)) return false;
   if (/página de vendas|pagina de vendas|landing page/i.test(cleanTitle)) return false;
-  if (/[!\[\]{}]|blob:|\.(png|jpe?g|webp|gif|svg)\b/i.test(cleanTitle)) return false;
+  if (/[!\][{}]|blob:|\.(png|jpe?g|webp|gif|svg)\b/i.test(cleanTitle)) return false;
   if (/^\d{1,2}\s+de\s+\w+\s+de\s+\d{4}/i.test(cleanTitle)) return false;
   if ((cleanTitle.match(/\*\*/g) ?? []).length > 0) return false;
 

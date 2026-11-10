@@ -1,4 +1,5 @@
 import BrandLogo from "@/components/BrandLogo";
+import SocialLinks from "@/components/SocialLinks";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { NavLink } from "@/types/landing";
@@ -45,7 +46,17 @@ const Navbar = ({ brandName, logoSrc, navLinks, ctaLabel, prospectCompanyName }:
       }`}
     >
       <div className="container mx-auto flex items-center justify-between py-4 px-4">
-        <a href="#" className="flex items-center shrink-0" aria-label={brandName}>
+        <a
+          href="/"
+          className="flex items-center shrink-0"
+          aria-label={brandName}
+          onClick={(event) => {
+            if (window.location.pathname === "/") {
+              event.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          }}
+        >
           {logoSrc ? (
             <img
               src={logoSrc}
@@ -70,9 +81,10 @@ const Navbar = ({ brandName, logoSrc, navLinks, ctaLabel, prospectCompanyName }:
               {link.label}
             </button>
           ))}
+          <SocialLinks className="flex gap-2" />
           <LanguageSwitcher />
           <button
-            onClick={() => openWhatsApp(whatsappMessage)}
+            onClick={() => openWhatsApp(whatsappMessage, "navbar")}
             className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition neon-glow"
           >
             {ctaLabel}
@@ -114,8 +126,9 @@ const Navbar = ({ brandName, logoSrc, navLinks, ctaLabel, prospectCompanyName }:
               {link.label}
             </button>
           ))}
+          <SocialLinks className="flex gap-2 py-2" />
           <button
-            onClick={() => openWhatsApp(whatsappMessage)}
+            onClick={() => openWhatsApp(whatsappMessage, "navbar")}
             className="mt-2 w-full bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium"
           >
             {ctaLabel}

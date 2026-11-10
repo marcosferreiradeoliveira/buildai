@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import SeoHead from "@/components/SeoHead";
 import HubspotLeadsSection from "@/components/HubspotLeadsSection";
 import LeadOutreachEmailModule from "@/components/LeadOutreachEmailModule";
 import { landingContentBySegment } from "@/content/landing";
@@ -240,6 +241,12 @@ const AdminLeadGeneratorPage = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SeoHead
+        title="Admin | BuildAI"
+        description="Área interna da BuildAI. Desenvolvimento de apps, sistemas sob medida e automação com IA."
+        previewImageSrc="/preview.jpeg"
+        faviconHref="/favicon.png"
+      />
       <div className="container mx-auto max-w-5xl px-4 py-10">
         <div className="mb-8">
           <p className="text-xs uppercase tracking-wider text-primary">Admin</p>

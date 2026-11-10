@@ -25,6 +25,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import SeoHead from "@/components/SeoHead";
+import WhatsAppCtaBand from "@/components/WhatsAppCtaBand";
 import { trackEvent } from "@/lib/analytics";
 import buildaiLogo from "@/assets/buildai-logo-transparent.png";
 import automacaoCaseImage from "@/assets/automacao Large.jpeg";
@@ -395,8 +397,6 @@ const RoiCalculator = () => {
 
 const DiagnosticoPage = () => {
   useEffect(() => {
-    document.title = "Diagnóstico de Automação & ROI | BuildAI";
-
     const scriptId = "calendly-inline-widget-script";
     const widget = document.querySelector<HTMLElement>(".calendly-inline-widget");
     const initCalendly = () => {
@@ -458,6 +458,12 @@ const DiagnosticoPage = () => {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#0B0F19] text-white">
+      <SeoHead
+        title="Diagnóstico de Automação & ROI | BuildAI"
+        description="Diagnóstico de automação e ROI. A BuildAI desenvolve apps, sistemas sob medida e automação com IA para reduzir trabalho manual."
+        previewImageSrc="/preview.jpeg"
+        faviconHref="/favicon.png"
+      />
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-1/2 top-0 h-[28rem] w-[42rem] -translate-x-1/2 rounded-full bg-blue-500/20 blur-[120px]" />
         <div className="absolute right-0 top-1/3 h-[24rem] w-[24rem] rounded-full bg-indigo-600/20 blur-[120px]" />
@@ -691,6 +697,7 @@ const DiagnosticoPage = () => {
               </article>
             ))}
           </div>
+          <WhatsAppCtaBand source="diagnostico_cases" className="mt-10" />
         </div>
       </section>
 
@@ -781,6 +788,10 @@ const DiagnosticoPage = () => {
           </div>
         </div>
       </section>
+
+      <div className="px-4 pb-16">
+        <WhatsAppCtaBand source="diagnostico_end" className="container" />
+      </div>
 
       <footer className="border-t border-white/10 px-4 py-8">
         <div className="container flex flex-col items-center justify-between gap-4 text-sm text-slate-500 sm:flex-row">

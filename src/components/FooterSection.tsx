@@ -1,5 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
+import SocialLinks from "@/components/SocialLinks";
+import WhatsAppLink from "@/components/WhatsAppLink";
 import { LandingContent } from "@/types/landing";
 import { useUi } from "@/i18n/LanguageContext";
 import { openWhatsApp } from "@/lib/whatsapp";
@@ -15,6 +17,7 @@ const FooterSection = ({ content }: FooterSectionProps) => {
 
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -30,9 +33,10 @@ const FooterSection = ({ content }: FooterSectionProps) => {
     ev.preventDefault();
     if (!validate()) return;
     const message = ui.footer.whatsappIntro(form.name, form.email, form.message);
-    openWhatsApp(message);
+    openWhatsApp(message, "contact_form");
     setForm({ name: "", email: "", message: "" });
     setErrors({});
+    setSubmitted(true);
   };
 
   return (
@@ -53,27 +57,34 @@ const FooterSection = ({ content }: FooterSectionProps) => {
               {content.description}
             </p>
 
-            <div className="flex gap-4">
-              {content.socials.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  className="w-10 h-10 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/40 transition"
-                >
-                  <span className="text-xs capitalize">{social.label.charAt(0).toUpperCase()}</span>
-                </a>
-              ))}
-            </div>
+            <SocialLinks />
           </motion.div>
 
           {/* Form */}
-          <motion.form
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.15 }}
-            onSubmit={handleSubmit}
-            className="space-y-5"
+            className="space-y-5 max-lg:pr-16"
           >
+            <div className="rounded-lg border border-border bg-card px-4 py-3">
+              <WhatsAppLink source="contact" className="text-sm font-semibold text-primary hover:underline">
+                {ui.footer.preferWhatsApp}
+              </WhatsAppLink>
+            </div>
+
+            {submitted ? (
+              <div
+                role="status"
+                aria-live="polite"
+                className="rounded-lg border border-success/40 bg-success/10 px-4 py-3"
+              >
+                <p className="text-sm font-semibold text-foreground">{content.successTitle}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{content.successDescription}</p>
+              </div>
+            ) : null}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <input
                 type="text"
@@ -113,7 +124,8 @@ const FooterSection = ({ content }: FooterSectionProps) => {
             >
               {content.submitLabel}
             </button>
-          </motion.form>
+            </form>
+          </motion.div>
         </div>
 
         <div className="mt-20 pt-8 border-t border-border text-center text-xs text-muted-foreground">

@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import WhatsAppCtaBand from "@/components/WhatsAppCtaBand";
 import { LandingContent } from "@/types/landing";
 import { useUi } from "@/i18n/LanguageContext";
 
@@ -155,6 +156,8 @@ const PortfolioSection = ({ content, sectionId = "portfolio" }: PortfolioSection
             );
           })}
         </div>
+
+        {sectionId === "portfolio" ? <WhatsAppCtaBand source="cases" className="mt-12" /> : null}
       </div>
 
       <Dialog open={Boolean(videoModal)} onOpenChange={(open) => !open && setVideoModal(null)}>
