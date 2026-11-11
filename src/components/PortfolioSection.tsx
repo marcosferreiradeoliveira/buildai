@@ -1,5 +1,5 @@
 import { motion, useInView } from "framer-motion";
-import { ArrowUpRight, Play } from "lucide-react";
+import { ArrowUpRight, Play, Sparkles } from "lucide-react";
 import { useRef, useState } from "react";
 import {
   Dialog,
@@ -22,22 +22,29 @@ type PortfolioSectionProps = {
 };
 
 const CasePicture = ({ project }: { project: ProjectItem }) => {
-  if (!project.imageSrc) return null;
-  const sizes = project.imageSizes ?? "(min-width: 1024px) 22rem, (min-width: 640px) 46vw, 100vw";
+  if (!project.imageSrc) {
+    return (
+      <div
+        className="relative z-10 flex aspect-[16/10] w-full items-center justify-center bg-gradient-to-br from-primary/35 via-card to-sky-400/20"
+        aria-hidden="true"
+      >
+        <Sparkles className="h-10 w-10 text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <picture>
-      {project.webpSrcSet ? <source type="image/webp" srcSet={project.webpSrcSet} sizes={sizes} /> : null}
-      <img
-        src={project.imageSrc}
-        srcSet={project.imageSrcSet}
-        sizes={project.imageSrcSet ? sizes : undefined}
-        alt={project.title}
-        loading="lazy"
-        decoding="async"
-        className="relative z-10 h-40 w-full object-cover sm:h-44"
-      />
-    </picture>
+    <img
+      src={project.imageSrc}
+      srcSet={project.imageSrcSet}
+      sizes={project.imageSizes || "(min-width: 1024px) 22rem, (min-width: 640px) 46vw, 100vw"}
+      alt={project.imageAlt || `Tela de ${project.title} da BuildAI`}
+      width={1600}
+      height={1000}
+      loading="lazy"
+      decoding="async"
+      className="relative z-10 aspect-[16/10] w-full object-cover"
+    />
   );
 };
 
@@ -87,11 +94,11 @@ const PortfolioSection = ({ content, sectionId = "portfolio", allCasesHref }: Po
         </motion.div>
 
         <div className={`grid gap-6 ${gridClass}`}>
-          {content.items.map((project, i) => {
+          {content.items.filter((project) => !project.hidden).map((project, i) => {
             const isClickable = Boolean(project.href || project.videoUrl);
-            const cardClass = `group relative overflow-hidden rounded-2xl bg-card border border-border neon-border-hover transition-all duration-500 ${
-              project.imageSrc ? "p-0" : "p-8"
-            } ${isClickable ? "cursor-pointer hover:border-primary/40" : ""}`;
+            const cardClass = `group relative overflow-hidden rounded-2xl bg-card border border-border neon-border-hover transition-all duration-500 p-0 ${
+              isClickable ? "cursor-pointer hover:border-primary/40" : ""
+            }`;
 
             const cardBody = (
               <>
@@ -109,7 +116,7 @@ const PortfolioSection = ({ content, sectionId = "portfolio", allCasesHref }: Po
                   </>
                 ) : null}
                 <CasePicture project={project} />
-                <div className={`relative z-10 ${project.imageSrc ? "p-6 sm:p-8" : ""}`}>
+                <div className="relative z-10 p-6 sm:p-8">
                   <span className="brand-eyebrow text-[10px]">
                     {project.category}
                   </span>

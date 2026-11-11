@@ -184,7 +184,7 @@ const esCopy: LandingCopy = {
         title: "Software a Medida",
         description:
           "Soluciones robustas para problemas complejos. Arquitectura limpia, rendimiento y mantenibilidad como prioridades.",
-        tag: "Custom Solutions",
+        tag: "Soluciones a medida",
       },
     ],
   },
@@ -216,7 +216,7 @@ const esCopy: LandingCopy = {
       },
     ],
   },
-  techStack: { eyebrow: "Tech Stack" },
+  techStack: { eyebrow: "Tecnologías" },
   portfolio: {
     eyebrow: "Portafolio",
     title: "Resultados que",

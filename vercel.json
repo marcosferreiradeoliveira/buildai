@@ -43,6 +43,7 @@
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/portfolio", "destination": "/portfolio/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

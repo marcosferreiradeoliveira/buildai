@@ -34,34 +34,18 @@ export type ProjectItem = {
   metric: string;
   description: string;
   imageSrc?: string;
+  imageAlt?: string;
   imageSrcSet?: string;
   webpSrcSet?: string;
   imageSizes?: string;
   href?: string;
   videoUrl?: string;
+  hidden?: boolean;
 };
 
 export type ContactSocial = {
   label: string;
   href: string;
-};
-
-export type CourseBlock = {
-  eyebrow: string;
-  title: string;
-  highlightedText: string;
-  description: string;
-  metric?: string;
-  previewImageSrc?: string;
-  backgroundImageSrc?: string;
-  instructorName?: string;
-  pricing?: {
-    originalPrice?: string;
-    installments: string;
-    total: string;
-  };
-  ctaLabel: string;
-  ctaHref: string;
 };
 
 export type LandingContent = {
@@ -124,8 +108,6 @@ export type LandingContent = {
     description?: string;
     items: ProjectItem[];
   };
-  /** Módulo promocional do CursoIA — exibido na landing principal. */
-  course?: CourseBlock;
   contact: {
     eyebrow: string;
     title: string;

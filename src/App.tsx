@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AnalyticsPageView from "@/components/AnalyticsPageView";
@@ -7,12 +8,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import Index from "./pages/Index.tsx";
-import AdminLeadGeneratorPage from "./pages/AdminLeadGeneratorPage.tsx";
-import DiagnosticoPage from "./pages/DiagnosticoPage.tsx";
-import LeadLandingPage from "./pages/LeadLandingPage.tsx";
-import PortfolioPage from "./pages/PortfolioPage.tsx";
-import SegmentPage from "./pages/SegmentPage.tsx";
-import NotFound from "./pages/NotFound.tsx";
+
+const AdminLeadGeneratorPage = lazy(() => import("./pages/AdminLeadGeneratorPage.tsx"));
+const DiagnosticoPage = lazy(() => import("./pages/DiagnosticoPage.tsx"));
+const LeadLandingPage = lazy(() => import("./pages/LeadLandingPage.tsx"));
+const PortfolioPage = lazy(() => import("./pages/PortfolioPage.tsx"));
+const SegmentPage = lazy(() => import("./pages/SegmentPage.tsx"));
+const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,7 @@ const App = () => (
       >
         <AnalyticsPageView />
         <WhatsAppFloat />
+        <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/diagnostico" element={<DiagnosticoPage />} />
@@ -41,6 +44,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </BrowserRouter>
       </TooltipProvider>
     </LanguageProvider>

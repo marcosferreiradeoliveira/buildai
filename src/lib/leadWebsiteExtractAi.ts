@@ -13,7 +13,6 @@ const ALLOWED_SEGMENTS = [
   "educacao",
   "saude",
   "varejo",
-  "cultura",
   "tecnologia",
   "juridico",
   "comunicacao",

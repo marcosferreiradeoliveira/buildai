@@ -1,16 +1,13 @@
 import { trackWhatsAppClick } from "@/lib/analytics";
 
 /** Dígitos apenas: código do país + DDD + número (sem +, sem espaços). */
-const DEFAULT_WHATSAPP_PHONE = "5521966225632";
+const WHATSAPP_PHONE = "5521985015148";
 
-const getWhatsAppPhoneDigits = (): string => {
-  const raw = import.meta.env.VITE_WHATSAPP_PHONE?.trim() || DEFAULT_WHATSAPP_PHONE;
-  return raw.replace(/\D/g, "");
-};
+const getWhatsAppPhoneDigits = (): string => WHATSAPP_PHONE;
 
 /**
  * Link oficial do WhatsApp (evita erros de concatenação com `wa.me`).
- * Em produção, defina `VITE_WHATSAPP_PHONE` na Vercel se o número mudar.
+ * Número oficial do site. Os CTAs usam `WHATSAPP_QUOTE_URL`.
  */
 export const createWhatsAppUrl = (message?: string): string => {
   const phone = getWhatsAppPhoneDigits();
@@ -27,7 +24,7 @@ export const WHATSAPP_URL = createWhatsAppUrl();
 
 /** Orçamento pelo site. Usar este link nos CTAs de conversão. */
 export const WHATSAPP_QUOTE_URL =
-  "https://wa.me/5521966225632?text=Olá!%20Vim%20pelo%20site%20da%20BuildAI%20e%20quero%20um%20orçamento.";
+  "https://wa.me/5521985015148?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20BuildAI.";
 
 export const createDefaultWhatsAppMessage = (companyName: string): string =>
   `Olá, quero mais informações sobre sistemas e automações para ${companyName}`;

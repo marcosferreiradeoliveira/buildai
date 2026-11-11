@@ -11,7 +11,7 @@ type HeroSectionProps = {
 
 const HeroSection = ({ content, logoSrc, secondaryCtaHref = "#portfolio" }: HeroSectionProps) => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center hero-gradient overflow-hidden pb-28 sm:pb-16">
+    <section className="relative min-h-screen flex items-center justify-center hero-gradient overflow-hidden pb-44 min-[481px]:pb-16">
       {content.backgroundImageSrc ? (
         <img
           src={content.backgroundImageSrc}

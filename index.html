@@ -1,16 +1,21 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1MHT8QP7FC"></script>
+    <!-- Google tag (gtag.js), after the first paint so it does not compete with the hero. -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
       }
       window.gtag = gtag;
-      gtag("js", new Date());
-      gtag("config", "G-1MHT8QP7FC");
+      window.addEventListener("load", function () {
+        var script = document.createElement("script");
+        script.async = true;
+        script.src = "https://www.googletagmanager.com/gtag/js?id=G-1MHT8QP7FC";
+        document.head.appendChild(script);
+        gtag("js", new Date());
+        gtag("config", "G-1MHT8QP7FC");
+      });
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

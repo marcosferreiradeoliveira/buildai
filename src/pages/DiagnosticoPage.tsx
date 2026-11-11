@@ -29,21 +29,6 @@ import SeoHead from "@/components/SeoHead";
 import WhatsAppCtaBand from "@/components/WhatsAppCtaBand";
 import { trackEvent } from "@/lib/analytics";
 import buildaiLogo from "@/assets/buildai-logo-transparent.png";
-import encartes640 from "@/assets/cases/encartes-640.webp";
-import encartes960 from "@/assets/cases/encartes-960.webp";
-import encartesJpeg from "@/assets/cases/encartes-960.jpg";
-import greensky640 from "@/assets/cases/greensky-640.webp";
-import greensky960 from "@/assets/cases/greensky-960.webp";
-import greenskyJpeg from "@/assets/cases/greensky-960.jpg";
-import conexao640 from "@/assets/cases/conexao-640.webp";
-import conexao960 from "@/assets/cases/conexao-960.webp";
-import conexaoJpeg from "@/assets/cases/conexao-960.jpg";
-import newsgen640 from "@/assets/cases/newsgen-640.webp";
-import newsgen960 from "@/assets/cases/newsgen-960.webp";
-import newsgenJpeg from "@/assets/cases/newsgen-960.jpg";
-import growth640 from "@/assets/cases/growth-640.webp";
-import growth960 from "@/assets/cases/growth-960.webp";
-import growthJpeg from "@/assets/cases/growth-960.jpg";
 
 const calendlyUrl = "https://calendly.com/buildaidev/30min";
 const urgentCtaClass =
@@ -89,9 +74,9 @@ const portfolio = [
       "Pega um layout do Photoshop, uma planilha e uma pasta de imagens, e gera encartes, catálogos, cards e banners em lote, sem montar peça por peça na mão.",
     highlight:
       "Produção em lote de encartes e peças de varejo a partir de um layout e de uma planilha, sem retrabalho manual.",
-    imageSrc: encartesJpeg,
-    imageSrcSet: `${encartesJpeg} 960w`,
-    webpSrcSet: `${encartes640} 640w, ${encartes960} 960w`,
+    imageSrc: "/cases/encartes.webp",
+    imageSrcSet: "/cases/encartes.webp 1600w",
+    webpSrcSet: "/cases/encartes.webp 1600w",
     href: "https://psdautomator.vercel.app/",
     cta: "Ver projeto ao vivo",
   },
@@ -101,9 +86,9 @@ const portfolio = [
     description:
       "Site da operadora de parapente e asa delta (São Conrado e Niterói), com catálogo de experiências, pagamento no site ou conversa no WhatsApp, seis idiomas e contador público do fundo de impacto.",
     highlight: "Reservas online com pagamento no site ou conversa no WhatsApp — turismo de aventura no Rio.",
-    imageSrc: greenskyJpeg,
-    imageSrcSet: `${greenskyJpeg} 960w`,
-    webpSrcSet: `${greensky640} 640w, ${greensky960} 960w`,
+    imageSrc: "/cases/greensky.webp",
+    imageSrcSet: "/cases/greensky.webp 1600w",
+    webpSrcSet: "/cases/greensky.webp 1600w",
     href: "https://greensky.com.br/",
     cta: "Ver projeto ao vivo",
   },
@@ -113,9 +98,9 @@ const portfolio = [
     description:
       "Monitora um canal do Telegram, estrutura o artigo, busca imagem e publica no portal, no Facebook e no Instagram, com repostagem em portais secundários quando cabe.",
     highlight: "Do Telegram ao portal, ao Facebook e ao Instagram, sem o time copiar e colar o mesmo conteúdo em três lugares.",
-    imageSrc: conexaoJpeg,
-    imageSrcSet: `${conexaoJpeg} 960w`,
-    webpSrcSet: `${conexao640} 640w, ${conexao960} 960w`,
+    imageSrc: "/cases/conexao.webp",
+    imageSrcSet: "/cases/conexao.webp 1600w",
+    webpSrcSet: "/cases/conexao.webp 1600w",
     href: "https://youtu.be/W5IOzuOQIVw",
     cta: "Assistir vídeo",
     video: true,
@@ -126,9 +111,9 @@ const portfolio = [
     description:
       "A partir de um texto, gera narração e vídeo com apresentador virtual. Também traduz um vídeo já gravado, mantendo áudio e imagem alinhados.",
     highlight: "Roteiro, voz e montagem de vídeo informativo num só fluxo.",
-    imageSrc: newsgenJpeg,
-    imageSrcSet: `${newsgenJpeg} 960w`,
-    webpSrcSet: `${newsgen640} 640w, ${newsgen960} 960w`,
+    imageSrc: "/cases/newsgen.webp",
+    imageSrcSet: "/cases/newsgen.webp 1600w",
+    webpSrcSet: "/cases/newsgen.webp 1600w",
     href: "https://ai-video-news-generator--video-generator-39001.us-central1.hosted.app/",
     cta: "Ver projeto ao vivo",
   },
@@ -138,9 +123,9 @@ const portfolio = [
     description:
       "Painel de growth com visão de receita, funil e canais. Conecta as fontes de anúncio e de e-mail, e um analista de IA monta o relatório a partir dos dados sincronizados.",
     highlight: "Funil de marketing e produto no mesmo lugar, com relatório estratégico gerado por IA.",
-    imageSrc: growthJpeg,
-    imageSrcSet: `${growthJpeg} 960w`,
-    webpSrcSet: `${growth640} 640w, ${growth960} 960w`,
+    imageSrc: "/cases/growth.webp",
+    imageSrcSet: "/cases/growth.webp 1600w",
+    webpSrcSet: "/cases/growth.webp 1600w",
     href: "https://youtu.be/oJyN6APFjuA",
     cta: "Assistir vídeo",
     video: true,
@@ -633,7 +618,9 @@ const DiagnosticoPage = () => {
                       src={project.imageSrc}
                       srcSet={project.imageSrcSet}
                       sizes={caseSizes}
-                      alt={`Preview do case ${project.title}`}
+                      alt={`Tela de ${project.title} da BuildAI`}
+                      width={1600}
+                      height={1000}
                       loading="lazy"
                       decoding="async"
                       className="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100"

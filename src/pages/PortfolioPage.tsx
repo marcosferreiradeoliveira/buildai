@@ -8,9 +8,9 @@ import { useLanguage } from "@/i18n/LanguageContext";
 
 const seoByLocale = {
   pt: {
-    title: "Portfólio | BuildAI",
+    title: "Portfólio | BuildAI: sistemas, automações e IA sob medida",
     description:
-      "Cases de microssistemas, automações com IA e software sob medida da BuildAI para a operação de PMEs.",
+      "Cases reais de microssistemas, automações com IA e chatbots de WhatsApp desenvolvidos pela BuildAI.",
   },
   en: {
     title: "Portfolio | BuildAI",

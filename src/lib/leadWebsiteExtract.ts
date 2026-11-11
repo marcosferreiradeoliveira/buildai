@@ -96,7 +96,6 @@ const SEGMENT_KEYWORDS: Record<string, string[]> = {
   educacao: ["educação", "educacao", "escola", "universidade", "ensino", "matrícula", "matricula", "pedagógico"],
   saude: ["saúde", "saude", "clínica", "clinica", "hospital", "médico", "medico", "paciente"],
   varejo: ["varejo", "e-commerce", "ecommerce", "loja", "produtos", "varejista"],
-  cultura: ["cultura", "cultural", "museu", "artes", "incentivo", "leis de incentivo"],
   tecnologia: ["software", "tecnologia", "saas", "startup", "digital", "ti"],
   juridico: ["advocacia", "jurídico", "juridico", "defesa do consumidor", "direito do consumidor", "procon"],
   comunicacao: [

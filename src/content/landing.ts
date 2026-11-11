@@ -58,7 +58,7 @@ export const baseLandingContent: LandingContent = {
       {
         title: "Softwares Sob Medida",
         description: "Soluções robustas para problemas complexos. Arquitetura limpa, performance e manutenibilidade como prioridades.",
-        tag: "Custom Solutions",
+        tag: "SOLUÇÕES SOB MEDIDA",
       },
     ],
   },
@@ -68,14 +68,14 @@ export const baseLandingContent: LandingContent = {
     highlightedText: "total",
     description: "Você acompanha cada etapa do desenvolvimento. Sem surpresas, sem caixas-pretas.",
     timeline: [
-      { date: "Semana 1", title: "Descoberta e Planejamento", description: "Entendemos seu problema, definimos escopo e escolhemos a stack ideal.", status: "done" },
-      { date: "Semana 2-3", title: "MVP e Prototipação", description: "Desenvolvimento ágil com entregas diárias. Você acompanha tudo em tempo real.", status: "done" },
-      { date: "Semana 4", title: "Testes e Feedback", description: "Ciclo de testes com usuários reais. Ajustes rápidos baseados em dados.", status: "active" },
-      { date: "Semana 5+", title: "Deploy e Iteração", description: "Lançamento, monitoramento e melhoria contínua com métricas de sucesso.", status: "upcoming" },
+      { date: "Semana 1", title: "Descoberta e Planejamento", description: "Entendemos seu problema, definimos escopo e escolhemos a tecnologia ideal.", status: "done" },
+      { date: "Semana 2-3", title: "Protótipo", description: "Desenvolvimento ágil com entregas diárias. Você acompanha tudo em tempo real.", status: "done" },
+      { date: "Semana 4", title: "Testes e ajustes", description: "Ciclo de testes com usuários reais. Ajustes rápidos baseados em dados.", status: "active" },
+      { date: "Semana 5+", title: "Lançamento e iteração", description: "Lançamento, monitoramento e melhoria contínua com métricas de sucesso.", status: "upcoming" },
     ],
   },
   techStack: {
-    eyebrow: "Tech Stack",
+    eyebrow: "Tecnologias",
     items: [
       { name: "React 19", icon: "⚛️" },
       { name: "Next.js 15", icon: "▲" },
@@ -176,7 +176,7 @@ export const educationLandingContent: LandingContent = {
     ],
   },
   techStack: {
-    eyebrow: "Stack para Educação",
+    eyebrow: "Tecnologias para educação",
     items: [
       { name: "React", icon: "⚛️" },
       { name: "Python", icon: "🐍" },

@@ -1,20 +1,5 @@
 import type { ProjectItem } from "@/types/landing";
 import type { Locale } from "@/i18n/types";
-import encartes640 from "@/assets/cases/encartes-640.webp";
-import encartes960 from "@/assets/cases/encartes-960.webp";
-import encartesJpeg from "@/assets/cases/encartes-960.jpg";
-import greensky640 from "@/assets/cases/greensky-640.webp";
-import greensky960 from "@/assets/cases/greensky-960.webp";
-import greenskyJpeg from "@/assets/cases/greensky-960.jpg";
-import conexao640 from "@/assets/cases/conexao-640.webp";
-import conexao960 from "@/assets/cases/conexao-960.webp";
-import conexaoJpeg from "@/assets/cases/conexao-960.jpg";
-import newsgen640 from "@/assets/cases/newsgen-640.webp";
-import newsgen960 from "@/assets/cases/newsgen-960.webp";
-import newsgenJpeg from "@/assets/cases/newsgen-960.jpg";
-import growth640 from "@/assets/cases/growth-640.webp";
-import growth960 from "@/assets/cases/growth-960.webp";
-import growthJpeg from "@/assets/cases/growth-960.jpg";
 
 type CaseCopy = {
   title: string;
@@ -23,35 +8,29 @@ type CaseCopy = {
   description: string;
 };
 
-type CaseMedia = Pick<
-  ProjectItem,
-  "imageSrc" | "imageSrcSet" | "webpSrcSet" | "imageSizes" | "href" | "videoUrl"
->;
+type CaseKey =
+  | "encartes"
+  | "greensky"
+  | "accounting"
+  | "ir"
+  | "nps"
+  | "alpha"
+  | "leadgen"
+  | "conexao"
+  | "newsgen"
+  | "growth"
+  | "factory"
+  | "cnu";
+
+type CaseMedia = Pick<ProjectItem, "imageSrc" | "imageSrcSet" | "imageSizes" | "href" | "videoUrl" | "hidden">;
 
 const sizes = "(min-width: 1024px) 22rem, (min-width: 640px) 46vw, 100vw";
 
-const media = (jpeg: string, webp640: string, webp960: string, extra?: Pick<CaseMedia, "href" | "videoUrl">): CaseMedia => ({
-  imageSrc: jpeg,
-  imageSrcSet: `${jpeg} 960w`,
-  webpSrcSet: `${webp640} 640w, ${webp960} 960w`,
+const shot = (file: string, extra?: Omit<CaseMedia, "imageSrc" | "imageSrcSet" | "imageSizes">): CaseMedia => ({
+  imageSrc: `/cases/${file}`,
+  imageSrcSet: `/cases/${file.replace(".webp", "-800.webp")} 800w, /cases/${file} 1600w`,
   imageSizes: sizes,
   ...extra,
-});
-
-const encartesMedia = media(encartesJpeg, encartes640, encartes960, {
-  href: "https://psdautomator.vercel.app/",
-});
-const greenskyMedia = media(greenskyJpeg, greensky640, greensky960, {
-  href: "https://greensky.com.br/",
-});
-const conexaoMedia = media(conexaoJpeg, conexao640, conexao960, {
-  videoUrl: "https://youtu.be/W5IOzuOQIVw",
-});
-const newsgenMedia = media(newsgenJpeg, newsgen640, newsgen960, {
-  href: "https://ai-video-news-generator--video-generator-39001.us-central1.hosted.app/",
-});
-const growthMedia = media(growthJpeg, growth640, growth960, {
-  videoUrl: "https://youtu.be/oJyN6APFjuA",
 });
 
 const toItem = (copy: CaseCopy, extra?: CaseMedia): ProjectItem => ({ ...copy, ...extra });
@@ -322,20 +301,75 @@ const byLocale: Record<Locale, typeof pt> = { pt, en, es };
 const homeKeys = ["encartes", "greensky", "accounting", "alpha", "leadgen", "conexao"] as const;
 const pageKeys = ["encartes", "greensky", "ir", "nps", "alpha", "leadgen", "conexao", "newsgen", "growth", "factory", "cnu"] as const;
 
-const mediaByKey: Partial<Record<(typeof pageKeys)[number] | "accounting", CaseMedia>> = {
-  encartes: encartesMedia,
-  greensky: greenskyMedia,
-  conexao: conexaoMedia,
-  newsgen: newsgenMedia,
-  growth: growthMedia,
-  factory: { href: "https://fabrica-de-conteudo.vercel.app/" },
-  alpha: { href: "https://slug-centric-3a4a6c77.vercel.app/" },
-  leadgen: { href: "https://leads-pi-seven.vercel.app/" },
-  cnu: { href: "https://cnu-three.vercel.app/" },
+const mediaByKey: Record<CaseKey, CaseMedia> = {
+  encartes: shot("encartes.webp", { href: "https://psdautomator.vercel.app/" }),
+  greensky: shot("greensky.webp", { href: "https://greensky.com.br/" }),
+  accounting: shot("contabilidade-ir.webp"),
+  ir: shot("contabilidade-ir.webp"),
+  nps: shot("contabilidade-nps.webp"),
+  alpha: shot("alphacoach.webp", { href: "https://slug-centric-3a4a6c77.vercel.app/" }),
+  leadgen: shot("leadgen.webp", { href: "https://leads-pi-seven.vercel.app/" }),
+  conexao: shot("conexao.webp", { videoUrl: "https://youtu.be/W5IOzuOQIVw" }),
+  newsgen: shot("newsgen.webp", {
+    href: "https://ai-video-news-generator--video-generator-39001.us-central1.hosted.app/",
+  }),
+  growth: shot("growth.webp", { videoUrl: "https://youtu.be/oJyN6APFjuA" }),
+  factory: shot("content-factory.webp", { href: "https://fabrica-de-conteudo.vercel.app/" }),
+  cnu: { hidden: true, href: "https://cnu-three.vercel.app/" },
 };
 
-const pick = (locale: Locale, keys: readonly (keyof typeof pt)[]): ProjectItem[] =>
-  keys.map((key) => toItem(byLocale[locale][key], mediaByKey[key]));
+const alts: Record<Locale, Record<CaseKey, string>> = {
+  pt: {
+    encartes: "Tela do Gerador de Encartes para Varejo da BuildAI",
+    greensky: "Tela do site Green Sky da BuildAI",
+    accounting: "Tela do formulário de Imposto de Renda da BuildAI",
+    ir: "Tela do formulário de Imposto de Renda da BuildAI",
+    nps: "Tela do painel de NPS da BuildAI",
+    alpha: "Tela do AlphaCoach da BuildAI",
+    leadgen: "Tela do LeadGen AI da BuildAI",
+    conexao: "Tela da automação de notícias Conexão Ativa da BuildAI",
+    newsgen: "Tela do NewsGen da BuildAI",
+    growth: "Tela do painel GrowthOS da BuildAI",
+    factory: "Tela do gerador de conteúdo da BuildAI",
+    cnu: "Tela do CNU Simulado da BuildAI",
+  },
+  en: {
+    encartes: "Screen of the BuildAI retail flyer generator",
+    greensky: "Screen of the Green Sky website by BuildAI",
+    accounting: "Screen of the BuildAI income-tax form",
+    ir: "Screen of the BuildAI income-tax form",
+    nps: "Screen of the BuildAI NPS dashboard",
+    alpha: "Screen of AlphaCoach by BuildAI",
+    leadgen: "Screen of LeadGen AI by BuildAI",
+    conexao: "Screen of the Conexão Ativa news automation by BuildAI",
+    newsgen: "Screen of NewsGen by BuildAI",
+    growth: "Screen of the GrowthOS dashboard by BuildAI",
+    factory: "Screen of the BuildAI content generator",
+    cnu: "Screen of the CNU practice exam by BuildAI",
+  },
+  es: {
+    encartes: "Pantalla del generador de folletos de BuildAI",
+    greensky: "Pantalla del sitio Green Sky de BuildAI",
+    accounting: "Pantalla del formulario de impuestos de BuildAI",
+    ir: "Pantalla del formulario de impuestos de BuildAI",
+    nps: "Pantalla del panel de NPS de BuildAI",
+    alpha: "Pantalla de AlphaCoach de BuildAI",
+    leadgen: "Pantalla de LeadGen AI de BuildAI",
+    conexao: "Pantalla de la automatización de noticias Conexão Ativa de BuildAI",
+    newsgen: "Pantalla de NewsGen de BuildAI",
+    growth: "Pantalla del panel GrowthOS de BuildAI",
+    factory: "Pantalla del generador de contenido de BuildAI",
+    cnu: "Pantalla del simulacro CNU de BuildAI",
+  },
+};
+
+const pick = (locale: Locale, keys: readonly CaseKey[]): ProjectItem[] =>
+  keys
+    .map((key) => ({
+      ...toItem(byLocale[locale][key], mediaByKey[key]),
+      imageAlt: alts[locale][key],
+    }))
+    .filter((item) => !item.hidden);
 
 export const getHomeCases = (locale: Locale): ProjectItem[] => pick(locale, homeKeys);
 

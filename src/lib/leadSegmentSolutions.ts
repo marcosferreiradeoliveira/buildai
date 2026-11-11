@@ -24,7 +24,6 @@ export const IMPLEMENTATION_SEGMENT_SLUGS = [
   "educacao",
   "saude",
   "varejo",
-  "cultura",
   "tecnologia",
   "juridico",
   "comunicacao",
@@ -176,26 +175,6 @@ const segmentTemplates: Record<string, (company: string) => LeadImplementationId
       title: "Conteúdo para e-commerce",
       description: `Descrições, campanhas e variações de anúncios com IA para a ${c} escalar catálogo digital.`,
       metric: "Mais produtos publicados por semana",
-    },
-  ],
-  cultura: (c) => [
-    {
-      category: "MicroSaaS",
-      title: "Gestão de programas e editais",
-      description: `Plataforma para a ${c} administrar inscrições, avaliações e cronogramas de projetos culturais.`,
-      metric: "Menos planilhas e mais controle",
-    },
-    {
-      category: "IA generativa",
-      title: "Produção de conteúdo cultural",
-      description: `Apoio de IA para a ${c} gerar textos, releases e materiais de divulgação de ações culturais.`,
-      metric: "Mais campanhas no ar",
-    },
-    {
-      category: "Automação com IA",
-      title: "Atendimento ao público",
-      description: `Chatbot e fluxos para a ${c} orientar visitantes e participantes sobre programação e inscrições.`,
-      metric: "Resposta imediata ao público",
     },
   ],
 };

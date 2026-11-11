@@ -1,3 +1,4 @@
+import { Instagram } from "lucide-react";
 import { getSocialLinks } from "@/config/social";
 
 type SocialLinksProps = {
@@ -17,9 +18,9 @@ const SocialLinks = ({ className = "flex gap-4" }: SocialLinksProps) => {
           target="_blank"
           rel="noopener"
           aria-label={social.label}
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
         >
-          {social.label.charAt(0).toUpperCase()}
+          {social.label === "Instagram" ? <Instagram className="h-4 w-4" aria-hidden="true" /> : null}
         </a>
       ))}
     </div>
