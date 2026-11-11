@@ -1,15 +1,13 @@
-import BrandLogo from "@/components/BrandLogo";
 import WhatsAppLink from "@/components/WhatsAppLink";
 import { motion } from "framer-motion";
 import { LandingContent } from "@/types/landing";
 
 type HeroSectionProps = {
   content: LandingContent["hero"];
-  logoSrc?: string;
   secondaryCtaHref?: string;
 };
 
-const HeroSection = ({ content, logoSrc, secondaryCtaHref = "#portfolio" }: HeroSectionProps) => {
+const HeroSection = ({ content, secondaryCtaHref = "#portfolio" }: HeroSectionProps) => {
   return (
     <section className="relative min-h-screen flex items-center justify-center hero-gradient overflow-hidden pb-44 min-[481px]:pb-16">
       {content.backgroundImageSrc ? (
@@ -41,25 +39,6 @@ const HeroSection = ({ content, logoSrc, secondaryCtaHref = "#portfolio" }: Hero
       <div className="container mx-auto px-4 pt-24 pb-16 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="mb-8 flex justify-center"
-          >
-            {logoSrc ? (
-              <img
-                src={logoSrc}
-                alt="BuildAI"
-                className="h-12 w-auto sm:h-14 lg:h-16 drop-shadow-[0_0_28px_hsl(var(--neon-purple)/0.45)]"
-                width={240}
-                height={54}
-              />
-            ) : (
-              <BrandLogo className="h-12 sm:h-14 lg:h-16" />
-            )}
-          </motion.div>
-
-          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.08 }}
@@ -69,10 +48,7 @@ const HeroSection = ({ content, logoSrc, secondaryCtaHref = "#portfolio" }: Hero
             </span>
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.15 }}
+          <h1
             className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold leading-tight mb-6"
           >
             {content.titleSuffix ? (
@@ -86,16 +62,11 @@ const HeroSection = ({ content, logoSrc, secondaryCtaHref = "#portfolio" }: Hero
                 {content.title} <span className="gradient-text">{content.highlightedText}</span>
               </>
             )}
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
-          >
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             {content.description}
-          </motion.p>
+          </p>
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}

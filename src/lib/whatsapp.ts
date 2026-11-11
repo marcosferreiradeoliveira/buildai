@@ -24,7 +24,7 @@ export const WHATSAPP_URL = createWhatsAppUrl();
 
 /** Orçamento pelo site. Usar este link nos CTAs de conversão. */
 export const WHATSAPP_QUOTE_URL =
-  "https://wa.me/5521985015148?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20BuildAI.";
+  "https://wa.me/5521985015148?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20BuildAI";
 
 export const createDefaultWhatsAppMessage = (companyName: string): string =>
   `Olá, quero mais informações sobre sistemas e automações para ${companyName}`;

@@ -32,11 +32,12 @@ type LandingCopy = {
     description: string;
     timeline: Array<{ date: string; title: string; description: string }>;
   };
-  techStack: { eyebrow: string };
+  techStack: { eyebrow: string; title: string };
   portfolio: {
     eyebrow: string;
     title: string;
     highlightedText: string;
+    description: string;
   };
   contact: {
     eyebrow: string;
@@ -53,14 +54,14 @@ const enCopy: LandingCopy = {
   seo: {
     title: "BuildAI | Microsystems and automation for SMBs",
     description:
-      "BuildAI builds small systems, AI automation and custom software that remove repeat work from small and mid-sized operations.",
+      "BuildAI creates custom AI solutions for small and mid-sized companies: a WhatsApp attendant, content generators, systems and automations.",
   },
   navbar: {
     navLinks: ["Services", "Process", "Technologies", "Portfolio", "Contact"],
-    ctaLabel: "Book a Consultation",
+    ctaLabel: "Book a conversation",
   },
   hero: {
-    badge: "An agency that builds in public",
+    badge: "Custom AI solutions for SMBs",
     title: "Stop the rework with",
     highlightedText: "small systems and automation",
     description:
@@ -70,35 +71,37 @@ const enCopy: LandingCopy = {
     stats: ["Custom systems", "AI automation", "MicroSaaS for SMBs"],
   },
   services: {
-    eyebrow: "Our Services",
-    title: "Solutions that",
-    highlightedText: "drive",
-    description: "We combine cutting-edge technology with business strategy to deliver real, measurable value.",
+    eyebrow: "For the operation",
+    title: "What we solve",
+    highlightedText: "",
+    description: "Custom solutions for the bottleneck that takes the most time from your team.",
     items: [
       {
-        title: "MicroSaaS Development",
-        description:
-          "From MVP to scale. We build lean, validated SaaS products ready to grow with your customer base.",
-        tag: "MVP → Scale",
+        title: "WhatsApp service",
+        description: "An AI assistant replies, qualifies and books. You step in only when it is worth it.",
+        tag: "Service",
       },
       {
-        title: "AI Automations",
-        description:
-          "We connect intelligent agents to your workflows, eliminating repetitive tasks and reducing operational costs.",
-        tag: "Agents + Flows",
+        title: "Content for social",
+        description: "Carousels, videos and posts generated from a topic, with your brand's look.",
+        tag: "Content",
       },
       {
-        title: "Custom Software",
-        description:
-          "Robust solutions for complex problems. Clean architecture, performance and maintainability as priorities.",
-        tag: "Custom Solutions",
+        title: "Spreadsheets and rework",
+        description: "Forms, dashboards and small systems instead of a spreadsheet copied by hand.",
+        tag: "Systems",
+      },
+      {
+        title: "Prospecting",
+        description: "Company lists organized and qualified for the sales team.",
+        tag: "Sales",
       },
     ],
   },
   process: {
-    eyebrow: "Building in public",
-    title: "Full",
-    highlightedText: "transparency",
+    eyebrow: "Process",
+    title: "How it works",
+    highlightedText: "",
     description: "You follow every step of development. No surprises, no black boxes.",
     timeline: [
       {
@@ -109,7 +112,7 @@ const enCopy: LandingCopy = {
       {
         date: "Week 2-3",
         title: "MVP and Prototyping",
-        description: "Agile development with daily deliveries. You follow everything in real time.",
+        description: "Agile development with frequent deliveries. You follow everything in real time.",
       },
       {
         date: "Week 4",
@@ -123,19 +126,19 @@ const enCopy: LandingCopy = {
       },
     ],
   },
-  techStack: { eyebrow: "Tech Stack" },
+  techStack: { eyebrow: "Tools", title: "Tools we use" },
   portfolio: {
     eyebrow: "Portfolio",
-    title: "Results that",
-    highlightedText: "speak for themselves",
+    title: "Solutions already running",
+    highlightedText: "",
+    description: "Some custom solutions BuildAI built for clients and for its own operation.",
   },
   contact: {
     eyebrow: "Contact",
     title: "Ready to",
     highlightedText: "get started",
-    description:
-      "Fill out the form and our team will reach out to understand your project and propose the best solution.",
-    submitLabel: "Send Message",
+    description: "Tell us briefly what you want to solve. The conversation continues on WhatsApp.",
+    submitLabel: "Continue on WhatsApp",
     successTitle: "Message sent!",
     successDescription: "We will contact you within 24 hours.",
   },
@@ -145,14 +148,14 @@ const esCopy: LandingCopy = {
   seo: {
     title: "BuildAI | Microsistemas y automatización para pymes",
     description:
-      "BuildAI crea microsistemas, automatización con IA y software a medida para sacar el retrabajo de la operación de pequeñas y medianas empresas.",
+      "BuildAI crea soluciones a medida con IA para pequeñas y medianas empresas: asistente de WhatsApp, generadores de contenido, sistemas y automatizaciones.",
   },
   navbar: {
     navLinks: ["Servicios", "Proceso", "Tecnologías", "Portafolio", "Contacto"],
-    ctaLabel: "Agendar Consultoría",
+    ctaLabel: "Agendar conversación",
   },
   hero: {
-    badge: "Agencia que construye en público",
+    badge: "Soluciones a medida con IA para pymes",
     title: "Para el retrabajo con",
     highlightedText: "microsistemas y automatizaciones",
     description:
@@ -162,36 +165,37 @@ const esCopy: LandingCopy = {
     stats: ["Sistemas a medida", "Automatización con IA", "MicroSaaS para pymes"],
   },
   services: {
-    eyebrow: "Nuestros Servicios",
-    title: "Soluciones que",
-    highlightedText: "impulsan",
-    description:
-      "Combinamos tecnología de punta con estrategia de negocios para entregar valor real y medible.",
+    eyebrow: "Para la operación",
+    title: "Qué resolvemos",
+    highlightedText: "",
+    description: "Soluciones a medida para el cuello de botella que más tiempo le toma a tu equipo.",
     items: [
       {
-        title: "Desarrollo de MicroSaaS",
-        description:
-          "Del MVP a la escala. Creamos productos SaaS ágiles, validados y listos para crecer con tu base de clientes.",
-        tag: "MVP → Escala",
+        title: "Atención en WhatsApp",
+        description: "Un asistente con IA responde, califica y agenda. Tú entras solo cuando vale la pena.",
+        tag: "Atención",
       },
       {
-        title: "Automatizaciones con IA",
-        description:
-          "Conectamos agentes inteligentes a tus flujos de trabajo, eliminando tareas repetitivas y reduciendo costos operacionales.",
-        tag: "Agentes + Flujos",
+        title: "Contenido para redes",
+        description: "Carruseles, videos y posts generados a partir de un tema, con la cara de tu marca.",
+        tag: "Contenido",
       },
       {
-        title: "Software a Medida",
-        description:
-          "Soluciones robustas para problemas complejos. Arquitectura limpia, rendimiento y mantenibilidad como prioridades.",
-        tag: "Soluciones a medida",
+        title: "Planillas y retrabajo",
+        description: "Formularios, paneles y sistemas chicos en lugar de la planilla copiada a mano.",
+        tag: "Sistemas",
+      },
+      {
+        title: "Prospección",
+        description: "Listas de empresas organizadas y calificadas para el equipo comercial.",
+        tag: "Ventas",
       },
     ],
   },
   process: {
-    eyebrow: "Construcción en público",
-    title: "Transparencia",
-    highlightedText: "total",
+    eyebrow: "Proceso",
+    title: "Cómo funciona",
+    highlightedText: "",
     description: "Acompañas cada etapa del desarrollo. Sin sorpresas, sin cajas negras.",
     timeline: [
       {
@@ -202,7 +206,7 @@ const esCopy: LandingCopy = {
       {
         date: "Semana 2-3",
         title: "MVP y Prototipado",
-        description: "Desarrollo ágil con entregas diarias. Sigues todo en tiempo real.",
+        description: "Desarrollo ágil con entregas frecuentes. Sigues todo en tiempo real.",
       },
       {
         date: "Semana 4",
@@ -216,19 +220,19 @@ const esCopy: LandingCopy = {
       },
     ],
   },
-  techStack: { eyebrow: "Tecnologías" },
+  techStack: { eyebrow: "Herramientas", title: "Herramientas que usamos" },
   portfolio: {
     eyebrow: "Portafolio",
-    title: "Resultados que",
-    highlightedText: "hablan por sí solos",
+    title: "Soluciones que ya están en marcha",
+    highlightedText: "",
+    description: "Algunas soluciones a medida que BuildAI creó para clientes y para su propia operación.",
   },
   contact: {
     eyebrow: "Contacto",
     title: "¿Listo para",
     highlightedText: "empezar",
-    description:
-      "Completa el formulario y nuestro equipo se pondrá en contacto para entender tu proyecto y proponer la mejor solución.",
-    submitLabel: "Enviar Mensaje",
+    description: "Cuéntanos rápido qué quieres resolver. La conversación sigue por WhatsApp.",
+    submitLabel: "Continuar en WhatsApp",
     successTitle: "¡Mensaje enviado!",
     successDescription: "Nos pondremos en contacto en hasta 24h.",
   },
@@ -275,12 +279,14 @@ const applyCopy = (base: LandingContent, copy: LandingCopy): LandingContent => (
   techStack: {
     ...base.techStack,
     eyebrow: copy.techStack.eyebrow,
+    title: copy.techStack.title,
   },
   portfolio: {
     ...base.portfolio,
     eyebrow: copy.portfolio.eyebrow,
     title: copy.portfolio.title,
     highlightedText: copy.portfolio.highlightedText,
+    description: copy.portfolio.description,
   },
   contact: {
     ...base.contact,

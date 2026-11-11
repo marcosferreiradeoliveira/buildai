@@ -1,7 +1,9 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import SocialLinks from "@/components/SocialLinks";
 import WhatsAppLink from "@/components/WhatsAppLink";
+import { COMPANY_CITY, COMPANY_CNPJ, COMPANY_EMAIL } from "@/config/company";
 import { LandingContent } from "@/types/landing";
 import { useUi } from "@/i18n/LanguageContext";
 import { openWhatsApp } from "@/lib/whatsapp";
@@ -31,11 +33,8 @@ const FooterSection = ({ content }: FooterSectionProps) => {
     const e: Record<string, string> = {};
     const phoneDigits = form.phone.replace(/\D/g, "");
     if (!form.name.trim()) e.name = ui.footer.nameRequired;
-    if (!form.email.trim()) e.email = ui.footer.emailRequired;
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = ui.footer.emailInvalid;
-    if (!phoneDigits) e.phone = ui.footer.phoneRequired;
-    else if (phoneDigits.length < 10) e.phone = ui.footer.phoneInvalid;
-    if (!form.company.trim()) e.company = ui.footer.companyRequired;
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = ui.footer.emailInvalid;
+    if (phoneDigits && phoneDigits.length < 10) e.phone = ui.footer.phoneInvalid;
     if (!form.message.trim()) e.message = ui.footer.messageRequired;
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -77,7 +76,7 @@ const FooterSection = ({ content }: FooterSectionProps) => {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.15 }}
-            className="space-y-5 max-lg:pr-16"
+            className="space-y-5 pb-28"
           >
             <div className="rounded-lg border border-border bg-card px-4 py-3">
               <WhatsAppLink source="contact" className="text-sm font-semibold text-primary hover:underline">
@@ -101,6 +100,8 @@ const FooterSection = ({ content }: FooterSectionProps) => {
               <input
                 type="text"
                 placeholder={ui.footer.namePlaceholder}
+                required
+                aria-required="true"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
@@ -109,46 +110,10 @@ const FooterSection = ({ content }: FooterSectionProps) => {
               {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
             </div>
             <div>
-              <input
-                type="email"
-                placeholder={ui.footer.emailPlaceholder}
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
-                maxLength={255}
-              />
-              {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
-            </div>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <input
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder={ui.footer.phonePlaceholder}
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: formatPhone(e.target.value) })}
-                  className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
-                  maxLength={16}
-                />
-                {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone}</p>}
-              </div>
-              <div>
-                <input
-                  type="text"
-                  autoComplete="organization"
-                  placeholder={ui.footer.companyPlaceholder}
-                  value={form.company}
-                  onChange={(e) => setForm({ ...form, company: e.target.value })}
-                  className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
-                  maxLength={120}
-                />
-                {errors.company && <p className="text-destructive text-xs mt-1">{errors.company}</p>}
-              </div>
-            </div>
-            <div>
               <textarea
                 placeholder={ui.footer.messagePlaceholder}
+                required
+                aria-required="true"
                 rows={4}
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
@@ -157,6 +122,48 @@ const FooterSection = ({ content }: FooterSectionProps) => {
               />
               {errors.message && <p className="text-destructive text-xs mt-1">{errors.message}</p>}
             </div>
+            <details className="rounded-lg border border-border px-4 py-3">
+              <summary className="cursor-pointer text-sm font-semibold">{ui.footer.moreDetails}</summary>
+              <div className="mt-4 space-y-5">
+                <div>
+                  <input
+                    type="email"
+                    placeholder={ui.footer.emailPlaceholder}
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
+                    maxLength={255}
+                  />
+                  {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
+                </div>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      placeholder={ui.footer.phonePlaceholder}
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: formatPhone(e.target.value) })}
+                      className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
+                      maxLength={16}
+                    />
+                    {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone}</p>}
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      autoComplete="organization"
+                      placeholder={ui.footer.companyPlaceholder}
+                      value={form.company}
+                      onChange={(e) => setForm({ ...form, company: e.target.value })}
+                      className="w-full bg-card border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition"
+                      maxLength={120}
+                    />
+                  </div>
+                </div>
+              </div>
+            </details>
             <button
               type="submit"
               className="w-full bg-primary text-primary-foreground py-3.5 rounded-lg font-semibold text-sm hover:opacity-90 transition neon-glow"
@@ -167,8 +174,14 @@ const FooterSection = ({ content }: FooterSectionProps) => {
           </motion.div>
         </div>
 
-        <div className="mt-20 pt-8 border-t border-border text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} {content.copyrightName}. {ui.footer.rightsReserved}
+        <div className="mt-20 pt-8 border-t border-border text-center text-xs text-muted-foreground space-y-2">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+            {COMPANY_EMAIL ? <a href={`mailto:${COMPANY_EMAIL}`}>{COMPANY_EMAIL}</a> : null}
+            {COMPANY_CITY ? <span>{COMPANY_CITY}</span> : null}
+            {COMPANY_CNPJ ? <span>{COMPANY_CNPJ}</span> : null}
+            <Link to={ui.footer.privacy} className="hover:text-foreground">{ui.footer.privacyLabel}</Link>
+          </div>
+          <p>© {new Date().getFullYear()} {content.copyrightName}. {ui.footer.rightsReserved}</p>
         </div>
       </div>
     </footer>

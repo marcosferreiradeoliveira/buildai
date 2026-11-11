@@ -20,6 +20,9 @@ const TechStackSection = ({ content }: TechStackSectionProps) => {
           className="text-center mb-10"
         >
           <span className="brand-eyebrow">{content.eyebrow}</span>
+          {content.title ? (
+            <h2 className="mt-3 text-3xl font-heading font-bold sm:text-4xl">{content.title}</h2>
+          ) : null}
         </motion.div>
         <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
           {content.items.map((tech, i) => (
@@ -30,7 +33,7 @@ const TechStackSection = ({ content }: TechStackSectionProps) => {
               transition={{ duration: 0.4, delay: i * 0.08 }}
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
             >
-              <span className="text-2xl">{tech.icon}</span>
+              {tech.icon ? <span className="text-2xl">{tech.icon}</span> : null}
               <span className="text-sm font-medium">{tech.name}</span>
             </motion.div>
           ))}

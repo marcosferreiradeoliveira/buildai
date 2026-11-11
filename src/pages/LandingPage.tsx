@@ -4,9 +4,10 @@ import ServicesSection from "@/components/ServicesSection";
 import BuildInPublicSection from "@/components/BuildInPublicSection";
 import TechStackSection from "@/components/TechStackSection";
 import PortfolioSection from "@/components/PortfolioSection";
+import AboutSection from "@/components/AboutSection";
+import FaqSection from "@/components/FaqSection";
 import FooterSection from "@/components/FooterSection";
 import SeoHead from "@/components/SeoHead";
-import WhatsAppCtaBand from "@/components/WhatsAppCtaBand";
 import { LandingContent } from "@/types/landing";
 
 type LandingPageProps = {
@@ -29,20 +30,21 @@ const LandingPage = ({ content }: LandingPageProps) => {
         ctaLabel={content.navbar.ctaLabel}
         prospectCompanyName={content.prospectCompanyName}
       />
-      <HeroSection
-        content={content.hero}
-        logoSrc={content.navbar.logoSrc}
-        secondaryCtaHref="#portfolio"
-      />
+      <HeroSection content={content.hero} secondaryCtaHref="#portfolio" />
       {content.implementationIdeas ? (
         <PortfolioSection sectionId="implementacoes" content={content.implementationIdeas} />
       ) : null}
-      <PortfolioSection content={content.portfolio} allCasesHref="/portfolio" />
       <ServicesSection content={content.services} />
+      <PortfolioSection content={content.portfolio} allCasesHref="/portfolio" />
       <BuildInPublicSection content={content.process} />
       <TechStackSection content={content.techStack} />
+      {content.showTrustSections ? (
+        <>
+          <AboutSection />
+          <FaqSection />
+        </>
+      ) : null}
       <FooterSection content={content.contact} />
-      <WhatsAppCtaBand source="page_end" className="container mx-auto px-4 pb-4" />
     </div>
   );
 };

@@ -589,7 +589,7 @@ const DiagnosticoPage = () => {
             <div className="max-w-3xl">
               <span className="brand-eyebrow">Portfólio BuildAI</span>
               <h2 className="mt-3 text-3xl font-bold text-white sm:text-5xl">
-                Resultados que falam por si
+                Soluções que já estão rodando
               </h2>
               <p className="mt-4 text-slate-400">
                 Cases reais em automação, MicroSaaS, IA generativa e software sob medida.

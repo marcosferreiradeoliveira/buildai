@@ -13,6 +13,7 @@ const AdminLeadGeneratorPage = lazy(() => import("./pages/AdminLeadGeneratorPage
 const DiagnosticoPage = lazy(() => import("./pages/DiagnosticoPage.tsx"));
 const LeadLandingPage = lazy(() => import("./pages/LeadLandingPage.tsx"));
 const PortfolioPage = lazy(() => import("./pages/PortfolioPage.tsx"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage.tsx"));
 const SegmentPage = lazy(() => import("./pages/SegmentPage.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/admin/gerar" element={<AdminLeadGeneratorPage />} />
           <Route path="/lp/:leadSlug" element={<LeadLandingPage />} />
           <Route path="/portfolio" element={<PortfolioPage />} />
+          <Route path="/privacidade" element={<PrivacyPage />} />
           <Route path="/:segmentSlug" element={<SegmentPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

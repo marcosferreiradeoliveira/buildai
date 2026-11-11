@@ -28,6 +28,8 @@ export type TechItem = {
   icon: string;
 };
 
+export type CaseCategory = "atendimento" | "conteudo" | "sistemas";
+
 export type ProjectItem = {
   title: string;
   category: string;
@@ -38,9 +40,16 @@ export type ProjectItem = {
   imageSrcSet?: string;
   webpSrcSet?: string;
   imageSizes?: string;
+  images?: string[];
   href?: string;
   videoUrl?: string;
   hidden?: boolean;
+  tag?: string;
+  outcome?: string;
+  badge?: string;
+  ctaLabel?: string;
+  caseCategory?: CaseCategory;
+  featuredOrder?: number | null;
 };
 
 export type ContactSocial = {
@@ -90,6 +99,7 @@ export type LandingContent = {
   };
   techStack: {
     eyebrow: string;
+    title?: string;
     items: TechItem[];
   };
   portfolio: {
@@ -100,6 +110,7 @@ export type LandingContent = {
     items: ProjectItem[];
     backgroundImageSrc?: string;
   };
+  showTrustSections?: boolean;
   /** Landings /lp: ideias de implementação (automação, SaaS, IA) com base no contexto do lead. */
   implementationIdeas?: {
     eyebrow: string;

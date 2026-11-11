@@ -1,376 +1,458 @@
-import type { ProjectItem } from "@/types/landing";
+import type { CaseCategory, ProjectItem } from "@/types/landing";
 import type { Locale } from "@/i18n/types";
+
+/** O Marcos pode desligar se o atendente de WhatsApp estiver fora do ar. */
+export const showWhatsappDemoCta = true;
+
+type CaseKey =
+  | "whatsapp"
+  | "leadgen"
+  | "greensky"
+  | "carrosseis"
+  | "newsgen"
+  | "factory"
+  | "conexao"
+  | "encartes"
+  | "alpha"
+  | "accounting"
+  | "growth"
+  | "cnu";
 
 type CaseCopy = {
   title: string;
-  category: string;
-  metric: string;
+  tag: string;
   description: string;
+  outcome: string;
+  imageAlt: string;
+  badge?: string;
+  ctaLabel?: string;
 };
-
-type CaseKey =
-  | "encartes"
-  | "greensky"
-  | "accounting"
-  | "ir"
-  | "nps"
-  | "alpha"
-  | "leadgen"
-  | "conexao"
-  | "newsgen"
-  | "growth"
-  | "factory"
-  | "cnu";
-
-type CaseMedia = Pick<ProjectItem, "imageSrc" | "imageSrcSet" | "imageSizes" | "href" | "videoUrl" | "hidden">;
 
 const sizes = "(min-width: 1024px) 22rem, (min-width: 640px) 46vw, 100vw";
 
-const shot = (file: string, extra?: Omit<CaseMedia, "imageSrc" | "imageSrcSet" | "imageSizes">): CaseMedia => ({
-  imageSrc: `/cases/${file}`,
+const media = (file: string) => ({
+  imageSrc: `/cases/${file.replace(".webp", "-800.webp")}`,
   imageSrcSet: `/cases/${file.replace(".webp", "-800.webp")} 800w, /cases/${file} 1600w`,
   imageSizes: sizes,
-  ...extra,
 });
 
-const toItem = (copy: CaseCopy, extra?: CaseMedia): ProjectItem => ({ ...copy, ...extra });
-
-const pt = {
-  encartes: {
-    title: "Gerador de Encartes para Varejo/Supermercado",
-    category: "Automação com IA",
-    metric: "Produção em lote de encartes e peças de varejo a partir de um layout e de uma planilha, sem retrabalho manual.",
+const pt: Record<CaseKey, CaseCopy> = {
+  whatsapp: {
+    title: "Atendente de WhatsApp com IA",
+    tag: "ATENDIMENTO COM IA",
+    badge: "Em uso na própria BuildAI",
     description:
-      "Pega um layout do Photoshop (PSD com camadas nomeadas), uma planilha de Excel e uma pasta de imagens, e gera as artes finais em lote — encartes, catálogos, cards e banners de supermercado ou varejo, sem montar peça por peça na mão.",
-  },
-  greensky: {
-    title: "Green Sky",
-    category: "Software sob medida",
-    metric: "Reservas online com pagamento no site ou conversa no WhatsApp — turismo de aventura no Rio.",
-    description:
-      "Site da operadora de parapente e asa delta (São Conrado e Niterói), com catálogo de experiências, checkout no Stripe ou conversa no WhatsApp, site em 6 idiomas e contador público do fundo de impacto da operação.",
-  },
-  accounting: {
-    title: "Sistemas para escritório de contabilidade de saúde",
-    category: "Software sob medida",
-    metric: "Menos planilha e menos arquivo solto na coleta do IR e na escuta dos clientes.",
-    description:
-      "Para um escritório de contabilidade que atende profissionais de saúde, a BuildAI criou um formulário de Imposto de Renda — o cliente preenche e a equipe recebe os dados organizados — e uma pesquisa de satisfação com dashboard de NPS, médias por serviço e evolução ao longo do tempo.",
-  },
-  ir: {
-    title: "Formulário de Imposto de Renda",
-    category: "Software sob medida",
-    metric: "A equipe recebe os dados de IR organizados, no lugar da planilha e do vai-e-vem de arquivo.",
-    description:
-      "Formulário online para um escritório de contabilidade que atende profissionais de saúde coletar os dados de Imposto de Renda dos clientes e avisar a equipe, no lugar da planilha e do vai-e-vem de arquivo.",
-  },
-  nps: {
-    title: "Pesquisa e dashboard de NPS",
-    category: "Software sob medida",
-    metric: "A escuta dos clientes do escritório deixa de ficar espalhada em arquivo solto.",
-    description:
-      "Pesquisa de satisfação com os clientes de um escritório de contabilidade de profissionais de saúde, e um painel com NPS geral, distribuição de promotores, neutros e detratores, médias por serviço e evolução mensal.",
-  },
-  alpha: {
-    title: "AlphaCoach",
-    category: "MicroSaaS",
-    metric: "A operação do coach e a jornada do aluno no mesmo sistema, com a cara de cada profissional.",
-    description:
-      "Plataforma para coaches e alunos, com web e aplicativo no celular. Cada coach tem o seu espaço, com cores, logo e identidade próprios, sem precisar publicar um app separado.",
+      "Assistente virtual que atende no WhatsApp a qualquer hora. Entende o que a pessoa precisa, faz as perguntas certas, mostra um exemplo parecido e já manda o link para agendar uma conversa. Quando o assunto é preço, reclamação ou a pessoa pede um humano, passa a conversa para a equipe.",
+    outcome: "Nenhum contato fica sem resposta, e a equipe só entra quando a conversa já está qualificada.",
+    imageAlt: "Conversa de exemplo com o atendente de WhatsApp com IA da BuildAI",
+    ctaLabel: "Converse com ele no WhatsApp",
   },
   leadgen: {
     title: "LeadGen AI",
-    category: "MicroSaaS",
-    metric: "Prospecção organizada num só fluxo — a BuildAI usa e também entrega para outras empresas.",
+    tag: "MICROSAAS",
     description:
-      "Produto da BuildAI para prospecção B2B. A equipe usa internamente e também oferece às empresas. Entra uma lista ou um conjunto de empresas; o sistema organiza e enriquece os leads, ajuda a qualificar e prepara o caminho para o contato.",
+      "Produto da BuildAI para prospecção B2B: organiza e enriquece listas de empresas, ajuda a qualificar e prepara o primeiro contato.",
+    outcome: "Prospecção num só fluxo. A BuildAI usa e também entrega para outras empresas.",
+    imageAlt: "Tela do LeadGen AI da BuildAI",
+    ctaLabel: "Ver projeto ao vivo",
   },
-  conexao: {
-    title: "Conexão Ativa — Automação de Notícias",
-    category: "Automação com IA",
-    metric: "Do Telegram ao portal, ao Facebook e ao Instagram, sem o time copiar e colar o mesmo conteúdo em três lugares.",
+  greensky: {
+    title: "Green Sky",
+    tag: "SITE + RESERVAS",
     description:
-      "Monitora um canal do Telegram (texto ou áudio), transcreve, estrutura o artigo com SEO, busca imagem e publica no WordPress, no Facebook e no Instagram, com repostagem em portais secundários quando cabe.",
+      "Site de reservas para operadora de parapente e asa delta no Rio, com catálogo de voos, pagamento no site ou conversa no WhatsApp, em 6 idiomas.",
+    outcome: "O cliente escolhe e paga o voo sem depender de atendimento manual.",
+    imageAlt: "Tela do site Green Sky da BuildAI",
+    ctaLabel: "Ver projeto ao vivo",
+  },
+  carrosseis: {
+    title: "Gerador de carrosséis",
+    tag: "CONTEÚDO COM IA",
+    description: "Transforma um tema em carrosséis prontos para o Instagram, com texto e arte, seguindo a identidade da marca.",
+    outcome: "Os posts saem de uma lista de temas, sem montar lâmina por lâmina.",
+    imageAlt: "Ilustração do gerador de carrosséis da BuildAI transformando um tema em lâminas para Instagram",
+    ctaLabel: "Pedir uma demonstração",
   },
   newsgen: {
-    title: "NewsGen AI",
-    category: "Vídeo com IA",
-    metric: "Roteiro, voz e montagem de vídeo informativo num só fluxo.",
+    title: "NewsGen AI: vídeos com apresentador virtual",
+    tag: "VÍDEO COM IA",
     description:
-      "A partir de um texto (notícia ou roteiro), gera narração e vídeo com apresentador virtual. Também traduz um vídeo já gravado, mantendo áudio e imagem alinhados. Cada conta tem login e histórico.",
-  },
-  growth: {
-    title: "GrowthOS",
-    category: "MicroSaaS",
-    metric: "Funil de marketing e produto no mesmo lugar, com relatório estratégico gerado por IA.",
-    description:
-      "Painel de growth com visão de receita, CAC, leads e ROAS, funil de produto e comparação de canais. Conecta Google Ads, Meta, Brevo, Snov.io, Mixpanel e GA4. Um analista de IA monta o relatório estratégico a partir dos dados sincronizados.",
+      "A partir de um texto, gera narração e vídeo com apresentador virtual. Também traduz um vídeo já gravado, mantendo voz e imagem alinhadas.",
+    outcome: "Roteiro, voz e vídeo num só fluxo, sem gravar nem editar na mão.",
+    imageAlt: "Tela do NewsGen da BuildAI",
+    ctaLabel: "Ver projeto ao vivo",
   },
   factory: {
     title: "Content Factory AI",
-    category: "Content Factory",
-    metric: "Um tema vira pacote de conteúdo em vários formatos, no mesmo fluxo.",
+    tag: "CONTEÚDO COM IA",
+    description: "De uma ideia, gera pesquisa, posts, roteiros e newsletter no tom da marca.",
+    outcome: "Um tema vira conteúdo para vários canais no mesmo fluxo.",
+    imageAlt: "Tela do gerador de conteúdo da BuildAI",
+    ctaLabel: "Ver projeto ao vivo",
+  },
+  conexao: {
+    title: "Conexão Ativa: automação de notícias",
+    tag: "AUTOMAÇÃO COM IA",
     description:
-      "Gerador de pacotes de conteúdo a partir de um tema — ebook, podcast e vídeo — para um time pequeno que precisa aparecer em mais de um canal sem produzir cada peça em silos.",
+      "Do Telegram ao portal: transcreve, escreve a matéria com SEO, escolhe imagem e publica no WordPress, no Facebook e no Instagram.",
+    outcome: "O time para de copiar e colar o mesmo conteúdo em três lugares.",
+    imageAlt: "Tela da automação de notícias Conexão Ativa da BuildAI",
+    ctaLabel: "Assistir vídeo",
+  },
+  encartes: {
+    title: "Gerador de artes em lote",
+    tag: "DESIGN EM LOTE",
+    description:
+      "A partir de um layout do Photoshop e de uma planilha, gera dezenas de peças de uma vez: encartes, catálogos, banners e cards.",
+    outcome: "Troca de preço ou produto vira planilha, não retrabalho de design.",
+    imageAlt: "Tela do gerador de artes em lote da BuildAI",
+    ctaLabel: "Ver projeto ao vivo",
+  },
+  alpha: {
+    title: "AlphaCoach",
+    tag: "MICROSAAS",
+    description:
+      "Plataforma web e app para coaches e alunos. Cada coach tem o seu espaço com cores e logo próprios, sem publicar um app separado.",
+    outcome: "A operação do coach e a jornada do aluno no mesmo lugar.",
+    imageAlt: "Tela do AlphaCoach da BuildAI",
+    ctaLabel: "Ver projeto ao vivo",
+  },
+  accounting: {
+    title: "Sistemas para escritório de contabilidade",
+    tag: "SOFTWARE SOB MEDIDA",
+    description:
+      "Para um escritório de contabilidade que atende profissionais de saúde: formulário online de Imposto de Renda e pesquisa de satisfação com painel de NPS.",
+    outcome: "Menos planilha e arquivo solto na coleta do IR e na escuta dos clientes.",
+    imageAlt: "Tela do formulário de Imposto de Renda e do painel de NPS da BuildAI",
+  },
+  growth: {
+    title: "GrowthOS",
+    tag: "MICROSAAS",
+    description: "Painel de growth que junta Google Ads, Meta, e-mail e analytics, e gera um relatório estratégico com IA.",
+    outcome: "Funil de marketing e produto num só lugar.",
+    imageAlt: "Tela do painel GrowthOS da BuildAI",
+    ctaLabel: "Assistir vídeo",
   },
   cnu: {
     title: "CNU Simulado",
-    category: "Educação",
-    metric: "Simulado alinhado à vaga, com revisão personalizada a partir dos erros.",
-    description:
-      "Simulador do Concurso Nacional Unificado. O candidato escolhe o bloco e a vaga, faz a prova e, no fim, pode gerar um áudio de revisão só com as questões que errou.",
+    tag: "EDUCAÇÃO",
+    description: "Simulador do Concurso Nacional Unificado, oculto enquanto o demo estiver fora do ar.",
+    outcome: "Simulado alinhado à vaga, com revisão a partir dos erros.",
+    imageAlt: "Tela do CNU Simulado da BuildAI",
   },
-} satisfies Record<string, CaseCopy>;
+};
 
-const en: typeof pt = {
-  encartes: {
-    title: "Retail and supermarket flyer generator",
-    category: "AI automation",
-    metric: "Batch production of retail flyers from one layout and a spreadsheet, without rebuilding each piece by hand.",
+const en: Record<CaseKey, CaseCopy> = {
+  whatsapp: {
+    title: "AI WhatsApp attendant",
+    tag: "AI SERVICE",
+    badge: "In use at BuildAI",
     description:
-      "Takes a Photoshop layout (PSD with named layers), an Excel spreadsheet and a folder of images, and generates the final artwork in batch — supermarket and retail flyers, catalogs, cards and banners.",
-  },
-  greensky: {
-    title: "Green Sky",
-    category: "Custom software",
-    metric: "Online bookings paid on the site or continued on WhatsApp — adventure tourism in Rio.",
-    description:
-      "Website for a paragliding and hang gliding operator in São Conrado and Niterói, with an experience catalog, Stripe checkout or a WhatsApp conversation, six languages and a public counter for the operation's impact fund.",
-  },
-  accounting: {
-    title: "Systems for a health-professionals accounting firm",
-    category: "Custom software",
-    metric: "Less spreadsheet and fewer loose files when collecting tax data and listening to clients.",
-    description:
-      "For an accounting firm that serves health professionals, BuildAI built an income-tax form — the client fills it in and the team receives organized data — and a satisfaction survey with an NPS dashboard, averages by service and change over time.",
-  },
-  ir: {
-    title: "Income tax form",
-    category: "Custom software",
-    metric: "The team receives organized income-tax data instead of a spreadsheet and files going back and forth.",
-    description:
-      "Online form for an accounting firm that serves health professionals to collect clients' income-tax data and notify the team, instead of a spreadsheet and loose files.",
-  },
-  nps: {
-    title: "NPS survey and dashboard",
-    category: "Custom software",
-    metric: "Client feedback for the firm no longer lives in scattered files.",
-    description:
-      "Satisfaction survey for the clients of an accounting firm that serves health professionals, plus a dashboard with overall NPS, promoters, passives and detractors, averages by service and monthly change.",
-  },
-  alpha: {
-    title: "AlphaCoach",
-    category: "MicroSaaS",
-    metric: "The coach's operation and the student's journey in one system, with each professional's own look.",
-    description:
-      "Platform for coaches and students, on the web and on a phone app. Each coach gets their own space, with their colors, logo and identity, without publishing a separate app.",
+      "A virtual assistant that answers on WhatsApp at any hour. It understands what the person needs, asks the right questions, shows a similar example and sends the link to book a conversation. When the topic is price, a complaint, or the person asks for a human, it hands the chat to the team.",
+    outcome: "No contact goes unanswered, and the team steps in only after the conversation is qualified.",
+    imageAlt: "Sample chat with BuildAI's AI WhatsApp attendant",
+    ctaLabel: "Talk to it on WhatsApp",
   },
   leadgen: {
     title: "LeadGen AI",
-    category: "MicroSaaS",
-    metric: "Prospecting in one flow — BuildAI uses it and also delivers it to other companies.",
+    tag: "MICROSAAS",
     description:
-      "BuildAI's product for B2B prospecting. The team uses it internally and also offers it to companies. A list or a set of companies goes in; the system organizes and enriches the leads, helps qualify them and prepares the outreach.",
+      "BuildAI's product for B2B prospecting: it organizes and enriches company lists, helps qualify them and prepares the first contact.",
+    outcome: "Prospecting in one flow. BuildAI uses it and also delivers it to other companies.",
+    imageAlt: "Screen of LeadGen AI by BuildAI",
+    ctaLabel: "View live project",
   },
-  conexao: {
-    title: "Conexão Ativa — news automation",
-    category: "AI automation",
-    metric: "From Telegram to the site, Facebook and Instagram, without the team pasting the same story in three places.",
+  greensky: {
+    title: "Green Sky",
+    tag: "SITE + BOOKING",
     description:
-      "Watches a Telegram channel (text or audio), transcribes it, structures the article for search, finds an image and publishes to WordPress, Facebook and Instagram, reposting to secondary sites when it fits.",
+      "Booking site for a paragliding and hang-gliding operator in Rio, with a flight catalog, payment on the site or a WhatsApp conversation, in 6 languages.",
+    outcome: "The customer chooses and pays for the flight without depending on manual service.",
+    imageAlt: "Screen of the Green Sky website by BuildAI",
+    ctaLabel: "View live project",
+  },
+  carrosseis: {
+    title: "Carousel generator",
+    tag: "AI CONTENT",
+    description: "Turns a topic into Instagram carousels, with copy and artwork that follow the brand.",
+    outcome: "Posts come from a list of topics, without building slide by slide.",
+    imageAlt: "Illustration of BuildAI's carousel generator turning a topic into Instagram slides",
+    ctaLabel: "Ask for a demo",
   },
   newsgen: {
-    title: "NewsGen AI",
-    category: "AI video",
-    metric: "Script, voice and edit of an informational video in one flow.",
+    title: "NewsGen AI: videos with a virtual presenter",
+    tag: "AI VIDEO",
     description:
-      "From a text (a news item or a script), it generates narration and a video with a virtual presenter. It also translates a recorded video, keeping audio and picture aligned. Each account has login and history.",
-  },
-  growth: {
-    title: "GrowthOS",
-    category: "MicroSaaS",
-    metric: "Marketing and product funnel in one place, with a strategy report written by AI.",
-    description:
-      "Growth dashboard with revenue, CAC, leads and ROAS, the product funnel and a channel comparison. It connects Google Ads, Meta, Brevo, Snov.io, Mixpanel and GA4. An AI analyst writes the strategy report from the synced data.",
+      "From a text, it generates narration and a video with a virtual presenter. It also translates a recorded video, keeping voice and picture aligned.",
+    outcome: "Script, voice and video in one flow, without recording or editing by hand.",
+    imageAlt: "Screen of NewsGen by BuildAI",
+    ctaLabel: "View live project",
   },
   factory: {
     title: "Content Factory AI",
-    category: "Content Factory",
-    metric: "One topic becomes a content pack in several formats, in the same flow.",
+    tag: "AI CONTENT",
+    description: "From an idea, it generates research, posts, scripts and a newsletter in the brand's voice.",
+    outcome: "One topic becomes content for several channels in the same flow.",
+    imageAlt: "Screen of BuildAI's content generator",
+    ctaLabel: "View live project",
+  },
+  conexao: {
+    title: "Conexão Ativa: news automation",
+    tag: "AI AUTOMATION",
     description:
-      "Content-pack generator from a topic — ebook, podcast and video — for a small team that needs to show up on more than one channel without producing each piece in a silo.",
+      "From Telegram to the site: it transcribes, writes the story for search, picks an image and publishes to WordPress, Facebook and Instagram.",
+    outcome: "The team stops pasting the same content in three places.",
+    imageAlt: "Screen of the Conexão Ativa news automation by BuildAI",
+    ctaLabel: "Watch video",
+  },
+  encartes: {
+    title: "Batch artwork generator",
+    tag: "BATCH DESIGN",
+    description:
+      "From a Photoshop layout and a spreadsheet, it generates dozens of pieces at once: flyers, catalogs, banners and cards.",
+    outcome: "A price or product change becomes a spreadsheet, not a design redo.",
+    imageAlt: "Screen of BuildAI's batch artwork generator",
+    ctaLabel: "View live project",
+  },
+  alpha: {
+    title: "AlphaCoach",
+    tag: "MICROSAAS",
+    description:
+      "Web platform and app for coaches and students. Each coach gets a space with their own colors and logo, without publishing a separate app.",
+    outcome: "The coach's operation and the student's journey in the same place.",
+    imageAlt: "Screen of AlphaCoach by BuildAI",
+    ctaLabel: "View live project",
+  },
+  accounting: {
+    title: "Systems for an accounting firm",
+    tag: "CUSTOM SOFTWARE",
+    description:
+      "For an accounting firm that serves health professionals: an online income-tax form and a satisfaction survey with an NPS dashboard.",
+    outcome: "Less spreadsheet and loose files when collecting tax data and listening to clients.",
+    imageAlt: "Screen of BuildAI's income-tax form and NPS dashboard",
+  },
+  growth: {
+    title: "GrowthOS",
+    tag: "MICROSAAS",
+    description: "A growth dashboard that brings together Google Ads, Meta, email and analytics, and writes a strategy report with AI.",
+    outcome: "Marketing and product funnel in one place.",
+    imageAlt: "Screen of the GrowthOS dashboard by BuildAI",
+    ctaLabel: "Watch video",
   },
   cnu: {
     title: "CNU practice exam",
-    category: "Education",
-    metric: "A practice exam matched to the role, with a review built from the questions the candidate missed.",
-    description:
-      "Practice exam for Brazil's Concurso Nacional Unificado. The candidate picks the block and the role, takes the test and can generate a review audio with only the questions they got wrong.",
+    tag: "EDUCATION",
+    description: "Practice exam for Brazil's unified national exam, hidden while the demo is down.",
+    outcome: "A practice exam matched to the role, with a review built from the misses.",
+    imageAlt: "Screen of the CNU practice exam by BuildAI",
   },
 };
 
-const es: typeof pt = {
-  encartes: {
-    title: "Generador de folletos para retail y supermercado",
-    category: "Automatización con IA",
-    metric: "Producción en lote de folletos de retail a partir de un layout y una planilla, sin rehacer cada pieza a mano.",
+const es: Record<CaseKey, CaseCopy> = {
+  whatsapp: {
+    title: "Asistente de WhatsApp con IA",
+    tag: "ATENCIÓN CON IA",
+    badge: "En uso en la propia BuildAI",
     description:
-      "Toma un layout de Photoshop (PSD con capas nombradas), una planilla de Excel y una carpeta de imágenes, y genera las artes finales en lote — folletos, catálogos, cards y banners de supermercado o retail.",
-  },
-  greensky: {
-    title: "Green Sky",
-    category: "Software a medida",
-    metric: "Reservas online con pago en el sitio o conversación por WhatsApp — turismo de aventura en Río.",
-    description:
-      "Sitio de un operador de parapente y ala delta (São Conrado y Niterói), con catálogo de experiencias, checkout en Stripe o conversación por WhatsApp, sitio en 6 idiomas y contador público del fondo de impacto de la operación.",
-  },
-  accounting: {
-    title: "Sistemas para un estudio contable de profesionales de la salud",
-    category: "Software a medida",
-    metric: "Menos planilla y menos archivo suelto al recoger datos de impuestos y escuchar a los clientes.",
-    description:
-      "Para un estudio contable que atiende a profesionales de la salud, BuildAI creó un formulario de impuesto a la renta — el cliente completa y el equipo recibe los datos ordenados — y una encuesta de satisfacción con panel de NPS, promedios por servicio y evolución en el tiempo.",
-  },
-  ir: {
-    title: "Formulario de impuesto a la renta",
-    category: "Software a medida",
-    metric: "El equipo recibe los datos de impuestos ordenados, en lugar de la planilla y el ida y vuelta de archivos.",
-    description:
-      "Formulario online para que un estudio contable de profesionales de la salud recoja los datos de impuesto a la renta de los clientes y avise al equipo, en lugar de la planilla y los archivos sueltos.",
-  },
-  nps: {
-    title: "Encuesta y panel de NPS",
-    category: "Software a medida",
-    metric: "La escucha de los clientes del estudio deja de quedar en archivos sueltos.",
-    description:
-      "Encuesta de satisfacción con los clientes de un estudio contable de profesionales de la salud, y un panel con NPS general, promotores, neutros y detractores, promedios por servicio y evolución mensual.",
-  },
-  alpha: {
-    title: "AlphaCoach",
-    category: "MicroSaaS",
-    metric: "La operación del coach y el recorrido del alumno en el mismo sistema, con la cara de cada profesional.",
-    description:
-      "Plataforma para coaches y alumnos, en web y en la app del celular. Cada coach tiene su espacio, con colores, logo e identidad propios, sin publicar una app separada.",
+      "Asistente virtual que atiende por WhatsApp a cualquier hora. Entiende lo que la persona necesita, hace las preguntas correctas, muestra un ejemplo parecido y ya manda el enlace para agendar una conversación. Cuando el tema es precio, un reclamo o la persona pide un humano, pasa la charla al equipo.",
+    outcome: "Ningún contacto queda sin respuesta, y el equipo entra solo cuando la conversación ya está calificada.",
+    imageAlt: "Conversación de ejemplo con el asistente de WhatsApp con IA de BuildAI",
+    ctaLabel: "Habla con él por WhatsApp",
   },
   leadgen: {
     title: "LeadGen AI",
-    category: "MicroSaaS",
-    metric: "Prospección organizada en un solo flujo — BuildAI lo usa y también lo entrega a otras empresas.",
+    tag: "MICROSAAS",
     description:
-      "Producto de BuildAI para prospección B2B. El equipo lo usa por dentro y también lo ofrece a las empresas. Entra una lista o un conjunto de empresas; el sistema organiza y enriquece los leads, ayuda a calificar y prepara el contacto.",
+      "Producto de BuildAI para prospección B2B: organiza y enriquece listas de empresas, ayuda a calificar y prepara el primer contacto.",
+    outcome: "Prospección en un solo flujo. BuildAI lo usa y también lo entrega a otras empresas.",
+    imageAlt: "Pantalla de LeadGen AI de BuildAI",
+    ctaLabel: "Ver proyecto en vivo",
   },
-  conexao: {
-    title: "Conexão Ativa — automatización de noticias",
-    category: "Automatización con IA",
-    metric: "Del Telegram al portal, a Facebook y a Instagram, sin que el equipo copie el mismo contenido en tres lugares.",
+  greensky: {
+    title: "Green Sky",
+    tag: "SITIO + RESERVAS",
     description:
-      "Monitorea un canal de Telegram (texto o audio), transcribe, estructura el artículo para búsqueda, busca imagen y publica en WordPress, Facebook e Instagram, con republicación en portales secundarios cuando corresponde.",
+      "Sitio de reservas para un operador de parapente y ala delta en Río, con catálogo de vuelos, pago en el sitio o conversación por WhatsApp, en 6 idiomas.",
+    outcome: "El cliente elige y paga el vuelo sin depender de atención manual.",
+    imageAlt: "Pantalla del sitio Green Sky de BuildAI",
+    ctaLabel: "Ver proyecto en vivo",
+  },
+  carrosseis: {
+    title: "Generador de carruseles",
+    tag: "CONTENIDO CON IA",
+    description: "Transforma un tema en carruseles listos para Instagram, con texto y arte, siguiendo la identidad de la marca.",
+    outcome: "Los posts salen de una lista de temas, sin armar lámina por lámina.",
+    imageAlt: "Ilustración del generador de carruseles de BuildAI transformando un tema en láminas para Instagram",
+    ctaLabel: "Pedir una demostración",
   },
   newsgen: {
-    title: "NewsGen AI",
-    category: "Video con IA",
-    metric: "Guion, voz y montaje de un video informativo en un solo flujo.",
+    title: "NewsGen AI: videos con presentador virtual",
+    tag: "VIDEO CON IA",
     description:
-      "A partir de un texto (noticia o guion), genera narración y video con presentador virtual. También traduce un video ya grabado, manteniendo audio e imagen alineados. Cada cuenta tiene acceso e historial.",
-  },
-  growth: {
-    title: "GrowthOS",
-    category: "MicroSaaS",
-    metric: "Embudo de marketing y producto en el mismo lugar, con informe estratégico generado por IA.",
-    description:
-      "Panel de growth con ingresos, CAC, leads y ROAS, embudo de producto y comparación de canales. Conecta Google Ads, Meta, Brevo, Snov.io, Mixpanel y GA4. Un analista de IA arma el informe a partir de los datos sincronizados.",
+      "A partir de un texto, genera narración y video con presentador virtual. También traduce un video ya grabado, manteniendo voz e imagen alineadas.",
+    outcome: "Guion, voz y video en un solo flujo, sin grabar ni editar a mano.",
+    imageAlt: "Pantalla de NewsGen de BuildAI",
+    ctaLabel: "Ver proyecto en vivo",
   },
   factory: {
     title: "Content Factory AI",
-    category: "Content Factory",
-    metric: "Un tema se vuelve un paquete de contenido en varios formatos, en el mismo flujo.",
+    tag: "CONTENIDO CON IA",
+    description: "De una idea, genera investigación, posts, guiones y newsletter con el tono de la marca.",
+    outcome: "Un tema se vuelve contenido para varios canales en el mismo flujo.",
+    imageAlt: "Pantalla del generador de contenido de BuildAI",
+    ctaLabel: "Ver proyecto en vivo",
+  },
+  conexao: {
+    title: "Conexão Ativa: automatización de noticias",
+    tag: "AUTOMATIZACIÓN CON IA",
     description:
-      "Generador de paquetes de contenido a partir de un tema — ebook, podcast y video — para un equipo chico que necesita aparecer en más de un canal sin producir cada pieza por separado.",
+      "Del Telegram al portal: transcribe, escribe la nota para búsqueda, elige imagen y publica en WordPress, Facebook e Instagram.",
+    outcome: "El equipo deja de copiar y pegar el mismo contenido en tres lugares.",
+    imageAlt: "Pantalla de la automatización de noticias Conexão Ativa de BuildAI",
+    ctaLabel: "Ver video",
+  },
+  encartes: {
+    title: "Generador de artes en lote",
+    tag: "DISEÑO EN LOTE",
+    description:
+      "A partir de un layout de Photoshop y una planilla, genera decenas de piezas a la vez: folletos, catálogos, banners y cards.",
+    outcome: "Un cambio de precio o de producto se vuelve planilla, no rehacer el diseño.",
+    imageAlt: "Pantalla del generador de artes en lote de BuildAI",
+    ctaLabel: "Ver proyecto en vivo",
+  },
+  alpha: {
+    title: "AlphaCoach",
+    tag: "MICROSAAS",
+    description:
+      "Plataforma web y app para coaches y alumnos. Cada coach tiene su espacio con colores y logo propios, sin publicar una app separada.",
+    outcome: "La operación del coach y el recorrido del alumno en el mismo lugar.",
+    imageAlt: "Pantalla de AlphaCoach de BuildAI",
+    ctaLabel: "Ver proyecto en vivo",
+  },
+  accounting: {
+    title: "Sistemas para un estudio contable",
+    tag: "SOFTWARE A MEDIDA",
+    description:
+      "Para un estudio contable que atiende a profesionales de la salud: formulario online de impuesto a la renta y encuesta de satisfacción con panel de NPS.",
+    outcome: "Menos planilla y archivo suelto al recoger datos de impuestos y escuchar a los clientes.",
+    imageAlt: "Pantalla del formulario de impuestos y del panel de NPS de BuildAI",
+  },
+  growth: {
+    title: "GrowthOS",
+    tag: "MICROSAAS",
+    description:
+      "Panel de growth que junta Google Ads, Meta, e-mail y analytics, y genera un informe estratégico con IA.",
+    outcome: "Embudo de marketing y producto en un solo lugar.",
+    imageAlt: "Pantalla del panel GrowthOS de BuildAI",
+    ctaLabel: "Ver video",
   },
   cnu: {
     title: "Simulacro CNU",
-    category: "Educación",
-    metric: "Simulacro alineado a la vacante, con repaso personalizado a partir de los errores.",
-    description:
-      "Simulacro del Concurso Nacional Unificado. El candidato elige el bloque y la vacante, hace la prueba y, al final, puede generar un audio de repaso solo con las preguntas que erró.",
+    tag: "EDUCACIÓN",
+    description: "Simulacro del Concurso Nacional Unificado, oculto mientras el demo esté caído.",
+    outcome: "Simulacro alineado a la vacante, con repaso a partir de los errores.",
+    imageAlt: "Pantalla del simulacro CNU de BuildAI",
   },
 };
 
-const byLocale: Record<Locale, typeof pt> = { pt, en, es };
-
-const homeKeys = ["encartes", "greensky", "accounting", "alpha", "leadgen", "conexao"] as const;
-const pageKeys = ["encartes", "greensky", "ir", "nps", "alpha", "leadgen", "conexao", "newsgen", "growth", "factory", "cnu"] as const;
-
-const mediaByKey: Record<CaseKey, CaseMedia> = {
-  encartes: shot("encartes.webp", { href: "https://psdautomator.vercel.app/" }),
-  greensky: shot("greensky.webp", { href: "https://greensky.com.br/" }),
-  accounting: shot("contabilidade-ir.webp"),
-  ir: shot("contabilidade-ir.webp"),
-  nps: shot("contabilidade-nps.webp"),
-  alpha: shot("alphacoach.webp", { href: "https://slug-centric-3a4a6c77.vercel.app/" }),
-  leadgen: shot("leadgen.webp", { href: "https://leads-pi-seven.vercel.app/" }),
-  conexao: shot("conexao.webp", { videoUrl: "https://youtu.be/W5IOzuOQIVw" }),
-  newsgen: shot("newsgen.webp", {
-    href: "https://ai-video-news-generator--video-generator-39001.us-central1.hosted.app/",
-  }),
-  growth: shot("growth.webp", { videoUrl: "https://youtu.be/oJyN6APFjuA" }),
-  factory: shot("content-factory.webp", { href: "https://fabrica-de-conteudo.vercel.app/" }),
+const links: Record<CaseKey, { href?: string; videoUrl?: string; hidden?: boolean; images?: string[] }> = {
+  whatsapp: {
+    href: showWhatsappDemoCta
+      ? "https://wa.me/5521985015148?text=Oi!%20Quero%20conhecer%20o%20atendente%20de%20WhatsApp%20da%20BuildAI"
+      : undefined,
+  },
+  leadgen: { href: "https://leads-pi-seven.vercel.app/" },
+  greensky: { href: "https://greensky.com.br/" },
+  carrosseis: {
+    href: "https://wa.me/5521985015148?text=Oi!%20Quero%20ver%20uma%20demonstra%C3%A7%C3%A3o%20do%20gerador%20de%20carross%C3%A9is",
+  },
+  newsgen: { href: "https://ai-video-news-generator--video-generator-39001.us-central1.hosted.app/" },
+  factory: { href: "https://fabrica-de-conteudo.vercel.app/" },
+  conexao: { videoUrl: "https://youtu.be/W5IOzuOQIVw" },
+  encartes: { href: "https://psdautomator.vercel.app/" },
+  alpha: { href: "https://slug-centric-3a4a6c77.vercel.app/" },
+  accounting: {
+    images: ["/cases/contabilidade-ir-800.webp", "/cases/contabilidade-nps-800.webp"],
+  },
+  growth: { videoUrl: "https://youtu.be/oJyN6APFjuA" },
   cnu: { hidden: true, href: "https://cnu-three.vercel.app/" },
 };
 
-const alts: Record<Locale, Record<CaseKey, string>> = {
-  pt: {
-    encartes: "Tela do Gerador de Encartes para Varejo da BuildAI",
-    greensky: "Tela do site Green Sky da BuildAI",
-    accounting: "Tela do formulário de Imposto de Renda da BuildAI",
-    ir: "Tela do formulário de Imposto de Renda da BuildAI",
-    nps: "Tela do painel de NPS da BuildAI",
-    alpha: "Tela do AlphaCoach da BuildAI",
-    leadgen: "Tela do LeadGen AI da BuildAI",
-    conexao: "Tela da automação de notícias Conexão Ativa da BuildAI",
-    newsgen: "Tela do NewsGen da BuildAI",
-    growth: "Tela do painel GrowthOS da BuildAI",
-    factory: "Tela do gerador de conteúdo da BuildAI",
-    cnu: "Tela do CNU Simulado da BuildAI",
-  },
-  en: {
-    encartes: "Screen of the BuildAI retail flyer generator",
-    greensky: "Screen of the Green Sky website by BuildAI",
-    accounting: "Screen of the BuildAI income-tax form",
-    ir: "Screen of the BuildAI income-tax form",
-    nps: "Screen of the BuildAI NPS dashboard",
-    alpha: "Screen of AlphaCoach by BuildAI",
-    leadgen: "Screen of LeadGen AI by BuildAI",
-    conexao: "Screen of the Conexão Ativa news automation by BuildAI",
-    newsgen: "Screen of NewsGen by BuildAI",
-    growth: "Screen of the GrowthOS dashboard by BuildAI",
-    factory: "Screen of the BuildAI content generator",
-    cnu: "Screen of the CNU practice exam by BuildAI",
-  },
-  es: {
-    encartes: "Pantalla del generador de folletos de BuildAI",
-    greensky: "Pantalla del sitio Green Sky de BuildAI",
-    accounting: "Pantalla del formulario de impuestos de BuildAI",
-    ir: "Pantalla del formulario de impuestos de BuildAI",
-    nps: "Pantalla del panel de NPS de BuildAI",
-    alpha: "Pantalla de AlphaCoach de BuildAI",
-    leadgen: "Pantalla de LeadGen AI de BuildAI",
-    conexao: "Pantalla de la automatización de noticias Conexão Ativa de BuildAI",
-    newsgen: "Pantalla de NewsGen de BuildAI",
-    growth: "Pantalla del panel GrowthOS de BuildAI",
-    factory: "Pantalla del generador de contenido de BuildAI",
-    cnu: "Pantalla del simulacro CNU de BuildAI",
-  },
+const files: Record<CaseKey, string> = {
+  whatsapp: "atendente-whatsapp.webp",
+  leadgen: "leadgen.webp",
+  greensky: "greensky.webp",
+  carrosseis: "gerador-carrosseis.webp",
+  newsgen: "newsgen.webp",
+  factory: "content-factory.webp",
+  conexao: "conexao.webp",
+  encartes: "encartes.webp",
+  alpha: "alphacoach.webp",
+  accounting: "contabilidade-ir.webp",
+  growth: "growth.webp",
+  cnu: "encartes.webp",
 };
 
-const pick = (locale: Locale, keys: readonly CaseKey[]): ProjectItem[] =>
-  keys
-    .map((key) => ({
-      ...toItem(byLocale[locale][key], mediaByKey[key]),
-      imageAlt: alts[locale][key],
-    }))
-    .filter((item) => !item.hidden);
+const meta: Record<CaseKey, { caseCategory: CaseCategory; featuredOrder: number | null }> = {
+  whatsapp: { caseCategory: "atendimento", featuredOrder: 1 },
+  carrosseis: { caseCategory: "conteudo", featuredOrder: 2 },
+  newsgen: { caseCategory: "conteudo", featuredOrder: 3 },
+  accounting: { caseCategory: "sistemas", featuredOrder: 4 },
+  alpha: { caseCategory: "sistemas", featuredOrder: 5 },
+  leadgen: { caseCategory: "atendimento", featuredOrder: 6 },
+  greensky: { caseCategory: "atendimento", featuredOrder: null },
+  factory: { caseCategory: "conteudo", featuredOrder: null },
+  conexao: { caseCategory: "conteudo", featuredOrder: null },
+  encartes: { caseCategory: "conteudo", featuredOrder: null },
+  growth: { caseCategory: "sistemas", featuredOrder: null },
+  cnu: { caseCategory: "sistemas", featuredOrder: null },
+};
 
-export const getHomeCases = (locale: Locale): ProjectItem[] => pick(locale, homeKeys);
+const pageOrder: CaseKey[] = [
+  "whatsapp",
+  "leadgen",
+  "greensky",
+  "carrosseis",
+  "newsgen",
+  "factory",
+  "conexao",
+  "encartes",
+  "alpha",
+  "accounting",
+  "growth",
+  "cnu",
+];
 
-export const getPortfolioCases = (locale: Locale): ProjectItem[] => pick(locale, pageKeys);
+const byLocale: Record<Locale, Record<CaseKey, CaseCopy>> = { pt, en, es };
+
+const toItem = (locale: Locale, key: CaseKey): ProjectItem => {
+  const copy = byLocale[locale][key];
+  const link = links[key];
+  const picture = media(files[key]);
+  return {
+    title: copy.title,
+    category: copy.tag,
+    tag: copy.tag,
+    metric: copy.outcome,
+    outcome: copy.outcome,
+    description: copy.description,
+    imageAlt: copy.imageAlt,
+    badge: copy.badge,
+    ctaLabel: link.href || link.videoUrl ? copy.ctaLabel : undefined,
+    ...picture,
+    images: link.images,
+    href: link.href,
+    videoUrl: link.videoUrl,
+    hidden: link.hidden,
+    ...meta[key],
+  };
+};
+
+export const getHomeCases = (locale: Locale): ProjectItem[] =>
+  pageOrder
+    .map((key) => toItem(locale, key))
+    .filter((item) => !item.hidden && item.featuredOrder != null)
+    .sort((a, b) => (a.featuredOrder ?? 0) - (b.featuredOrder ?? 0));
+
+export const getPortfolioCases = (locale: Locale): ProjectItem[] =>
+  pageOrder.map((key) => toItem(locale, key)).filter((item) => !item.hidden);

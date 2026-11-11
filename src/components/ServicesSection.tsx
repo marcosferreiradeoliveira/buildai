@@ -4,6 +4,13 @@ import { useRef } from "react";
 import { LandingContent } from "@/types/landing";
 import { useUi } from "@/i18n/LanguageContext";
 
+const sheetIcon = (
+  <svg key="sheets" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-neon-blue">
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <path d="M3 9h18M3 14h18M9 9v11" />
+  </svg>
+);
+
 const serviceIcons = [
   <svg key="micro-saas" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-neon-purple">
     <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -19,6 +26,7 @@ const serviceIcons = [
     <path d="M2 17l10 5 10-5" />
     <path d="M2 12l10 5 10-5" />
   </svg>,
+  sheetIcon,
 ];
 
 type ServicesSectionProps = {
@@ -41,15 +49,15 @@ const ServicesSection = ({ content }: ServicesSectionProps) => {
         >
           <span className="brand-eyebrow">{content.eyebrow}</span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mt-3">
-            {content.title} <span className="gradient-text">{content.highlightedText}</span>{" "}
-            {ui.services.titleSuffix}
+            {content.title}{content.highlightedText ? <span className="gradient-text"> {content.highlightedText}</span> : null}
+            {content.highlightedText ? ` ${ui.services.titleSuffix}` : ""}
           </h2>
           <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
             {content.description}
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className={`grid gap-6 ${content.items.length > 3 ? "md:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-3"}`}>
           {content.items.map((service, i) => (
             <motion.div
               key={service.title}

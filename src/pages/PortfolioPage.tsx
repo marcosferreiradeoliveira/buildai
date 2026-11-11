@@ -45,6 +45,7 @@ const PortfolioPage = () => {
       <main className="pt-24">
         <PortfolioSection
           sectionId="cases"
+          enableFilters
           content={{
             ...landingContent.portfolio,
             items: getPortfolioCases(locale),
