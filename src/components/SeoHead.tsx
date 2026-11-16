@@ -78,13 +78,15 @@ const SeoHead = ({ title, description, previewImageSrc, faviconHref, canonicalPa
     const twitterImage = ensureMetaTag("name", "twitter:image");
     twitterImage.content = previewImageUrl;
 
-    let faviconTag = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+    let faviconTag = document.querySelector('link[rel="icon"][type="image/png"]') as HTMLLinkElement | null;
     if (!faviconTag) {
       faviconTag = document.createElement("link");
       faviconTag.rel = "icon";
+      faviconTag.type = "image/png";
       document.head.appendChild(faviconTag);
     }
     faviconTag.href = faviconHref;
+    faviconTag.sizes = "192x192";
   }, [title, description, previewImageSrc, faviconHref, canonicalPath]);
 
   return null;

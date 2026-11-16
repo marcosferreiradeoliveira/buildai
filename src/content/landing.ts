@@ -1,5 +1,4 @@
 import { LandingContent } from "@/types/landing";
-import buildaiIcon from "@/assets/buildai-icon-only.png";
 import buildaiLogoDark from "@/assets/buildai-logo-transparent.png";
 import educationHeroImage from "@/assets/Gemini_Generated_Image_re9l7qre9l7qre9l Small.png";
 import educationCasesImage from "@/assets/Gemini_Generated_Image_jgkljmjgkljmjgkl Small.png";
@@ -11,7 +10,7 @@ export const baseLandingContent: LandingContent = {
     description:
       "A BuildAI cria soluções sob medida com IA para pequenas e médias empresas: atendente de WhatsApp, geradores de conteúdo, sistemas e automações.",
     previewImageSrc: "/preview.jpeg",
-    faviconHref: buildaiIcon,
+    faviconHref: "/favicon.png",
   },
   navbar: {
     brandName: "BuildAI",
@@ -124,7 +123,7 @@ export const educationLandingContent: LandingContent = {
     description:
       "Soluções de IA para educação: captação, matrícula, retenção e eficiência acadêmica com foco em resultado.",
     previewImageSrc: educationCasesImage,
-    faviconHref: buildaiIcon,
+    faviconHref: "/favicon.png",
   },
   navbar: {
     brandName: "BuildAI Educação",
